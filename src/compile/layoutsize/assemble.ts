@@ -63,6 +63,20 @@ export function sizeSignals(model: Model, sizeType: LayoutSizeType): (NewSignal 
     const defaultValue = getViewConfigContinuousSize(model.config.view, isWidth ? 'width' : 'height');
     const safeExpr = `isFinite(${expr}) ? ${expr} : ${defaultValue}`;
     return [{name, init: safeExpr, on: [{update: safeExpr, events: 'window:resize'}]}];
+  } else if (isFacetModel(model.parent) && sizeType === 'width' && model.parent.size.width) {
+    return [
+      {
+        name,
+        update: model.parent.facet.column ? "width / length(data('column_domain'))" : 'width'
+      }
+    ];
+  } else if (isFacetModel(model.parent) && sizeType === 'height' && model.parent.size.height) {
+    return [
+      {
+        name,
+        update: model.parent.facet.row ? "height / length(data('row_domain'))" : 'height'
+      }
+    ];
   } else {
     return [
       {

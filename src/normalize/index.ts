@@ -6,6 +6,7 @@ import {
   LayerSpec,
   FacetedUnitSpec,
   GenericSpec,
+  isFacetSpec,
   isLayerSpec,
   isUnitSpec,
   LayoutSizeMixins,
@@ -64,7 +65,8 @@ export function normalizeAutoSize(
 ) {
   let {width, height} = sizeInfo;
 
-  const isFitCompatible = isUnitSpec(spec) || isLayerSpec(spec);
+  const isFitCompatibleFacet = isFacetSpec(spec) && (spec.width || spec.height);
+  const isFitCompatible = isUnitSpec(spec) || isLayerSpec(spec) || isFitCompatibleFacet;
   const autosizeDefault: AutoSizeParams = {};
 
   if (!isFitCompatible) {
