@@ -160,5 +160,8 @@
     "setupFiles": [
       "./test/jest.overrides.ts"
     ]
-  }
+  },
+  "files": [
+    "build"
+  ]
 }
