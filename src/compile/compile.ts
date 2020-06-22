@@ -18,7 +18,7 @@ import {Dict, keys} from '../util';
 import {buildModel} from './buildmodel';
 import {assembleRootData} from './data/assemble';
 import {optimizeDataflow} from './data/optimize';
-import {Model} from './model';
+import {isFacetModel, Model} from './model';
 
 export interface CompileOptions {
   /**
@@ -181,6 +181,7 @@ function getTopLevelProperties(
         ? {}
         : {autosize: autosize.type}
       : {autosize}),
+    ...(isFacetModel(model) ? {width, height} : {}),
     ...extractTopLevelProperties(config),
     ...extractTopLevelProperties(inputSpec)
   };

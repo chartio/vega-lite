@@ -10,6 +10,7 @@ import {
   DeprecatedFrameMixins,
   FrameMixins,
   GenericCompositionLayout,
+  LayoutSizeMixins,
   ResolveMixins
 } from './base';
 import {TopLevel} from './toplevel';
@@ -59,7 +60,8 @@ export type UnitSpecWithFrame = GenericUnitSpec<CompositeEncoding, AnyMark> & Fr
 export type FacetedUnitSpec = GenericUnitSpec<FacetedCompositeEncoding, AnyMark> &
   ResolveMixins &
   GenericCompositionLayout &
-  FrameMixins;
+  FrameMixins &
+  LayoutSizeMixins;
 
 export type TopLevelUnitSpec = TopLevel<FacetedUnitSpec> & DataMixins;
 
