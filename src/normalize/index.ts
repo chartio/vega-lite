@@ -6,6 +6,7 @@ import {
   LayerSpec,
   FacetedUnitSpec,
   GenericSpec,
+  isFacetSpec,
   isLayerSpec,
   isUnitSpec,
   LayoutSizeMixins,
@@ -64,7 +65,9 @@ export function normalizeAutoSize(
 ) {
   let {width, height} = sizeInfo;
 
-  const isFitCompatible = isUnitSpec(spec) || isLayerSpec(spec);
+  // A faceted view is only compatible with autosize === "fit" if a specific outer width and/or height is specified in the spec
+  const isFitCompatibleFacet = isFacetSpec(spec) && (spec.width || spec.height);
+  const isFitCompatible = isUnitSpec(spec) || isLayerSpec(spec) || isFitCompatibleFacet;
   const autosizeDefault: AutoSizeParams = {};
 
   if (!isFitCompatible) {
