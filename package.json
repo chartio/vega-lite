@@ -157,5 +157,8 @@
     ],
     "coverageDirectory": "./coverage/",
     "collectCoverage": false
-  }
+  },
+  "files": [
+    "build"
+  ]
 }
