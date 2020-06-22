@@ -4,7 +4,7 @@ import {ChannelDef, Field, FieldName, TypedFieldDef} from '../channeldef';
 import {Header} from '../header';
 import {EncodingSortField, SortArray, SortOrder} from '../sort';
 import {StandardType} from '../type';
-import {BaseSpec, GenericCompositionLayoutWithColumns, ResolveMixins} from './base';
+import {BaseSpec, GenericCompositionLayoutWithColumns, LayoutSizeMixins, ResolveMixins} from './base';
 import {GenericLayerSpec, NormalizedLayerSpec} from './layer';
 import {GenericUnitSpec, NormalizedUnitSpec} from './unit';
 
@@ -105,7 +105,7 @@ export interface GenericFacetSpec<
   U extends GenericUnitSpec<any, any>,
   L extends GenericLayerSpec<any>,
   F extends Field
-> extends BaseSpec, GenericCompositionLayoutWithColumns, ResolveMixins {
+> extends BaseSpec, GenericCompositionLayoutWithColumns, ResolveMixins, LayoutSizeMixins {
   /**
    * Definition for how to facet the data. One of:
    * 1) [a field definition for faceting the plot by one field](https://vega.github.io/vega-lite/docs/facet.html#field-def)
