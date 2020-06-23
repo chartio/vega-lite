@@ -5,10 +5,10 @@ import {Axis} from './axis';
 import {autoMaxBins, Bin, BinParams, binToString, isBinned, isBinning} from './bin';
 import {
   ANGLE,
-  DESCRIPTION,
   Channel,
   COLOR,
   COLUMN,
+  DESCRIPTION,
   DETAIL,
   FACET,
   FILL,
@@ -76,9 +76,9 @@ import {
   flatAccessWithDatum,
   getFirstDefined,
   internalField,
+  removePathFromField,
   replacePathInField,
-  titleCase,
-  removePathFromField
+  titleCase
 } from './util';
 import {isSignalRef} from './vega.schema';
 
@@ -584,6 +584,8 @@ export interface OrderFieldDef<F extends Field> extends FieldDefWithoutScale<F> 
   sort?: SortOrder;
 }
 
+export type OrderValueDef = ConditionValueDefMixins<number> & NumericValueDef;
+
 export interface StringFieldDef<F extends Field> extends FieldDefWithoutScale<F, StandardType>, FormatMixins {}
 
 export type FieldDef<F extends Field, T extends Type = any> = SecondaryFieldDef<F> | TypedFieldDef<F, T>;
@@ -1050,7 +1052,7 @@ export function initFieldDef(fd: FieldDef<string, any>, channel: Channel) {
   }
 
   if (isBinned(bin) && !isXorY(channel)) {
-    log.warn(`Channel ${channel} should not be used with "binned" bin.`);
+    log.warn(log.message.channelShouldNotBeUsedForBinned(channel));
   }
 
   // Normalize Type
