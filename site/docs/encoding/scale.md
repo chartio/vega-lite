@@ -75,7 +75,7 @@ bar, image, rect, and rule marks while `"point"` is the default scales for all o
 
 By default, a scale in Vega-Lite draws domain values directly from a channel's encoded field. Users can specify the `domain` property of a scale to customize its domain values. To sort the order of the domain of the encoded, the [`sort`](sort.html) property of a [field definition](encoding.html#field-def) can be specified.
 
-{% include table.html props="domain,domainMid" source="Scale" %}
+{% include table.html props="domain,domainMax,domainMin,domainMid" source="Scale" %}
 
 A common use case for the `domain` property is to limit, for example, the `x` range of values to include in a plot. However, setting the domain property alone is insufficient to achieve the desired effect.
 
@@ -123,7 +123,7 @@ The range of the scale represents the set of output visual values. Vega-Lite aut
 
 To customize range values, users can directly specify `range` or specify the special [`scheme`](#scheme) property for [ordinal](#ordinal) and [continuous](#continuous) color scales.
 
-{% include table.html props="range" source="Scale" %}
+{% include table.html props="range,rangeMin,rangeMax" source="Scale" %}
 
 ### Example: Setting Color Range based on a Field
 
@@ -132,6 +132,16 @@ In this example, we create a scale that maps the field `"l"` to colors specified
 <div class="vl-example" data-name="point_scale_range_field"></div>
 
 **Note:** This only works if there is a 1:1 mapping between the color domain field (`l`) and therange field (`c`).
+
+### Example: Setting Range Min/Max
+
+We may use `rangeMin` if we want to override just the minimum value of the range, while keeping the default maximum value of the range.
+
+<div class="vl-example" data-name="arc_radial"></div>
+
+Similarly, we may use `rangeMax` if we want to override just the maximum value of the range, while keeping the default minimum value of the range.
+
+<div class="vl-example" data-name="circle_natural_disasters"></div>
 
 {:#scheme}
 

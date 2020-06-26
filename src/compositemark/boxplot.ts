@@ -2,7 +2,7 @@ import {Orientation} from 'vega';
 import {isNumber, isObject} from 'vega-util';
 import {getMarkPropOrConfig} from '../compile/common';
 import {Config} from '../config';
-import {Encoding, extractTransformsFromEncoding} from '../encoding';
+import {Encoding, extractTransformsFromEncoding, normalizeEncoding} from '../encoding';
 import * as log from '../log';
 import {isMarkDef, MarkDef} from '../mark';
 import {NormalizerParams} from '../normalize';
@@ -20,6 +20,7 @@ import {
   partLayerMixins,
   PartsMixins
 } from './common';
+import {omit, isEmpty} from '../util';
 
 export const BOXPLOT = 'boxplot' as const;
 export type BoxPlot = typeof BOXPLOT;
@@ -81,7 +82,11 @@ export function normalizeBoxPlot(
   spec: GenericUnitSpec<Encoding<string>, BoxPlot | BoxPlotDef>,
   {config}: NormalizerParams
 ): NormalizedLayerSpec {
-  // TODO: use selection
+  // Need to initEncoding first so we can infer type
+  spec = {
+    ...spec,
+    encoding: normalizeEncoding(spec.encoding, config)
+  };
   const {mark, encoding: _encoding, selection, projection: _p, ...outerSpec} = spec;
   const markDef: BoxPlotDef = isMarkDef(mark) ? mark : {type: mark};
 
@@ -275,6 +280,7 @@ export function normalizeBoxPlot(
 
     const {scale, axis} = continuousAxisChannelDef;
     const title = getTitle(continuousAxisChannelDef);
+    const axisWithoutTitle = omit(axis, ['title']);
 
     const outlierLayersMixins = partLayerMixins<BoxPlotPartsMixins>(markDef, 'outliers', config.boxplot, true, {
       transform: [{filter: `(${fieldExpr} < ${lowerWhiskerExpr}) || (${fieldExpr} > ${upperWhiskerExpr})`}],
@@ -285,7 +291,8 @@ export function normalizeBoxPlot(
           type: continuousAxisChannelDef.type,
           ...(title !== undefined ? {title} : {}),
           ...(scale !== undefined ? {scale} : {}),
-          ...(axis !== undefined ? {axis} : {})
+          // add axis without title since we already added the title above
+          ...(isEmpty(axisWithoutTitle) ? {} : {axis: axisWithoutTitle})
         },
         ...encodingWithoutSizeColorContinuousAxisAndTooltip,
         ...(customTooltipWithoutAggregatedField ? {tooltip: customTooltipWithoutAggregatedField} : {})

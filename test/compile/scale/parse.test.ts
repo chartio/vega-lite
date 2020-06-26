@@ -7,7 +7,7 @@ import {parseModel, parseModelWithScale, parseUnitModelWithScale, without} from 
 describe('src/compile', () => {
   it('NON_TYPE_RANGE_SCALE_PROPERTIES should be SCALE_PROPERTIES without type, domain, and range properties', () => {
     expect(toSet(NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTIES)).toEqual(
-      toSet(without(SCALE_PROPERTIES, ['type', 'domain', 'range', 'scheme']))
+      toSet(without(SCALE_PROPERTIES, ['type', 'domain', 'range', 'rangeMax', 'rangeMin', 'scheme']))
     );
   });
 
@@ -228,6 +228,25 @@ describe('src/compile', () => {
         expect(logger.warns).toHaveLength(0);
       })
     );
+
+    it('should converts date time object in domainMin/Max to signal', () => {
+      const model = parseUnitModelWithScale({
+        mark: 'point',
+        encoding: {
+          x: {
+            field: 'date',
+            type: 'temporal',
+            scale: {
+              domainMin: {year: 2002},
+              domainMax: {year: 2012}
+            }
+          }
+        }
+      });
+      const scale = model.getScaleComponent('x');
+      expect(scale.explicit.domainMin).toEqual({signal: 'datetime(2002, 0, 1, 0, 0, 0, 0)'});
+      expect(scale.explicit.domainMax).toEqual({signal: 'datetime(2012, 0, 1, 0, 0, 0, 0)'});
+    });
 
     describe('x ordinal point', () => {
       it('should create an x point scale with a step-based range ', () => {

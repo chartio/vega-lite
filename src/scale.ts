@@ -50,7 +50,7 @@ export type ScaleType = ValueOf<typeof ScaleType>;
  * Index for scale categories -- only scale of the same categories can be merged together.
  * Current implementation is trying to be conservative and avoid merging scale type that might not work together
  */
-const SCALE_CATEGORY_INDEX: Record<ScaleType, ScaleType | 'numeric' | 'ordinal-position' | 'discretizing'> = {
+export const SCALE_CATEGORY_INDEX: Record<ScaleType, ScaleType | 'numeric' | 'ordinal-position' | 'discretizing'> = {
   linear: 'numeric',
   log: 'numeric',
   pow: 'numeric',
@@ -491,6 +491,16 @@ export interface Scale {
   domainMid?: number | SignalRef;
 
   /**
+   * Sets the maximum value in the scale domain, overriding the `domain` property. This property is only intended for use with scales having continuous domains.
+   */
+  domainMax?: number | DateTime | SignalRef;
+
+  /**
+   * Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
+   */
+  domainMin?: number | DateTime | SignalRef;
+
+  /**
    * If true, reverses the order of the scale range.
    * __Default value:__ `false`.
    */
@@ -512,6 +522,16 @@ export interface Scale {
    * 2) Any directly specified `range` for `x` and `y` channels will be ignored. Range can be customized via the view's corresponding [size](https://vega.github.io/vega-lite/docs/size.html) (`width` and `height`).
    */
   range?: RangeEnum | (number | string | number[] | SignalRef)[] | {field: string};
+
+  /**
+   * Sets the maximum value in the scale range, overriding the `range` property or the default range. This property is only intended for use with scales having continuous ranges.
+   */
+  rangeMax?: number | string | SignalRef;
+
+  /**
+   * Sets the minimum value in the scale range, overriding the `range` property or the default range. This property is only intended for use with scales having continuous ranges.
+   */
+  rangeMin?: number | string | SignalRef;
 
   // ordinal
 
@@ -644,9 +664,13 @@ export interface Scale {
 const SCALE_PROPERTY_INDEX: Flag<keyof Scale> = {
   type: 1,
   domain: 1,
+  domainMax: 1,
+  domainMin: 1,
   domainMid: 1,
   align: 1,
   range: 1,
+  rangeMax: 1,
+  rangeMin: 1,
   scheme: 1,
   bins: 1,
   // Other properties
@@ -669,7 +693,15 @@ const SCALE_PROPERTY_INDEX: Flag<keyof Scale> = {
 
 export const SCALE_PROPERTIES = keys(SCALE_PROPERTY_INDEX);
 
-const {type, domain, range, scheme, ...NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTY_INDEX} = SCALE_PROPERTY_INDEX;
+const {
+  type,
+  domain,
+  range,
+  rangeMax,
+  rangeMin,
+  scheme,
+  ...NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTY_INDEX
+} = SCALE_PROPERTY_INDEX;
 
 export const NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTIES = keys(NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTY_INDEX);
 
@@ -690,13 +722,17 @@ export function scaleTypeSupportProperty(scaleType: ScaleType, propName: keyof S
     case 'round':
       return isContinuousToContinuous(scaleType) || scaleType === 'band' || scaleType === 'point';
     case 'padding':
+    case 'rangeMin':
+    case 'rangeMax':
       return isContinuousToContinuous(scaleType) || contains(['point', 'band'], scaleType);
     case 'paddingOuter':
     case 'align':
       return contains(['point', 'band'], scaleType);
     case 'paddingInner':
       return scaleType === 'band';
+    case 'domainMax':
     case 'domainMid':
+    case 'domainMin':
     case 'clamp':
       return isContinuousToContinuous(scaleType);
     case 'nice':
@@ -740,6 +776,8 @@ export function channelScalePropertyIncompatability(channel: Channel, propName: 
     case 'type':
     case 'bins':
     case 'domain':
+    case 'domainMax':
+    case 'domainMin':
     case 'range':
     case 'base':
     case 'exponent':
@@ -748,6 +786,8 @@ export function channelScalePropertyIncompatability(channel: Channel, propName: 
     case 'padding':
     case 'paddingInner':
     case 'paddingOuter':
+    case 'rangeMax':
+    case 'rangeMin':
     case 'reverse':
     case 'round':
     case 'clamp':
