@@ -188,13 +188,13 @@ function parseAxis(channel, model) {
         defaultOrient(channel);
     const scaleType = model.getScaleComponent(channel).get('type');
     const axisConfigs = getAxisConfigs(channel, scaleType, orient, model.config);
-    const disable = axis !== undefined ? !axis : getAxisConfig('disable', config, axis === null || axis === void 0 ? void 0 : axis.style, axisConfigs).configValue;
+    const disable = axis !== undefined ? !axis : getAxisConfig('disable', config.style, axis === null || axis === void 0 ? void 0 : axis.style, axisConfigs).configValue;
     axisComponent.set('disable', disable, axis !== undefined);
     if (disable) {
         return axisComponent;
     }
     axis = axis || {};
-    const labelAngle = getLabelAngle(model, axis, channel, fieldOrDatumDef, axisConfigs);
+    const labelAngle = getLabelAngle(fieldOrDatumDef, axis, channel, config.style, axisConfigs);
     const ruleParams = {
         fieldOrDatumDef,
         axis,
@@ -216,7 +216,7 @@ function parseAxis(channel, model) {
         }
         else {
             const { configValue = undefined, configFrom = undefined } = isAxisProperty(property) && property !== 'values'
-                ? getAxisConfig(property, model.config, axis.style, axisConfigs)
+                ? getAxisConfig(property, config.style, axis.style, axisConfigs)
                 : {};
             const hasConfigValue = configValue !== undefined;
             if (hasValue && !hasConfigValue) {

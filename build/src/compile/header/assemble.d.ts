@@ -14,22 +14,22 @@ export declare function assembleTitleGroup(model: Model, channel: FacetChannel):
     type: string;
     role: string;
     title: {
-        text: string | import("vega").SignalRef | string[];
-        subtitle?: string | import("vega").SignalRef | string[];
+        text: string | string[] | import("vega").SignalRef;
+        subtitle?: string | string[] | import("vega").SignalRef;
         name?: string;
         interactive?: boolean;
-        style: string | string[];
+        style: import("vega").Text;
         encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
         anchor?: import("vega").AnchorValue;
         frame?: import("vega").StringValue;
         offset?: import("vega").NumberValue;
-        orient?: string | import("vega").SignalRef;
+        orient?: import("vega").ScaleField;
         aria?: boolean;
         align: string | import("vega").SignalRef | {
             field: import("vega").Field;
         } | {
             scale: import("vega").Field;
-            value: import("../../channeldef").PrimitiveValue;
+            value: string | number | boolean;
         } | {
             scale: import("vega").Field;
             field: import("vega").Field;
@@ -47,7 +47,7 @@ export declare function assembleTitleGroup(model: Model, channel: FacetChannel):
             field: import("vega").Field;
         } | {
             scale: import("vega").Field;
-            value: import("../../channeldef").PrimitiveValue;
+            value: string | number | boolean;
         } | {
             scale: import("vega").Field;
             field: import("vega").Field;
@@ -80,16 +80,16 @@ export declare function assembleTitleGroup(model: Model, channel: FacetChannel):
         subtitlePadding?: import("vega").NumberValue;
         zindex?: number;
     } | {
-        text: string | import("vega").SignalRef | string[];
-        subtitle?: string | import("vega").SignalRef | string[];
+        text: string | string[] | import("vega").SignalRef;
+        subtitle?: string | string[] | import("vega").SignalRef;
         name?: string;
         interactive?: boolean;
-        style: string | string[];
+        style: import("vega").Text;
         encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
         anchor?: import("vega").AnchorValue;
         frame?: import("vega").StringValue;
         offset?: import("vega").NumberValue;
-        orient?: string | import("vega").SignalRef;
+        orient?: import("vega").ScaleField;
         aria?: boolean;
         align: import("vega").AlignValue;
         angle?: import("vega").NumberValue;
@@ -97,7 +97,7 @@ export declare function assembleTitleGroup(model: Model, channel: FacetChannel):
             field: import("vega").Field;
         } | {
             scale: import("vega").Field;
-            value: import("../../channeldef").PrimitiveValue;
+            value: string | number | boolean;
         } | {
             scale: import("vega").Field;
             field: import("vega").Field;
@@ -130,16 +130,16 @@ export declare function assembleTitleGroup(model: Model, channel: FacetChannel):
         subtitlePadding?: import("vega").NumberValue;
         zindex?: number;
     } | {
-        text: string | import("vega").SignalRef | string[];
-        subtitle?: string | import("vega").SignalRef | string[];
+        text: string | string[] | import("vega").SignalRef;
+        subtitle?: string | string[] | import("vega").SignalRef;
         name?: string;
         interactive?: boolean;
-        style: string | string[];
+        style: import("vega").Text;
         encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
         anchor?: import("vega").AnchorValue;
         frame?: import("vega").StringValue;
         offset?: import("vega").NumberValue;
-        orient?: string | import("vega").SignalRef;
+        orient?: import("vega").ScaleField;
         aria?: boolean;
         align?: import("vega").AlignValue;
         angle?: import("vega").NumberValue;
@@ -147,7 +147,7 @@ export declare function assembleTitleGroup(model: Model, channel: FacetChannel):
             field: import("vega").Field;
         } | {
             scale: import("vega").Field;
-            value: import("../../channeldef").PrimitiveValue;
+            value: string | number | boolean;
         } | {
             scale: import("vega").Field;
             field: import("vega").Field;
@@ -180,22 +180,22 @@ export declare function assembleTitleGroup(model: Model, channel: FacetChannel):
         subtitlePadding?: import("vega").NumberValue;
         zindex?: number;
     } | {
-        text: string | import("vega").SignalRef | string[];
-        subtitle?: string | import("vega").SignalRef | string[];
+        text: string | string[] | import("vega").SignalRef;
+        subtitle?: string | string[] | import("vega").SignalRef;
         name?: string;
         interactive?: boolean;
-        style: string | string[];
+        style: import("vega").Text;
         encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
         anchor?: import("vega").AnchorValue;
         frame?: import("vega").StringValue;
         offset?: import("vega").NumberValue;
-        orient?: string | import("vega").SignalRef;
+        orient?: import("vega").ScaleField;
         aria?: boolean;
         align: string | import("vega").SignalRef | {
             field: import("vega").Field;
         } | {
             scale: import("vega").Field;
-            value: import("../../channeldef").PrimitiveValue;
+            value: string | number | boolean;
         } | {
             scale: import("vega").Field;
             field: import("vega").Field;
@@ -228,16 +228,16 @@ export declare function assembleTitleGroup(model: Model, channel: FacetChannel):
         subtitlePadding?: import("vega").NumberValue;
         zindex?: number;
     } | {
-        text: string | import("vega").SignalRef | string[];
-        subtitle?: string | import("vega").SignalRef | string[];
+        text: string | string[] | import("vega").SignalRef;
+        subtitle?: string | string[] | import("vega").SignalRef;
         name?: string;
         interactive?: boolean;
-        style: string | string[];
+        style: import("vega").Text;
         encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
         anchor?: import("vega").AnchorValue;
         frame?: import("vega").StringValue;
         offset?: import("vega").NumberValue;
-        orient?: string | import("vega").SignalRef;
+        orient?: import("vega").ScaleField;
         aria?: boolean;
         align: import("vega").AlignValue;
         angle?: import("vega").NumberValue;
@@ -260,16 +260,16 @@ export declare function assembleTitleGroup(model: Model, channel: FacetChannel):
         subtitlePadding?: import("vega").NumberValue;
         zindex?: number;
     } | {
-        text: string | import("vega").SignalRef | string[];
-        subtitle?: string | import("vega").SignalRef | string[];
+        text: string | string[] | import("vega").SignalRef;
+        subtitle?: string | string[] | import("vega").SignalRef;
         name?: string;
         interactive?: boolean;
-        style: string | string[];
+        style: import("vega").Text;
         encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
         anchor?: import("vega").AnchorValue;
         frame?: import("vega").StringValue;
         offset?: import("vega").NumberValue;
-        orient?: string | import("vega").SignalRef;
+        orient?: import("vega").ScaleField;
         aria?: boolean;
         align?: import("vega").AlignValue;
         angle?: import("vega").NumberValue;
@@ -296,7 +296,7 @@ export declare function assembleTitleGroup(model: Model, channel: FacetChannel):
 export declare function defaultHeaderGuideAlign(headerChannel: HeaderChannel, angle: number, anchor?: TitleAnchor): {
     align: string;
 } | {
-    align: import("vega").SignalRef | "left" | "right" | "center";
+    align: import("vega").SignalRef | "left" | "center" | "right";
 } | {
     align?: undefined;
 };
@@ -309,24 +309,24 @@ export declare function defaultHeaderGuideBaseline(angle: number, channel: Facet
 };
 export declare function assembleHeaderGroups(model: Model, channel: HeaderChannel): VgMarkGroup[];
 export declare function assembleLabelTitle(facetFieldDef: FacetFieldDef<string>, channel: FacetChannel, config: Config): {
-    text: string | import("vega").SignalRef | string[] | {
+    text: string | string[] | import("vega").SignalRef | {
         signal: string;
     };
-    subtitle?: string | import("vega").SignalRef | string[];
+    subtitle?: string | string[] | import("vega").SignalRef;
     name?: string;
     interactive?: boolean;
-    style: string | string[];
+    style: import("vega").Text;
     encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
     anchor?: import("vega").AnchorValue;
     frame: import("vega").StringValue;
     offset?: import("vega").NumberValue;
-    orient?: string | import("vega").SignalRef;
+    orient?: import("vega").ScaleField;
     aria?: boolean;
     align: string | import("vega").SignalRef | {
         field: import("vega").Field;
     } | {
         scale: import("vega").Field;
-        value: import("../../channeldef").PrimitiveValue;
+        value: string | number | boolean;
     } | {
         scale: import("vega").Field;
         field: import("vega").Field;
@@ -344,7 +344,7 @@ export declare function assembleLabelTitle(facetFieldDef: FacetFieldDef<string>,
         field: import("vega").Field;
     } | {
         scale: import("vega").Field;
-        value: import("../../channeldef").PrimitiveValue;
+        value: string | number | boolean;
     } | {
         scale: import("vega").Field;
         field: import("vega").Field;
@@ -377,18 +377,18 @@ export declare function assembleLabelTitle(facetFieldDef: FacetFieldDef<string>,
     subtitlePadding?: import("vega").NumberValue;
     zindex?: number;
 } | {
-    text: string | import("vega").SignalRef | string[] | {
+    text: string | string[] | import("vega").SignalRef | {
         signal: string;
     };
-    subtitle?: string | import("vega").SignalRef | string[];
+    subtitle?: string | string[] | import("vega").SignalRef;
     name?: string;
     interactive?: boolean;
-    style: string | string[];
+    style: import("vega").Text;
     encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
     anchor?: import("vega").AnchorValue;
     frame: import("vega").StringValue;
     offset?: import("vega").NumberValue;
-    orient?: string | import("vega").SignalRef;
+    orient?: import("vega").ScaleField;
     aria?: boolean;
     align: import("vega").AlignValue;
     angle?: import("vega").NumberValue;
@@ -396,7 +396,7 @@ export declare function assembleLabelTitle(facetFieldDef: FacetFieldDef<string>,
         field: import("vega").Field;
     } | {
         scale: import("vega").Field;
-        value: import("../../channeldef").PrimitiveValue;
+        value: string | number | boolean;
     } | {
         scale: import("vega").Field;
         field: import("vega").Field;
@@ -429,18 +429,18 @@ export declare function assembleLabelTitle(facetFieldDef: FacetFieldDef<string>,
     subtitlePadding?: import("vega").NumberValue;
     zindex?: number;
 } | {
-    text: string | import("vega").SignalRef | string[] | {
+    text: string | string[] | import("vega").SignalRef | {
         signal: string;
     };
-    subtitle?: string | import("vega").SignalRef | string[];
+    subtitle?: string | string[] | import("vega").SignalRef;
     name?: string;
     interactive?: boolean;
-    style: string | string[];
+    style: import("vega").Text;
     encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
     anchor?: import("vega").AnchorValue;
     frame: import("vega").StringValue;
     offset?: import("vega").NumberValue;
-    orient?: string | import("vega").SignalRef;
+    orient?: import("vega").ScaleField;
     aria?: boolean;
     align?: import("vega").AlignValue;
     angle?: import("vega").NumberValue;
@@ -448,7 +448,7 @@ export declare function assembleLabelTitle(facetFieldDef: FacetFieldDef<string>,
         field: import("vega").Field;
     } | {
         scale: import("vega").Field;
-        value: import("../../channeldef").PrimitiveValue;
+        value: string | number | boolean;
     } | {
         scale: import("vega").Field;
         field: import("vega").Field;
@@ -481,24 +481,24 @@ export declare function assembleLabelTitle(facetFieldDef: FacetFieldDef<string>,
     subtitlePadding?: import("vega").NumberValue;
     zindex?: number;
 } | {
-    text: string | import("vega").SignalRef | string[] | {
+    text: string | string[] | import("vega").SignalRef | {
         signal: string;
     };
-    subtitle?: string | import("vega").SignalRef | string[];
+    subtitle?: string | string[] | import("vega").SignalRef;
     name?: string;
     interactive?: boolean;
-    style: string | string[];
+    style: import("vega").Text;
     encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
     anchor?: import("vega").AnchorValue;
     frame: import("vega").StringValue;
     offset?: import("vega").NumberValue;
-    orient?: string | import("vega").SignalRef;
+    orient?: import("vega").ScaleField;
     aria?: boolean;
     align: string | import("vega").SignalRef | {
         field: import("vega").Field;
     } | {
         scale: import("vega").Field;
-        value: import("../../channeldef").PrimitiveValue;
+        value: string | number | boolean;
     } | {
         scale: import("vega").Field;
         field: import("vega").Field;
@@ -531,18 +531,18 @@ export declare function assembleLabelTitle(facetFieldDef: FacetFieldDef<string>,
     subtitlePadding?: import("vega").NumberValue;
     zindex?: number;
 } | {
-    text: string | import("vega").SignalRef | string[] | {
+    text: string | string[] | import("vega").SignalRef | {
         signal: string;
     };
-    subtitle?: string | import("vega").SignalRef | string[];
+    subtitle?: string | string[] | import("vega").SignalRef;
     name?: string;
     interactive?: boolean;
-    style: string | string[];
+    style: import("vega").Text;
     encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
     anchor?: import("vega").AnchorValue;
     frame: import("vega").StringValue;
     offset?: import("vega").NumberValue;
-    orient?: string | import("vega").SignalRef;
+    orient?: import("vega").ScaleField;
     aria?: boolean;
     align: import("vega").AlignValue;
     angle?: import("vega").NumberValue;
@@ -565,18 +565,18 @@ export declare function assembleLabelTitle(facetFieldDef: FacetFieldDef<string>,
     subtitlePadding?: import("vega").NumberValue;
     zindex?: number;
 } | {
-    text: string | import("vega").SignalRef | string[] | {
+    text: string | string[] | import("vega").SignalRef | {
         signal: string;
     };
-    subtitle?: string | import("vega").SignalRef | string[];
+    subtitle?: string | string[] | import("vega").SignalRef;
     name?: string;
     interactive?: boolean;
-    style: string | string[];
+    style: import("vega").Text;
     encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
     anchor?: import("vega").AnchorValue;
     frame: import("vega").StringValue;
     offset?: import("vega").NumberValue;
-    orient?: string | import("vega").SignalRef;
+    orient?: import("vega").ScaleField;
     aria?: boolean;
     align?: import("vega").AlignValue;
     angle?: import("vega").NumberValue;
@@ -609,24 +609,24 @@ export declare function assembleHeaderGroup(model: Model, channel: HeaderChannel
         };
     };
     title?: {
-        text: string | import("vega").SignalRef | string[] | {
+        text: string | string[] | import("vega").SignalRef | {
             signal: string;
         };
-        subtitle?: string | import("vega").SignalRef | string[];
+        subtitle?: string | string[] | import("vega").SignalRef;
         name?: string;
         interactive?: boolean;
-        style: string | string[];
+        style: import("vega").Text;
         encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
         anchor?: import("vega").AnchorValue;
         frame: import("vega").StringValue;
         offset?: import("vega").NumberValue;
-        orient?: string | import("vega").SignalRef;
+        orient?: import("vega").ScaleField;
         aria?: boolean;
         align: string | import("vega").SignalRef | {
             field: import("vega").Field;
         } | {
             scale: import("vega").Field;
-            value: import("../../channeldef").PrimitiveValue;
+            value: string | number | boolean;
         } | {
             scale: import("vega").Field;
             field: import("vega").Field;
@@ -644,7 +644,7 @@ export declare function assembleHeaderGroup(model: Model, channel: HeaderChannel
             field: import("vega").Field;
         } | {
             scale: import("vega").Field;
-            value: import("../../channeldef").PrimitiveValue;
+            value: string | number | boolean;
         } | {
             scale: import("vega").Field;
             field: import("vega").Field;
@@ -677,18 +677,18 @@ export declare function assembleHeaderGroup(model: Model, channel: HeaderChannel
         subtitlePadding?: import("vega").NumberValue;
         zindex?: number;
     } | {
-        text: string | import("vega").SignalRef | string[] | {
+        text: string | string[] | import("vega").SignalRef | {
             signal: string;
         };
-        subtitle?: string | import("vega").SignalRef | string[];
+        subtitle?: string | string[] | import("vega").SignalRef;
         name?: string;
         interactive?: boolean;
-        style: string | string[];
+        style: import("vega").Text;
         encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
         anchor?: import("vega").AnchorValue;
         frame: import("vega").StringValue;
         offset?: import("vega").NumberValue;
-        orient?: string | import("vega").SignalRef;
+        orient?: import("vega").ScaleField;
         aria?: boolean;
         align?: import("vega").AlignValue;
         angle?: import("vega").NumberValue;
@@ -696,7 +696,7 @@ export declare function assembleHeaderGroup(model: Model, channel: HeaderChannel
             field: import("vega").Field;
         } | {
             scale: import("vega").Field;
-            value: import("../../channeldef").PrimitiveValue;
+            value: string | number | boolean;
         } | {
             scale: import("vega").Field;
             field: import("vega").Field;
@@ -729,24 +729,24 @@ export declare function assembleHeaderGroup(model: Model, channel: HeaderChannel
         subtitlePadding?: import("vega").NumberValue;
         zindex?: number;
     } | {
-        text: string | import("vega").SignalRef | string[] | {
+        text: string | string[] | import("vega").SignalRef | {
             signal: string;
         };
-        subtitle?: string | import("vega").SignalRef | string[];
+        subtitle?: string | string[] | import("vega").SignalRef;
         name?: string;
         interactive?: boolean;
-        style: string | string[];
+        style: import("vega").Text;
         encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
         anchor?: import("vega").AnchorValue;
         frame: import("vega").StringValue;
         offset?: import("vega").NumberValue;
-        orient?: string | import("vega").SignalRef;
+        orient?: import("vega").ScaleField;
         aria?: boolean;
         align: string | import("vega").SignalRef | {
             field: import("vega").Field;
         } | {
             scale: import("vega").Field;
-            value: import("../../channeldef").PrimitiveValue;
+            value: string | number | boolean;
         } | {
             scale: import("vega").Field;
             field: import("vega").Field;
@@ -779,18 +779,18 @@ export declare function assembleHeaderGroup(model: Model, channel: HeaderChannel
         subtitlePadding?: import("vega").NumberValue;
         zindex?: number;
     } | {
-        text: string | import("vega").SignalRef | string[] | {
+        text: string | string[] | import("vega").SignalRef | {
             signal: string;
         };
-        subtitle?: string | import("vega").SignalRef | string[];
+        subtitle?: string | string[] | import("vega").SignalRef;
         name?: string;
         interactive?: boolean;
-        style: string | string[];
+        style: import("vega").Text;
         encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
         anchor?: import("vega").AnchorValue;
         frame: import("vega").StringValue;
         offset?: import("vega").NumberValue;
-        orient?: string | import("vega").SignalRef;
+        orient?: import("vega").ScaleField;
         aria?: boolean;
         align?: import("vega").AlignValue;
         angle?: import("vega").NumberValue;
@@ -832,24 +832,24 @@ export declare function assembleHeaderGroup(model: Model, channel: HeaderChannel
         };
     };
     title?: {
-        text: string | import("vega").SignalRef | string[] | {
+        text: string | string[] | import("vega").SignalRef | {
             signal: string;
         };
-        subtitle?: string | import("vega").SignalRef | string[];
+        subtitle?: string | string[] | import("vega").SignalRef;
         name?: string;
         interactive?: boolean;
-        style: string | string[];
+        style: import("vega").Text;
         encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
         anchor?: import("vega").AnchorValue;
         frame: import("vega").StringValue;
         offset?: import("vega").NumberValue;
-        orient?: string | import("vega").SignalRef;
+        orient?: import("vega").ScaleField;
         aria?: boolean;
         align: string | import("vega").SignalRef | {
             field: import("vega").Field;
         } | {
             scale: import("vega").Field;
-            value: import("../../channeldef").PrimitiveValue;
+            value: string | number | boolean;
         } | {
             scale: import("vega").Field;
             field: import("vega").Field;
@@ -867,7 +867,7 @@ export declare function assembleHeaderGroup(model: Model, channel: HeaderChannel
             field: import("vega").Field;
         } | {
             scale: import("vega").Field;
-            value: import("../../channeldef").PrimitiveValue;
+            value: string | number | boolean;
         } | {
             scale: import("vega").Field;
             field: import("vega").Field;
@@ -900,18 +900,18 @@ export declare function assembleHeaderGroup(model: Model, channel: HeaderChannel
         subtitlePadding?: import("vega").NumberValue;
         zindex?: number;
     } | {
-        text: string | import("vega").SignalRef | string[] | {
+        text: string | string[] | import("vega").SignalRef | {
             signal: string;
         };
-        subtitle?: string | import("vega").SignalRef | string[];
+        subtitle?: string | string[] | import("vega").SignalRef;
         name?: string;
         interactive?: boolean;
-        style: string | string[];
+        style: import("vega").Text;
         encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
         anchor?: import("vega").AnchorValue;
         frame: import("vega").StringValue;
         offset?: import("vega").NumberValue;
-        orient?: string | import("vega").SignalRef;
+        orient?: import("vega").ScaleField;
         aria?: boolean;
         align?: import("vega").AlignValue;
         angle?: import("vega").NumberValue;
@@ -919,7 +919,7 @@ export declare function assembleHeaderGroup(model: Model, channel: HeaderChannel
             field: import("vega").Field;
         } | {
             scale: import("vega").Field;
-            value: import("../../channeldef").PrimitiveValue;
+            value: string | number | boolean;
         } | {
             scale: import("vega").Field;
             field: import("vega").Field;
@@ -952,24 +952,24 @@ export declare function assembleHeaderGroup(model: Model, channel: HeaderChannel
         subtitlePadding?: import("vega").NumberValue;
         zindex?: number;
     } | {
-        text: string | import("vega").SignalRef | string[] | {
+        text: string | string[] | import("vega").SignalRef | {
             signal: string;
         };
-        subtitle?: string | import("vega").SignalRef | string[];
+        subtitle?: string | string[] | import("vega").SignalRef;
         name?: string;
         interactive?: boolean;
-        style: string | string[];
+        style: import("vega").Text;
         encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
         anchor?: import("vega").AnchorValue;
         frame: import("vega").StringValue;
         offset?: import("vega").NumberValue;
-        orient?: string | import("vega").SignalRef;
+        orient?: import("vega").ScaleField;
         aria?: boolean;
         align: string | import("vega").SignalRef | {
             field: import("vega").Field;
         } | {
             scale: import("vega").Field;
-            value: import("../../channeldef").PrimitiveValue;
+            value: string | number | boolean;
         } | {
             scale: import("vega").Field;
             field: import("vega").Field;
@@ -1002,18 +1002,18 @@ export declare function assembleHeaderGroup(model: Model, channel: HeaderChannel
         subtitlePadding?: import("vega").NumberValue;
         zindex?: number;
     } | {
-        text: string | import("vega").SignalRef | string[] | {
+        text: string | string[] | import("vega").SignalRef | {
             signal: string;
         };
-        subtitle?: string | import("vega").SignalRef | string[];
+        subtitle?: string | string[] | import("vega").SignalRef;
         name?: string;
         interactive?: boolean;
-        style: string | string[];
+        style: import("vega").Text;
         encode?: import("vega").TitleEncode | Partial<Record<import("vega").EncodeEntryName, import("vega").TextEncodeEntry>>;
         anchor?: import("vega").AnchorValue;
         frame: import("vega").StringValue;
         offset?: import("vega").NumberValue;
-        orient?: string | import("vega").SignalRef;
+        orient?: import("vega").ScaleField;
         aria?: boolean;
         align?: import("vega").AlignValue;
         angle?: import("vega").NumberValue;

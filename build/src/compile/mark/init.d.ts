@@ -1,7 +1,8 @@
 import { Config } from '../../config';
 import { Encoding } from '../../encoding';
-import { Mark, MarkDef } from '../../mark';
-export declare function initMarkdef(mark: Mark | MarkDef, encoding: Encoding<string>, config: Config, { graticule }: {
+import { MarkDef } from '../../mark';
+export declare function initMarkdef(markDef: MarkDef, encoding: Encoding<string>, config: Config): MarkDef<"square" | "circle" | "text" | "point" | "arc" | "area" | "image" | "line" | "rect" | "rule" | "trail" | "geoshape" | "bar" | "tick">;
+export declare function defaultFilled(markDef: MarkDef, config: Config, { graticule }: {
     graticule: boolean;
-}): MarkDef<"text" | "point" | "arc" | "area" | "bar" | "image" | "line" | "rect" | "rule" | "tick" | "trail" | "circle" | "square" | "geoshape">;
+}): boolean;
 //# sourceMappingURL=init.d.ts.map

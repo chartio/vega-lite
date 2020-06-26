@@ -12,7 +12,7 @@ import { parseData } from './data/parse';
 import { assembleLayoutSignals } from './layoutsize/assemble';
 import { initLayoutSize } from './layoutsize/init';
 import { parseUnitLayoutSize } from './layoutsize/parse';
-import { initMarkdef } from './mark/init';
+import { defaultFilled, initMarkdef } from './mark/init';
 import { parseMarkGroups } from './mark/mark';
 import { isLayerModel, ModelWithField } from './model';
 import { assembleTopLevelSignals, assembleUnitSelectionData, assembleUnitSelectionMarks, assembleUnitSelectionSignals } from './selection/assemble';
@@ -22,7 +22,6 @@ import { parseUnitSelection } from './selection/parse';
  */
 export class UnitModel extends ModelWithField {
     constructor(spec, parent, parentGivenName, parentGivenSize = {}, config) {
-        var _a, _b;
         super(spec, 'unit', parent, parentGivenName, config, undefined, isFrameMixins(spec) ? spec.view : undefined);
         this.specifiedScales = {};
         this.specifiedAxes = {};
@@ -30,11 +29,16 @@ export class UnitModel extends ModelWithField {
         this.specifiedProjection = {};
         this.selection = {};
         this.children = [];
-        const mark = isMarkDef(spec.mark) ? spec.mark.type : spec.mark;
-        this.markDef = initMarkdef(spec.mark, (_a = spec.encoding) !== null && _a !== void 0 ? _a : {}, config, {
-            graticule: spec.data && isGraticuleGenerator(spec.data)
-        });
-        const encoding = (this.encoding = initEncoding((_b = spec.encoding) !== null && _b !== void 0 ? _b : {}, this.markDef, config));
+        const markDef = isMarkDef(spec.mark) ? Object.assign({}, spec.mark) : { type: spec.mark };
+        const mark = markDef.type;
+        // Need to init filled before other mark properties because encoding depends on filled but other mark properties depend on types inside encoding
+        if (markDef.filled === undefined) {
+            markDef.filled = defaultFilled(markDef, config, {
+                graticule: spec.data && isGraticuleGenerator(spec.data)
+            });
+        }
+        const encoding = (this.encoding = initEncoding(spec.encoding || {}, mark, markDef.filled, config));
+        this.markDef = initMarkdef(markDef, encoding, config);
         this.size = initLayoutSize({
             encoding: encoding,
             size: isFrameMixins(spec)

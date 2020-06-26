@@ -1,7 +1,7 @@
 import { Channel } from './channel';
-import { ChannelDef, ColorGradientDatumDefWithCondition, ColorGradientFieldDefWithCondition, ColorGradientValueDefWithCondition, DatumDef, Field, FieldDef, FieldDefWithoutScale, LatLongFieldDef, NumericArrayDatumDefWithCondition, NumericArrayFieldDefWithCondition, NumericArrayValueDefWithCondition, NumericDatumDefWithCondition, NumericFieldDefWithCondition, NumericValueDef, NumericValueDefWithCondition, OrderFieldDef, PolarDatumDef, PolarFieldDef, PositionDatumDef, PositionFieldDef, SecondaryFieldDef, ShapeFieldDefWithCondition, ShapeValueDefWithCondition, StringDatumDefWithCondition, StringFieldDef, StringFieldDefWithCondition, StringValueDefWithCondition, TextDatumDefWithCondition, TextFieldDefWithCondition, TextValueDefWithCondition, TypedFieldDef, XValueDef, YValueDef } from './channeldef';
+import { ChannelDef, ColorGradientDatumDefWithCondition, ColorGradientFieldDefWithCondition, ColorGradientValueDefWithCondition, DatumDef, Field, FieldDef, FieldDefWithoutScale, LatLongFieldDef, NumericArrayDatumDefWithCondition, NumericArrayFieldDefWithCondition, NumericArrayValueDefWithCondition, NumericDatumDefWithCondition, NumericFieldDefWithCondition, NumericValueDef, NumericValueDefWithCondition, OrderFieldDef, OrderValueDef, PolarDatumDef, PolarFieldDef, PositionDatumDef, PositionFieldDef, SecondaryFieldDef, ShapeFieldDefWithCondition, ShapeValueDefWithCondition, StringDatumDefWithCondition, StringFieldDef, StringFieldDefWithCondition, StringValueDefWithCondition, TextDatumDefWithCondition, TextFieldDefWithCondition, TextValueDefWithCondition, TypedFieldDef, XValueDef, YValueDef } from './channeldef';
 import { Config } from './config';
-import { Mark, MarkDef } from './mark';
+import { Mark } from './mark';
 import { EncodingFacetMapping } from './spec/facet';
 import { AggregatedFieldDef, BinTransform, TimeUnitTransform } from './transform';
 export interface Encoding<F extends Field> {
@@ -184,7 +184,7 @@ export interface Encoding<F extends Field> {
      *
      * __Note__: In aggregate plots, `order` field should be `aggregate`d to avoid creating additional aggregation grouping.
      */
-    order?: OrderFieldDef<F> | OrderFieldDef<F>[] | NumericValueDef;
+    order?: OrderFieldDef<F> | OrderFieldDef<F>[] | OrderValueDef;
 }
 export interface EncodingWithFacet<F extends Field> extends Encoding<F>, EncodingFacetMapping<F> {
 }
@@ -198,7 +198,11 @@ export declare function extractTransformsFromEncoding(oldEncoding: Encoding<any>
     encoding: Encoding<string>;
 };
 export declare function markChannelCompatible(encoding: Encoding<string>, channel: Channel, mark: Mark): boolean;
-export declare function initEncoding(encoding: Encoding<string>, markDef: MarkDef, config: Config): Encoding<string>;
+export declare function initEncoding(encoding: Encoding<string>, mark: Mark, filled: boolean, config: Config): Encoding<string>;
+/**
+ * For composite marks, we have to call initChannelDef during init so we can infer types earlier.
+ */
+export declare function normalizeEncoding(encoding: Encoding<string>, config: Config): Encoding<string>;
 export declare function fieldDefs<F extends Field>(encoding: EncodingWithFacet<F>): FieldDef<F>[];
 export declare function forEach<U extends Partial<Record<Channel, any>>>(mapping: U, f: (cd: ChannelDef, c: Channel) => void, thisArg?: any): void;
 export declare function reduce<T, U extends Partial<Record<Channel, any>>>(mapping: U, f: (acc: any, fd: TypedFieldDef<string>, c: Channel) => U, init: T, thisArg?: any): any;

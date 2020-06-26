@@ -15,11 +15,11 @@ export declare function assembleLegend(legendCmpt: LegendComponent, config: Conf
     direction?: import("vega").Orientation;
     format?: string | import("vega").SignalRef | import("vega").TimeFormatSpecifier;
     formatType?: "number" | import("vega").SignalRef | "time" | "utc";
-    title?: string | import("vega").SignalRef | string[];
+    title?: string | string[] | import("vega").SignalRef;
     tickMinStep?: number | import("vega").SignalRef;
     values?: any[] | import("vega").SignalRef;
     encode?: LegendEncode;
-    orient?: import("vega").SignalRef | "top" | "bottom" | "left" | "right" | "none" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
+    orient?: "none" | import("vega").SignalRef | "left" | "right" | "top" | "bottom" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
     symbolLimit?: import("vega").NumberValue;
     tickCount?: import("vega").TickCount;
     aria?: boolean;
@@ -53,7 +53,7 @@ export declare function assembleLegend(legendCmpt: LegendComponent, config: Conf
     columns?: number | import("vega").SignalRef;
     columnPadding?: number | import("vega").SignalRef;
     rowPadding?: number | import("vega").SignalRef;
-    gridAlign?: import("vega").SignalRef | "all" | "none" | "each";
+    gridAlign?: "none" | import("vega").SignalRef | "all" | "each";
     symbolDash?: import("vega").DashArrayValue;
     symbolDashOffset?: import("vega").NumberValue;
     symbolFillColor?: import("vega").ColorValue;

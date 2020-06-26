@@ -1,5 +1,6 @@
 import { __rest } from "tslib";
 import { isObject } from 'vega-util';
+import { normalizeEncoding } from '../encoding';
 import { isMarkDef } from '../mark';
 import { isUnitSpec } from '../spec/unit';
 import { stack } from '../stack';
@@ -83,7 +84,9 @@ export class PathOverlayNormalizer {
     }
     run(spec, params, normalize) {
         const { config } = params;
-        const { selection, projection, encoding, mark } = spec, outerSpec = __rest(spec, ["selection", "projection", "encoding", "mark"]);
+        const { selection, projection, mark, encoding: e } = spec, outerSpec = __rest(spec, ["selection", "projection", "mark", "encoding"]);
+        // Need to call normalizeEncoding because we need the inferred types to correctly determine stack
+        const encoding = normalizeEncoding(e, config);
         const markDef = isMarkDef(mark) ? mark : { type: mark };
         const pointOverlay = getPointOverlay(markDef, config[markDef.type], encoding);
         const lineOverlay = markDef.type === 'area' && getLineOverlay(markDef, config[markDef.type]);

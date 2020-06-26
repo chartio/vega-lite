@@ -1,7 +1,8 @@
 import { __rest } from "tslib";
+import { isObject } from 'vega-util';
 import { isXorY } from '../../channel';
 import { keys } from '../../util';
-import { isVgRangeStep } from '../../vega.schema';
+import { isDataRefDomain, isVgRangeStep } from '../../vega.schema';
 import { isConcatModel, isLayerModel } from '../model';
 import { assembleSelectionScaleDomain } from '../selection/assemble';
 import { assembleDomain } from './domain';
@@ -27,7 +28,7 @@ export function assembleScalesForModel(model) {
         }
         const scale = scaleComponent.combine();
         const { name, type, selectionExtent, domains: _d, range: _r, reverse } = scale, otherScaleProps = __rest(scale, ["name", "type", "selectionExtent", "domains", "range", "reverse"]);
-        const range = assembleScaleRange(scale.range, name, channel);
+        const range = assembleScaleRange(scale.range, name, channel, model);
         let domainRaw;
         if (selectionExtent) {
             domainRaw = assembleSelectionScaleDomain(model, selectionExtent);
@@ -38,7 +39,7 @@ export function assembleScalesForModel(model) {
         return scales;
     }, []);
 }
-export function assembleScaleRange(scaleRange, scaleName, channel) {
+export function assembleScaleRange(scaleRange, scaleName, channel, model) {
     // add signals to x/y range
     if (isXorY(channel)) {
         if (isVgRangeStep(scaleRange)) {
@@ -47,6 +48,9 @@ export function assembleScaleRange(scaleRange, scaleName, channel) {
                 step: { signal: scaleName + '_step' }
             };
         }
+    }
+    else if (isObject(scaleRange) && isDataRefDomain(scaleRange)) {
+        return Object.assign(Object.assign({}, scaleRange), { data: model.lookupDataSource(scaleRange.data) });
     }
     return scaleRange;
 }

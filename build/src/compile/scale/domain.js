@@ -70,7 +70,7 @@ function parseNonUnitScaleDomain(model) {
                 }
                 const se = childComponent.get('selectionExtent');
                 if (selectionExtent && se && selectionExtent.selection !== se.selection) {
-                    log.warn('The same selection must be used to override scale domains in a layered view.');
+                    log.warn(log.message.NEEDS_SAME_SELECTION);
                 }
                 selectionExtent = se;
             }

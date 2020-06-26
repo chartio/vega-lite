@@ -37,7 +37,7 @@ export declare type Mark = keyof typeof Mark;
 export declare function isMark(m: string): m is Mark;
 export declare function isPathMark(m: Mark | CompositeMark): m is 'line' | 'area' | 'trail';
 export declare function isRectBasedMark(m: Mark | CompositeMark): m is 'rect' | 'bar' | 'image' | 'arc';
-export declare const PRIMITIVE_MARKS: ("text" | "point" | "arc" | "area" | "bar" | "image" | "line" | "rect" | "rule" | "tick" | "trail" | "circle" | "square" | "geoshape")[];
+export declare const PRIMITIVE_MARKS: ("square" | "circle" | "text" | "point" | "arc" | "area" | "image" | "line" | "rect" | "rule" | "trail" | "geoshape" | "bar" | "tick")[];
 export interface ColorMixins {
     /**
      * Default color.
@@ -242,8 +242,8 @@ export declare function isMarkDef(mark: string | GenericMarkDef<any>): mark is G
 export declare function isPrimitiveMark(mark: AnyMark): mark is Mark;
 export declare const STROKE_CONFIG: readonly ["stroke", "strokeWidth", "strokeDash", "strokeDashOffset", "strokeOpacity", "strokeJoin", "strokeMiterLimit"];
 export declare const FILL_CONFIG: readonly ["fill", "fillOpacity"];
-export declare const FILL_STROKE_CONFIG: ("fill" | "stroke" | "fillOpacity" | "strokeOpacity" | "strokeWidth" | "strokeDash" | "strokeDashOffset" | "strokeJoin" | "strokeMiterLimit")[];
-export declare const VL_ONLY_MARK_CONFIG_PROPERTIES: ("theta2" | "radius2" | "color" | "order" | "filled" | "invalid" | "timeUnitBandPosition" | "timeUnitBand")[];
+export declare const FILL_STROKE_CONFIG: ("stroke" | "fill" | "fillOpacity" | "strokeOpacity" | "strokeWidth" | "strokeDash" | "strokeDashOffset" | "strokeMiterLimit" | "strokeJoin")[];
+export declare const VL_ONLY_MARK_CONFIG_PROPERTIES: ("color" | "theta2" | "radius2" | "order" | "filled" | "invalid" | "timeUnitBandPosition" | "timeUnitBand")[];
 export declare const VL_ONLY_MARK_SPECIFIC_CONFIG_PROPERTY_INDEX: {
     [k in Mark]?: (keyof Required<MarkConfigMixins>[k])[];
 };

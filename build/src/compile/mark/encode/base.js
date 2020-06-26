@@ -11,6 +11,7 @@ import { nonPosition } from './nonposition';
 import { text } from './text';
 import { tooltip } from './tooltip';
 import { fieldInvalidPredicate } from './valueref';
+import { zindex } from './zindex';
 export { color } from './color';
 export { wrapCondition } from './conditional';
 export { nonPosition } from './nonposition';
@@ -22,7 +23,7 @@ export { tooltip } from './tooltip';
 const ALWAYS_IGNORE = new Set(['aria']);
 export function baseEncodeEntry(model, ignore) {
     const { fill = undefined, stroke = undefined } = ignore.color === 'include' ? color(model) : {};
-    return Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, markDefProperties(model.markDef, ignore)), wrapAllFieldsInvalid(model, 'fill', fill)), wrapAllFieldsInvalid(model, 'stroke', stroke)), nonPosition('opacity', model)), nonPosition('fillOpacity', model)), nonPosition('strokeOpacity', model)), nonPosition('strokeWidth', model)), nonPosition('strokeDash', model)), tooltip(model)), text(model, 'href')), aria(model));
+    return Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, markDefProperties(model.markDef, ignore)), wrapAllFieldsInvalid(model, 'fill', fill)), wrapAllFieldsInvalid(model, 'stroke', stroke)), nonPosition('opacity', model)), nonPosition('fillOpacity', model)), nonPosition('strokeOpacity', model)), nonPosition('strokeWidth', model)), nonPosition('strokeDash', model)), zindex(model)), tooltip(model)), text(model, 'href')), aria(model));
 }
 // TODO: mark VgValueRef[] as readonly after https://github.com/vega/vega/pull/1987
 function wrapAllFieldsInvalid(model, channel, valueRef) {

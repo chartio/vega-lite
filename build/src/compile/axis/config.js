@@ -66,9 +66,9 @@ export function getAxisConfigStyle(axisConfigTypes, config) {
     }
     return Object.assign.apply(null, toMerge);
 }
-export function getAxisConfig(property, config, style, axisConfigs = {}) {
+export function getAxisConfig(property, styleConfigIndex, style, axisConfigs = {}) {
     var _a;
-    const styleConfig = getStyleConfig(property, style, config.style);
+    const styleConfig = getStyleConfig(property, style, styleConfigIndex);
     if (styleConfig !== undefined) {
         return {
             configFrom: 'style',

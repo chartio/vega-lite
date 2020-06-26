@@ -46,7 +46,7 @@ const project = {
                         }
                         else {
                             if (selDef.type === 'interval') {
-                                log.warn('Interval selections should be initialized using "x" and/or "y" keys.');
+                                log.warn(log.message.INTERVAL_INITIALIZED_WITH_X_Y);
                                 selDef.encodings = cfg.encodings;
                             }
                             else {

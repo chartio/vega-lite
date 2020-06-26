@@ -9,7 +9,7 @@ import { Type } from '../../type';
 import { Model } from '../model';
 import { SignalRefWrapper } from '../signal';
 import { ScaleComponentProps } from './component';
-export declare function parseScaleProperty(model: Model, property: keyof (Scale | ScaleComponentProps)): void;
+export declare function parseScaleProperty(model: Model, property: Exclude<keyof (Scale | ScaleComponentProps), 'range'>): void;
 export interface ScaleRuleParams {
     model: Model;
     channel: Channel;

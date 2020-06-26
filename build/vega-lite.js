@@ -1961,6 +1961,10 @@
             ? `Dropping "fit-${channel}" because spec has discrete ${getSizeChannel(channel)}.`
             : `Dropping "fit" because spec has discrete size.`;
     }
+    // VIEW SIZE
+    function unknownField(channel) {
+        return `Unknown field for ${channel}. Cannot calculate view size.`;
+    }
     // SELECTION
     function cannotProjectOnChannelWithoutField(channel) {
         return `Cannot project a selection on encoding channel "${channel}", which has no field.`;
@@ -1983,6 +1987,8 @@
         return (`Cannot define and lookup the "${name}" selection in the same view. ` +
             `Try moving the lookup into a second, layered view?`);
     }
+    const NEEDS_SAME_SELECTION = 'The same selection must be used to override scale domains in a layered view.';
+    const INTERVAL_INITIALIZED_WITH_X_Y = 'Interval selections should be initialized using "x" and/or "y" keys.';
     // REPEAT
     function noSuchRepeatedValue(field) {
         return `Unknown repeated value "${field}".`;
@@ -2025,9 +2031,6 @@
     function invalidAggregate(aggregate) {
         return `Invalid aggregation operator "${aggregate}".`;
     }
-    function missingFieldType(channel, newType) {
-        return `Missing type for channel "${channel}", using "${newType}" instead.`;
-    }
     function droppingColor(type, opt) {
         const { fill, stroke } = opt;
         return `Dropping color ${type} as the plot also has ${fill && stroke ? 'fill and stroke' : fill ? 'fill' : 'stroke'}.`;
@@ -2051,7 +2054,7 @@
     function discreteChannelCannotEncode(channel, type) {
         return `Using discrete channel "${channel}" to encode "${type}" field can be misleading as it does not encode ${type === 'ordinal' ? 'order' : 'magnitude'}.`;
     }
-    // Mark
+    // MARK
     function lineWithRange(hasX2, hasY2) {
         const channels = hasX2 && hasY2 ? 'x2 and y2' : hasX2 ? 'x2' : 'y2';
         return `Line mark is for continuous lines and thus cannot be used with ${channels}. We will use the rule mark (line segments) instead.`;
@@ -2138,6 +2141,9 @@
     // CHANNEL
     function channelRequiredForBinned(channel) {
         return `Channel ${channel} is required for "binned" bin.`;
+    }
+    function channelShouldNotBeUsedForBinned(channel) {
+        return `Channel ${channel} should not be used with "binned" bin.`;
     }
     function domainRequiredForThresholdScale(channel) {
         return `Domain for ${channel} is required for threshold scale.`;
@@ -2950,9 +2956,13 @@
     const SCALE_PROPERTY_INDEX = {
         type: 1,
         domain: 1,
+        domainMax: 1,
+        domainMin: 1,
         domainMid: 1,
         align: 1,
         range: 1,
+        rangeMax: 1,
+        rangeMin: 1,
         scheme: 1,
         bins: 1,
         // Other properties
@@ -2972,7 +2982,7 @@
         paddingInner: 1,
         paddingOuter: 1
     };
-    const NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTY_INDEX = __rest(SCALE_PROPERTY_INDEX, ["type", "domain", "range", "scheme"]);
+    const NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTY_INDEX = __rest(SCALE_PROPERTY_INDEX, ["type", "domain", "range", "rangeMax", "rangeMin", "scheme"]);
     const NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTIES = keys(NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTY_INDEX);
     const SCALE_TYPE_INDEX = generateScaleTypeIndex();
     function scaleTypeSupportProperty(scaleType, propName) {
@@ -2990,13 +3000,17 @@
             case 'round':
                 return isContinuousToContinuous(scaleType) || scaleType === 'band' || scaleType === 'point';
             case 'padding':
+            case 'rangeMin':
+            case 'rangeMax':
                 return isContinuousToContinuous(scaleType) || contains(['point', 'band'], scaleType);
             case 'paddingOuter':
             case 'align':
                 return contains(['point', 'band'], scaleType);
             case 'paddingInner':
                 return scaleType === 'band';
+            case 'domainMax':
             case 'domainMid':
+            case 'domainMin':
             case 'clamp':
                 return isContinuousToContinuous(scaleType);
             case 'nice':
@@ -3034,6 +3048,8 @@
             case 'type':
             case 'bins':
             case 'domain':
+            case 'domainMax':
+            case 'domainMin':
             case 'range':
             case 'base':
             case 'exponent':
@@ -3042,6 +3058,8 @@
             case 'padding':
             case 'paddingInner':
             case 'paddingOuter':
+            case 'rangeMax':
+            case 'rangeMin':
             case 'reverse':
             case 'round':
             case 'clamp':
@@ -3514,7 +3532,7 @@
         return Object.assign(Object.assign(Object.assign(Object.assign({}, (timeUnit ? { timeUnit } : {})), (bin ? { bin } : {})), (aggregate ? { aggregate } : {})), { field });
     }
     function isSortableFieldDef(fieldDef) {
-        return isTypedFieldDef(fieldDef) && 'sort' in fieldDef;
+        return 'sort' in fieldDef;
     }
     function getBand({ channel, fieldDef, fieldDef2, markDef: mark, stack, config, isMidPoint }) {
         if (isFieldOrDatumDef(fieldDef) && fieldDef.band !== undefined) {
@@ -3584,7 +3602,7 @@
         return isFieldDef(channelDef) || isDatumDef(channelDef);
     }
     function isTypedFieldDef(channelDef) {
-        return !!channelDef && (('field' in channelDef && 'type' in channelDef) || channelDef['aggregate'] === 'count');
+        return !!channelDef && ('field' in channelDef || channelDef['aggregate'] === 'count') && 'type' in channelDef;
     }
     function isValueDef(channelDef) {
         return channelDef && 'value' in channelDef && 'value' in channelDef;
@@ -3598,8 +3616,17 @@
     function isMarkPropFieldOrDatumDef(channelDef) {
         return !!channelDef && 'legend' in channelDef;
     }
-    function isTextFieldOrDatumDef(channelDef) {
+    function isStringFieldOrDatumDef(channelDef) {
         return !!channelDef && ('format' in channelDef || 'formatType' in channelDef);
+    }
+    function toStringFieldDef(fieldDef) {
+        // add title from guide to title property
+        const guide = getGuide(fieldDef);
+        if (fieldDef.title == undefined && (guide === null || guide === void 0 ? void 0 : guide.title)) {
+            fieldDef = Object.assign(Object.assign({}, fieldDef), { title: guide.title });
+        }
+        // omit properties that don't exist in string field defs
+        return omit(fieldDef, ['legend', 'axis', 'header', 'scale']);
     }
     function isOpFieldDef(fieldDef) {
         return 'op' in fieldDef;
@@ -3752,8 +3779,7 @@
     }
     function title(fieldOrDatumDef, config, { allowDisabling, includeDefault = true }) {
         var _a, _b;
-        const guide = (_a = getGuide(fieldOrDatumDef)) !== null && _a !== void 0 ? _a : {};
-        const guideTitle = guide.title;
+        const guideTitle = (_a = getGuide(fieldOrDatumDef)) === null || _a === void 0 ? void 0 : _a.title;
         if (!isFieldDef(fieldOrDatumDef)) {
             return guideTitle;
         }
@@ -3783,7 +3809,7 @@
     }
     function getFormatMixins(fieldDef) {
         var _a;
-        if (isTextFieldOrDatumDef(fieldDef)) {
+        if (isStringFieldOrDatumDef(fieldDef)) {
             const { format, formatType } = fieldDef;
             return { format, formatType };
         }
@@ -3794,22 +3820,38 @@
         }
     }
     function defaultType(fieldDef, channel) {
-        if (fieldDef.timeUnit) {
+        var _a;
+        switch (channel) {
+            case 'latitude':
+            case 'longitude':
+                return 'quantitative';
+            case 'row':
+            case 'column':
+            case 'facet':
+            case 'shape':
+            case 'strokeDash':
+                return 'nominal';
+        }
+        if (isSortableFieldDef(fieldDef) && isArray(fieldDef.sort)) {
+            return 'ordinal';
+        }
+        const { aggregate, bin, timeUnit } = fieldDef;
+        if (timeUnit) {
             return 'temporal';
         }
-        if (isBinning(fieldDef.bin)) {
+        if (bin || (aggregate && !isArgmaxDef(aggregate) && !isArgminDef(aggregate))) {
             return 'quantitative';
         }
-        switch (rangeType(channel)) {
-            case 'continuous':
-                return 'quantitative';
-            case 'discrete':
-                return 'nominal';
-            case 'flexible': // color
-                return 'nominal';
-            default:
-                return 'quantitative';
+        if (isScaleFieldDef(fieldDef) && ((_a = fieldDef.scale) === null || _a === void 0 ? void 0 : _a.type)) {
+            switch (SCALE_CATEGORY_INDEX[fieldDef.scale.type]) {
+                case 'numeric':
+                case 'discretizing':
+                    return 'quantitative';
+                case 'time':
+                    return 'temporal';
+            }
         }
+        return 'nominal';
     }
     /**
      * Returns the fieldDef -- either from the outer channelDef or from the condition of channelDef.
@@ -3836,7 +3878,7 @@
     /**
      * Convert type to full, lowercase type, or augment the fieldDef with a default type if missing.
      */
-    function initChannelDef(channelDef, channel, config) {
+    function initChannelDef(channelDef, channel, config, opt = {}) {
         if (isString(channelDef) || isNumber(channelDef) || isBoolean(channelDef)) {
             const primitiveType = isString(channelDef) ? 'string' : isNumber(channelDef) ? 'number' : 'boolean';
             warn(primitiveChannelDef(channel, primitiveType, channelDef));
@@ -3844,21 +3886,21 @@
         }
         // If a fieldDef contains a field, we need type.
         if (isFieldOrDatumDef(channelDef)) {
-            return initFieldOrDatumDef(channelDef, channel, config);
+            return initFieldOrDatumDef(channelDef, channel, config, opt);
         }
         else if (hasConditionalFieldOrDatumDef(channelDef)) {
             return Object.assign(Object.assign({}, channelDef), { 
                 // Need to cast as normalizeFieldDef normally return FieldDef, but here we know that it is definitely Condition<FieldDef>
-                condition: initFieldOrDatumDef(channelDef.condition, channel, config) });
+                condition: initFieldOrDatumDef(channelDef.condition, channel, config, opt) });
         }
         return channelDef;
     }
-    function initFieldOrDatumDef(fd, channel, config) {
-        if (isTextFieldOrDatumDef(fd)) {
+    function initFieldOrDatumDef(fd, channel, config, opt) {
+        if (isStringFieldOrDatumDef(fd)) {
             const { format, formatType } = fd, rest = __rest(fd, ["format", "formatType"]);
             if (isCustomFormatType(formatType) && !config.customFormatTypes) {
                 warn(customFormatTypeNotAllowed(channel));
-                return initFieldOrDatumDef(rest, channel, config);
+                return initFieldOrDatumDef(rest, channel, config, opt);
             }
         }
         else {
@@ -3873,12 +3915,12 @@
                 const _a = fd[guideType], { format, formatType } = _a, newGuide = __rest(_a, ["format", "formatType"]);
                 if (isCustomFormatType(formatType) && !config.customFormatTypes) {
                     warn(customFormatTypeNotAllowed(channel));
-                    return initFieldOrDatumDef(Object.assign(Object.assign({}, fd), { [guideType]: newGuide }), channel, config);
+                    return initFieldOrDatumDef(Object.assign(Object.assign({}, fd), { [guideType]: newGuide }), channel, config, opt);
                 }
             }
         }
         if (isFieldDef(fd)) {
-            return initFieldDef(fd, channel);
+            return initFieldDef(fd, channel, opt);
         }
         return initDatumDef(fd);
     }
@@ -3891,11 +3933,11 @@
         type = isNumber(datum) ? 'quantitative' : isString(datum) ? 'nominal' : isDateTime(datum) ? 'temporal' : undefined;
         return Object.assign(Object.assign({}, datumDef), { type });
     }
-    function initFieldDef(fd, channel) {
+    function initFieldDef(fd, channel, { compositeMark = false } = {}) {
         const { aggregate, timeUnit, bin, field } = fd;
         const fieldDef = Object.assign({}, fd);
         // Drop invalid aggregate
-        if (aggregate && !isAggregateOp(aggregate) && !isArgmaxDef(aggregate) && !isArgminDef(aggregate)) {
+        if (!compositeMark && aggregate && !isAggregateOp(aggregate) && !isArgmaxDef(aggregate) && !isArgminDef(aggregate)) {
             warn(invalidAggregate(aggregate));
             delete fieldDef.aggregate;
         }
@@ -3911,7 +3953,7 @@
             fieldDef.bin = normalizeBin(bin, channel);
         }
         if (isBinned(bin) && !isXorY(channel)) {
-            warn(`Channel ${channel} should not be used with "binned" bin.`);
+            warn(channelShouldNotBeUsedForBinned(channel));
         }
         // Normalize Type
         if (isTypedFieldDef(fieldDef)) {
@@ -3931,12 +3973,11 @@
         else if (!isSecondaryRangeChannel(channel)) {
             // If type is empty / invalid, then augment with default type
             const newType = defaultType(fieldDef, channel);
-            warn(missingFieldType(channel, newType));
             fieldDef['type'] = newType;
         }
         if (isTypedFieldDef(fieldDef)) {
-            const { compatible, warning } = channelCompatibility(fieldDef, channel);
-            if (!compatible) {
+            const { compatible, warning } = channelCompatibility(fieldDef, channel) || {};
+            if (compatible === false) {
                 warn(warning);
             }
         }
@@ -4463,8 +4504,7 @@
         }
         return true;
     }
-    function initEncoding(encoding, markDef, config) {
-        const mark = markDef.type;
+    function initEncoding(encoding, mark, filled, config) {
         return keys(encoding).reduce((normalizedEncoding, channel) => {
             if (!isChannel(channel)) {
                 // Drop invalid channel
@@ -4490,7 +4530,7 @@
                 }
             }
             // Drop color if either fill or stroke is specified
-            if (channel === COLOR && (markDef.filled ? 'fill' in encoding : 'stroke' in encoding)) {
+            if (channel === COLOR && (filled ? 'fill' in encoding : 'stroke' in encoding)) {
                 warn(droppingColor('encoding', { fill: 'fill' in encoding, stroke: 'stroke' in encoding }));
                 return normalizedEncoding;
             }
@@ -4525,6 +4565,16 @@
                 }
                 normalizedEncoding[channel] = initChannelDef(channelDef, channel, config);
             }
+            return normalizedEncoding;
+        }, {});
+    }
+    /**
+     * For composite marks, we have to call initChannelDef during init so we can infer types earlier.
+     */
+    function normalizeEncoding(encoding, config) {
+        return keys(encoding).reduce((normalizedEncoding, channel) => {
+            const channelDef = encoding[channel];
+            normalizedEncoding[channel] = initChannelDef(channelDef, channel, config, { compositeMark: true });
             return normalizedEncoding;
         }, {});
     }
@@ -4658,7 +4708,7 @@
     function filterTooltipWithAggregatedField(oldEncoding) {
         const { tooltip } = oldEncoding, filteredEncoding = __rest(oldEncoding, ["tooltip"]);
         if (!tooltip) {
-            return { filteredEncoding: oldEncoding };
+            return { filteredEncoding };
         }
         let customTooltipWithAggregatedField;
         let customTooltipWithoutAggregatedField;
@@ -4699,32 +4749,34 @@
             return { tooltip: encodingWithoutContinuousAxis.tooltip };
         }
         const fiveSummaryTooltip = tooltipSummary.map(({ fieldPrefix, titlePrefix }) => {
-            const mainTitle = withFieldName ? ` of ${continuousAxisChannelDef.field}` : '';
+            const mainTitle = withFieldName ? ` of ${getTitle(continuousAxisChannelDef)}` : '';
             return {
                 field: fieldPrefix + continuousAxisChannelDef.field,
                 type: continuousAxisChannelDef.type,
                 title: isSignalRef(titlePrefix) ? { signal: titlePrefix + `"${escape(mainTitle)}"` } : titlePrefix + mainTitle
             };
         });
+        const tooltipFieldDefs = fieldDefs(encodingWithoutContinuousAxis).map(toStringFieldDef);
         return {
             tooltip: [
                 ...fiveSummaryTooltip,
                 // need to cast because TextFieldDef supports fewer types of bin
-                ...fieldDefs(encodingWithoutContinuousAxis)
+                ...unique(tooltipFieldDefs, hash)
             ]
         };
     }
     function getTitle(continuousAxisChannelDef) {
         const { axis, title, field } = continuousAxisChannelDef;
-        return axis && axis.title !== undefined ? undefined : getFirstDefined(title, field);
+        return getFirstDefined(axis === null || axis === void 0 ? void 0 : axis.title, title, field);
     }
     function makeCompositeAggregatePartFactory(compositeMarkDef, continuousAxis, continuousAxisChannelDef, sharedEncoding, compositeMarkConfig) {
         const { scale, axis } = continuousAxisChannelDef;
         return ({ partName, mark, positionPrefix, endPositionPrefix = undefined, aria, extraEncoding = {} }) => {
             const title = getTitle(continuousAxisChannelDef);
+            const axisWithoutTitle = omit(axis, ['title']);
             return partLayerMixins(compositeMarkDef, partName, compositeMarkConfig, aria, {
                 mark,
-                encoding: Object.assign(Object.assign(Object.assign({ [continuousAxis]: Object.assign(Object.assign(Object.assign({ field: positionPrefix + '_' + continuousAxisChannelDef.field, type: continuousAxisChannelDef.type }, (title !== undefined ? { title } : {})), (scale !== undefined ? { scale } : {})), (axis !== undefined ? { axis } : {})) }, (isString(endPositionPrefix)
+                encoding: Object.assign(Object.assign(Object.assign({ [continuousAxis]: Object.assign(Object.assign(Object.assign({ field: positionPrefix + '_' + continuousAxisChannelDef.field, type: continuousAxisChannelDef.type }, (title !== undefined ? { title } : {})), (scale !== undefined ? { scale } : {})), (isEmpty(axisWithoutTitle) ? {} : { axis: axisWithoutTitle })) }, (isString(endPositionPrefix)
                     ? {
                         [continuousAxis + '2']: {
                             field: endPositionPrefix + '_' + continuousAxisChannelDef.field
@@ -4825,7 +4877,8 @@
     }
     function normalizeBoxPlot(spec, { config }) {
         var _a, _b;
-        // TODO: use selection
+        // Need to initEncoding first so we can infer type
+        spec = Object.assign(Object.assign({}, spec), { encoding: normalizeEncoding(spec.encoding, config) });
         const { mark, encoding: _encoding, selection, projection: _p } = spec, outerSpec = __rest(spec, ["mark", "encoding", "selection", "projection"]);
         const markDef = isMarkDef(mark) ? mark : { type: mark };
         // TODO(https://github.com/vega/vega-lite/issues/3702): add selection support
@@ -4965,10 +5018,11 @@
             const encodingWithoutSizeColorContinuousAxisAndTooltip = __rest(encodingWithoutSizeColorAndContinuousAxis, ["tooltip"]);
             const { scale, axis } = continuousAxisChannelDef;
             const title = getTitle(continuousAxisChannelDef);
+            const axisWithoutTitle = omit(axis, ['title']);
             const outlierLayersMixins = partLayerMixins(markDef, 'outliers', config.boxplot, true, {
                 transform: [{ filter: `(${fieldExpr} < ${lowerWhiskerExpr}) || (${fieldExpr} > ${upperWhiskerExpr})` }],
                 mark: 'point',
-                encoding: Object.assign(Object.assign({ [continuousAxis]: Object.assign(Object.assign(Object.assign({ field: continuousAxisChannelDef.field, type: continuousAxisChannelDef.type }, (title !== undefined ? { title } : {})), (scale !== undefined ? { scale } : {})), (axis !== undefined ? { axis } : {})) }, encodingWithoutSizeColorContinuousAxisAndTooltip), (customTooltipWithoutAggregatedField ? { tooltip: customTooltipWithoutAggregatedField } : {}))
+                encoding: Object.assign(Object.assign({ [continuousAxis]: Object.assign(Object.assign(Object.assign({ field: continuousAxisChannelDef.field, type: continuousAxisChannelDef.type }, (title !== undefined ? { title } : {})), (scale !== undefined ? { scale } : {})), (isEmpty(axisWithoutTitle) ? {} : { axis: axisWithoutTitle })) }, encodingWithoutSizeColorContinuousAxisAndTooltip), (customTooltipWithoutAggregatedField ? { tooltip: customTooltipWithoutAggregatedField } : {}))
             })[0];
             if (outlierLayersMixins && filteredWhiskerSpec) {
                 filteredLayersMixins = {
@@ -5083,6 +5137,8 @@
     const ERRORBAR_PARTS = ['ticks', 'rule'];
     const errorBarNormalizer = new CompositeMarkNormalizer(ERRORBAR, normalizeErrorBar);
     function normalizeErrorBar(spec, { config }) {
+        // Need to initEncoding first so we can infer type
+        spec = Object.assign(Object.assign({}, spec), { encoding: normalizeEncoding(spec.encoding, config) });
         const { transform, continuousAxisChannelDef, continuousAxis, encodingWithoutContinuousAxis, ticksOrient, markDef, outerSpec, tooltipEncoding } = errorBarParams(spec, ERRORBAR, config);
         const makeErrorBarPart = makeCompositeAggregatePartFactory(markDef, continuousAxis, continuousAxisChannelDef, encodingWithoutContinuousAxis, config.errorbar);
         const tick = { type: 'tick', orient: ticksOrient };
@@ -5387,6 +5443,8 @@
     const ERRORBAND_PARTS = ['band', 'borders'];
     const errorBandNormalizer = new CompositeMarkNormalizer(ERRORBAND, normalizeErrorBand);
     function normalizeErrorBand(spec, { config }) {
+        // Need to initEncoding first so we can infer type
+        spec = Object.assign(Object.assign({}, spec), { encoding: normalizeEncoding(spec.encoding, config) });
         const { transform, continuousAxisChannelDef, continuousAxis, encodingWithoutContinuousAxis, markDef, outerSpec, tooltipEncoding } = errorBarParams(spec, ERRORBAND, config);
         const errorBandDef = markDef;
         const makeErrorBandPart = makeCompositeAggregatePartFactory(errorBandDef, continuousAxis, continuousAxisChannelDef, encodingWithoutContinuousAxis, config.errorband);
@@ -6320,7 +6378,9 @@
         }
         run(spec, params, normalize) {
             const { config } = params;
-            const { selection, projection, encoding, mark } = spec, outerSpec = __rest(spec, ["selection", "projection", "encoding", "mark"]);
+            const { selection, projection, mark, encoding: e } = spec, outerSpec = __rest(spec, ["selection", "projection", "mark", "encoding"]);
+            // Need to call normalizeEncoding because we need the inferred types to correctly determine stack
+            const encoding = normalizeEncoding(e, config);
             const markDef = isMarkDef(mark) ? mark : { type: mark };
             const pointOverlay = getPointOverlay(markDef, config[markDef.type], encoding);
             const lineOverlay = markDef.type === 'area' && getLineOverlay(markDef, config[markDef.type]);
@@ -6748,6 +6808,7 @@
      */
     function normalizeAutoSize(spec, sizeInfo, config) {
         let { width, height } = sizeInfo;
+        // A faceted view is only compatible with autosize === "fit" if a specific outer width and/or height is specified in the spec
         const isFitCompatibleFacet = isFacetSpec(spec) && (spec.width || spec.height);
         const isFitCompatible = isUnitSpec(spec) || isLayerSpec(spec) || isFitCompatibleFacet;
         const autosizeDefault = {};
@@ -7509,6 +7570,15 @@
         }));
     }
 
+    function zindex(model) {
+        const { encoding, mark } = model;
+        const order = encoding.order;
+        if (!isPathMark(mark) && isValueDef(order)) {
+            return wrapCondition(model, order, 'zindex', cd => cd);
+        }
+        return {};
+    }
+
     function getOffset(channel, markDef) {
         const offsetChannel = getOffsetChannel(channel);
         // TODO: in the future read from encoding channel too
@@ -8008,7 +8078,7 @@
     const ALWAYS_IGNORE = new Set(['aria']);
     function baseEncodeEntry(model, ignore) {
         const { fill = undefined, stroke = undefined } = ignore.color === 'include' ? color(model) : {};
-        return Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, markDefProperties(model.markDef, ignore)), wrapAllFieldsInvalid(model, 'fill', fill)), wrapAllFieldsInvalid(model, 'stroke', stroke)), nonPosition('opacity', model)), nonPosition('fillOpacity', model)), nonPosition('strokeOpacity', model)), nonPosition('strokeWidth', model)), nonPosition('strokeDash', model)), tooltip(model)), text(model, 'href')), aria(model));
+        return Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, markDefProperties(model.markDef, ignore)), wrapAllFieldsInvalid(model, 'fill', fill)), wrapAllFieldsInvalid(model, 'stroke', stroke)), nonPosition('opacity', model)), nonPosition('fillOpacity', model)), nonPosition('strokeOpacity', model)), nonPosition('strokeWidth', model)), nonPosition('strokeDash', model)), zindex(model)), tooltip(model)), text(model, 'href')), aria(model));
     }
     // TODO: mark VgValueRef[] as readonly after https://github.com/vega/vega/pull/1987
     function wrapAllFieldsInvalid(model, channel, valueRef) {
@@ -8421,7 +8491,7 @@
                             }
                             else {
                                 if (selDef.type === 'interval') {
-                                    warn('Interval selections should be initialized using "x" and/or "y" keys.');
+                                    warn(INTERVAL_INITIALIZED_WITH_X_Y);
                                     selDef.encodings = cfg.encodings;
                                 }
                                 else {
@@ -11410,9 +11480,9 @@
         }
         return Object.assign.apply(null, toMerge);
     }
-    function getAxisConfig(property, config, style, axisConfigs = {}) {
+    function getAxisConfig(property, styleConfigIndex, style, axisConfigs = {}) {
         var _a;
-        const styleConfig = getStyleConfig(property, style, config.style);
+        const styleConfig = getStyleConfig(property, style, styleConfigIndex);
         if (styleConfig !== undefined) {
             return {
                 configFrom: 'style',
@@ -11451,7 +11521,7 @@
         labelAngle: ({ labelAngle }) => labelAngle,
         labelBaseline: ({ axis, labelAngle, orient, channel }) => axis.labelBaseline || defaultLabelBaseline(labelAngle, orient, channel),
         labelFlush: ({ axis, fieldOrDatumDef, channel }) => { var _a; return (_a = axis.labelFlush) !== null && _a !== void 0 ? _a : defaultLabelFlush(fieldOrDatumDef.type, channel); },
-        labelOverlap: ({ axis, fieldOrDatumDef, scaleType }) => { var _a; return (_a = axis.labelOverlap) !== null && _a !== void 0 ? _a : defaultLabelOverlap(fieldOrDatumDef.type, scaleType); },
+        labelOverlap: ({ axis, fieldOrDatumDef, scaleType }) => { var _a; return (_a = axis.labelOverlap) !== null && _a !== void 0 ? _a : defaultLabelOverlap(fieldOrDatumDef.type, scaleType, isFieldDef(fieldOrDatumDef) && !!fieldOrDatumDef.timeUnit, isFieldDef(fieldOrDatumDef) ? fieldOrDatumDef.sort : undefined); },
         // we already calculate orient in parse
         orient: ({ orient }) => orient,
         tickCount: ({ channel, model, axis, fieldOrDatumDef, scaleType }) => {
@@ -11492,7 +11562,7 @@
         }
         return undefined;
     }
-    function getLabelAngle(model, axis, channel, fieldOrDatumDef, axisConfigs) {
+    function getLabelAngle(fieldOrDatumDef, axis, channel, styleConfig, axisConfigs) {
         const labelAngle = axis === null || axis === void 0 ? void 0 : axis.labelAngle;
         // try axis value
         if (labelAngle !== undefined) {
@@ -11500,13 +11570,15 @@
         }
         else {
             // try axis config value
-            const { configValue: angle } = getAxisConfig('labelAngle', model.config, axis === null || axis === void 0 ? void 0 : axis.style, axisConfigs);
+            const { configValue: angle } = getAxisConfig('labelAngle', styleConfig, axis === null || axis === void 0 ? void 0 : axis.style, axisConfigs);
             if (angle !== undefined) {
                 return normalizeAngle(angle);
             }
             else {
                 // get default value
-                if (channel === X && contains([NOMINAL, ORDINAL], fieldOrDatumDef.type)) {
+                if (channel === X &&
+                    contains([NOMINAL, ORDINAL], fieldOrDatumDef.type) &&
+                    !(isFieldDef(fieldOrDatumDef) && fieldOrDatumDef.timeUnit)) {
                     return 270;
                 }
                 // no default
@@ -11595,9 +11667,9 @@
         }
         return undefined;
     }
-    function defaultLabelOverlap(type, scaleType) {
+    function defaultLabelOverlap(type, scaleType, hasTimeUnit, sort) {
         // do not prevent overlap for nominal data because there is no way to infer what the missing labels are
-        if (type !== 'nominal') {
+        if ((hasTimeUnit && !isObject(sort)) || (type !== 'nominal' && type !== 'ordinal')) {
             if (scaleType === 'log') {
                 return 'greedy';
             }
@@ -11969,7 +12041,14 @@
             return [
                 {
                     name,
-                    update: model.parent.facet.column ? "width / length(data('column_domain'))" : 'width'
+                    // if the facet operator defines a column channel, the compiled vega spec includes the 'column_domain' data
+                    // if however the facet operator is itself is a facet field definition, the compiled vega spec instead includes the 'facet_domain_column' data
+                    // otherwise there is no column faceting so the width should be passed through
+                    update: model.parent.facet.column
+                        ? "width / length(data('column_domain'))"
+                        : model.parent.facet.facet
+                            ? "width / length(data('facet_domain_column'))"
+                            : 'width'
                 }
             ];
         }
@@ -11977,7 +12056,14 @@
             return [
                 {
                     name,
-                    update: model.parent.facet.row ? "height / length(data('row_domain'))" : 'height'
+                    // if the facet operator defines a row channel, the compiled vega spec includes the 'row_domain' data
+                    // if however the facet operator is itself is a facet field definition, the compiled vega spec instead includes the 'facet_domain_row' data
+                    // otherwise there is no row faceting so the height should be passed through
+                    update: model.parent.facet.row
+                        ? "height / length(data('row_domain'))"
+                        : model.parent.facet.facet
+                            ? "height / length(data('facet_domain_row'))"
+                            : 'height'
                 }
             ];
         }
@@ -13423,7 +13509,7 @@
                             childIndependentFieldsWithStep[channel] = field;
                         }
                         else {
-                            warn(`Unknown field for ${channel}. Cannot calculate view size.`);
+                            warn(unknownField(channel));
                         }
                     }
                 }
@@ -14783,7 +14869,7 @@
                     }
                     const se = childComponent.get('selectionExtent');
                     if (selectionExtent && se && selectionExtent.selection !== se.selection) {
-                        warn('The same selection must be used to override scale domains in a layered view.');
+                        warn(NEEDS_SAME_SELECTION);
                     }
                     selectionExtent = se;
                 }
@@ -15260,7 +15346,7 @@
             }
             const scale = scaleComponent.combine();
             const { name, type, selectionExtent, domains: _d, range: _r, reverse } = scale, otherScaleProps = __rest(scale, ["name", "type", "selectionExtent", "domains", "range", "reverse"]);
-            const range = assembleScaleRange(scale.range, name, channel);
+            const range = assembleScaleRange(scale.range, name, channel, model);
             let domainRaw;
             if (selectionExtent) {
                 domainRaw = assembleSelectionScaleDomain(model, selectionExtent);
@@ -15271,7 +15357,7 @@
             return scales;
         }, []);
     }
-    function assembleScaleRange(scaleRange, scaleName, channel) {
+    function assembleScaleRange(scaleRange, scaleName, channel, model) {
         // add signals to x/y range
         if (isXorY(channel)) {
             if (isVgRangeStep(scaleRange)) {
@@ -15280,6 +15366,9 @@
                     step: { signal: scaleName + '_step' }
                 };
             }
+        }
+        else if (isObject(scaleRange) && isDataRefDomain(scaleRange)) {
+            return Object.assign(Object.assign({}, scaleRange), { data: model.lookupDataSource(scaleRange.data) });
         }
         return scaleRange;
     }
@@ -15357,20 +15446,31 @@
                 }
                 else {
                     switch (property) {
-                        case 'range':
-                            if (isArray(specifiedScale.range) && isXorY(channel)) {
-                                return makeExplicit(specifiedScale.range.map(v => {
-                                    if (v === 'width' || v === 'height') {
-                                        // get signal for width/height
-                                        // Just like default range logic below, we use SignalRefWrapper to account for potential merges and renames.
-                                        const sizeSignal = model.getName(v);
-                                        const getSignalName = model.getSignalName.bind(model);
-                                        return SignalRefWrapper.fromName(getSignalName, sizeSignal);
-                                    }
-                                    return v;
-                                }));
+                        case 'range': {
+                            const range = specifiedScale.range;
+                            if (isArray(range)) {
+                                if (isXorY(channel)) {
+                                    return makeExplicit(range.map(v => {
+                                        if (v === 'width' || v === 'height') {
+                                            // get signal for width/height
+                                            // Just like default range logic below, we use SignalRefWrapper to account for potential merges and renames.
+                                            const sizeSignal = model.getName(v);
+                                            const getSignalName = model.getSignalName.bind(model);
+                                            return SignalRefWrapper.fromName(getSignalName, sizeSignal);
+                                        }
+                                        return v;
+                                    }));
+                                }
                             }
-                            return makeExplicit(specifiedScale.range);
+                            else if (isObject(range)) {
+                                return makeExplicit({
+                                    data: model.requestDataName(MAIN),
+                                    field: range.field,
+                                    sort: { op: 'min', field: model.vgField(channel) }
+                                });
+                            }
+                            return makeExplicit(range);
+                        }
                         case 'scheme':
                             return makeExplicit(parseScheme(specifiedScale[property]));
                     }
@@ -15389,7 +15489,16 @@
                 }
             }
         }
-        return makeImplicit(defaultRange(channel, model));
+        const { rangeMin, rangeMax } = specifiedScale;
+        const d = defaultRange(channel, model);
+        if ((rangeMin !== undefined || rangeMax !== undefined) &&
+            // it's ok to check just rangeMin's compatibility since rangeMin/rangeMax are the same
+            scaleTypeSupportProperty(scaleType, 'rangeMin') &&
+            isArray(d) &&
+            d.length === 2) {
+            return makeExplicit([rangeMin !== null && rangeMin !== void 0 ? rangeMin : d[0], rangeMax !== null && rangeMax !== void 0 ? rangeMax : d[1]]);
+        }
+        return makeImplicit(d);
     }
     function parseScheme(scheme) {
         if (isExtendedScheme(scheme)) {
@@ -15665,8 +15774,22 @@
             }
             if (supportedByScaleType && channelIncompatability === undefined) {
                 if (specifiedValue !== undefined) {
-                    // copyKeyFromObject ensures type safety
-                    localScaleCmpt.copyKeyFromObject(property, specifiedScale);
+                    const timeUnit = fieldOrDatumDef['timeUnit'];
+                    const type = fieldOrDatumDef.type;
+                    switch (property) {
+                        // domainMax/Min to signal if the value is a datetime object
+                        case 'domainMax':
+                        case 'domainMin':
+                            if (isDateTime(specifiedScale[property]) || type === 'temporal' || timeUnit) {
+                                localScaleCmpt.set(property, { signal: valueExpr(specifiedScale[property], { type, timeUnit }) }, true);
+                            }
+                            else {
+                                localScaleCmpt.set(property, specifiedScale[property], true);
+                            }
+                            break;
+                        default:
+                            localScaleCmpt.copyKeyFromObject(property, specifiedScale);
+                    }
                 }
                 else {
                     const value = property in scaleRules
@@ -16360,7 +16483,7 @@
                             };
                         }
                         else {
-                            warn(`Unknown field for ${channel}. Cannot calculate view size.`);
+                            warn(unknownField(channel));
                             return null;
                         }
                     }
@@ -17652,7 +17775,7 @@
                                 as.push(`distinct_${field}`);
                             }
                             else {
-                                warn(`Unknown field for ${channel}. Cannot calculate view size.`);
+                                warn(unknownField(channel));
                             }
                         }
                     }
@@ -18445,13 +18568,13 @@
             defaultOrient(channel);
         const scaleType = model.getScaleComponent(channel).get('type');
         const axisConfigs = getAxisConfigs(channel, scaleType, orient, model.config);
-        const disable = axis !== undefined ? !axis : getAxisConfig('disable', config, axis === null || axis === void 0 ? void 0 : axis.style, axisConfigs).configValue;
+        const disable = axis !== undefined ? !axis : getAxisConfig('disable', config.style, axis === null || axis === void 0 ? void 0 : axis.style, axisConfigs).configValue;
         axisComponent.set('disable', disable, axis !== undefined);
         if (disable) {
             return axisComponent;
         }
         axis = axis || {};
-        const labelAngle = getLabelAngle(model, axis, channel, fieldOrDatumDef, axisConfigs);
+        const labelAngle = getLabelAngle(fieldOrDatumDef, axis, channel, config.style, axisConfigs);
         const ruleParams = {
             fieldOrDatumDef,
             axis,
@@ -18473,7 +18596,7 @@
             }
             else {
                 const { configValue = undefined, configFrom = undefined } = isAxisProperty(property) && property !== 'values'
-                    ? getAxisConfig(property, model.config, axis.style, axisConfigs)
+                    ? getAxisConfig(property, config.style, axis.style, axisConfigs)
                     : {};
                 const hasConfigValue = configValue !== undefined;
                 if (hasValue && !hasConfigValue) {
@@ -18529,8 +18652,7 @@
         return size;
     }
 
-    function initMarkdef(mark, encoding, config, { graticule }) {
-        const markDef = isMarkDef(mark) ? Object.assign({}, mark) : { type: mark };
+    function initMarkdef(markDef, encoding, config) {
         // set orient, which can be overridden by rules as sometimes the specified orient is invalid.
         const specifiedOrient = getMarkPropOrConfig('orient', markDef, config);
         markDef.orient = orient(markDef.type, encoding, specifiedOrient);
@@ -18556,10 +18678,6 @@
         if (specifiedOpacity === undefined) {
             markDef.opacity = opacity(markDef.type, encoding);
         }
-        const specifiedFilled = markDef.filled;
-        if (specifiedFilled === undefined) {
-            markDef.filled = graticule ? false : filled(markDef, config);
-        }
         // set cursor, which should be pointer if href channel is present unless otherwise specified
         const specifiedCursor = getMarkPropOrConfig('cursor', markDef, config);
         if (specifiedCursor === undefined) {
@@ -18582,7 +18700,10 @@
         }
         return undefined;
     }
-    function filled(markDef, config) {
+    function defaultFilled(markDef, config, { graticule }) {
+        if (graticule) {
+            return false;
+        }
         const filledConfig = getMarkConfig('filled', markDef, config);
         const mark = markDef.type;
         return getFirstDefined(filledConfig, mark !== POINT && mark !== LINE && mark !== RULE);
@@ -19279,7 +19400,6 @@
      */
     class UnitModel extends ModelWithField {
         constructor(spec, parent, parentGivenName, parentGivenSize = {}, config) {
-            var _a, _b;
             super(spec, 'unit', parent, parentGivenName, config, undefined, isFrameMixins(spec) ? spec.view : undefined);
             this.specifiedScales = {};
             this.specifiedAxes = {};
@@ -19287,11 +19407,16 @@
             this.specifiedProjection = {};
             this.selection = {};
             this.children = [];
-            const mark = isMarkDef(spec.mark) ? spec.mark.type : spec.mark;
-            this.markDef = initMarkdef(spec.mark, (_a = spec.encoding) !== null && _a !== void 0 ? _a : {}, config, {
-                graticule: spec.data && isGraticuleGenerator(spec.data)
-            });
-            const encoding = (this.encoding = initEncoding((_b = spec.encoding) !== null && _b !== void 0 ? _b : {}, this.markDef, config));
+            const markDef = isMarkDef(spec.mark) ? Object.assign({}, spec.mark) : { type: spec.mark };
+            const mark = markDef.type;
+            // Need to init filled before other mark properties because encoding depends on filled but other mark properties depend on types inside encoding
+            if (markDef.filled === undefined) {
+                markDef.filled = defaultFilled(markDef, config, {
+                    graticule: spec.data && isGraticuleGenerator(spec.data)
+                });
+            }
+            const encoding = (this.encoding = initEncoding(spec.encoding || {}, mark, markDef.filled, config));
+            this.markDef = initMarkdef(markDef, encoding, config);
             this.size = initLayoutSize({
                 encoding: encoding,
                 size: isFrameMixins(spec)
@@ -19675,34 +19800,7 @@
         return Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({ $schema: 'https://vega.github.io/schema/vega/v5.json' }, (model.description ? { description: model.description } : {})), topLevelProperties), (title ? { title } : {})), (style ? { style } : {})), (encodeEntry ? { encode: { update: encodeEntry } } : {})), { data }), (projections.length > 0 ? { projections: projections } : {})), model.assembleGroup([...layoutSignals, ...model.assembleSelectionTopLevelSignals([])])), (vgConfig ? { config: vgConfig } : {})), (usermeta ? { usermeta } : {}));
     }
 
-    class TransformExtractMapper extends SpecMapper {
-        mapUnit(spec, { config }) {
-            if (spec.encoding) {
-                const { encoding: oldEncoding, transform: oldTransforms } = spec;
-                const { bins, timeUnits, aggregate, groupby, encoding } = extractTransformsFromEncoding(oldEncoding, config);
-                const transform = [
-                    ...(oldTransforms ? oldTransforms : []),
-                    ...bins,
-                    ...timeUnits,
-                    ...(aggregate.length === 0 ? [] : [{ aggregate, groupby }])
-                ];
-                return Object.assign(Object.assign(Object.assign({}, spec), (transform.length > 0 ? { transform } : {})), { encoding });
-            }
-            else {
-                return spec;
-            }
-        }
-    }
-    const extractor = new TransformExtractMapper();
-    /**
-     * Modifies spec extracting transformations from encoding and moving them to the transforms array
-     */
-    function extractTransforms(spec, config) {
-        return extractor.map(spec, { config });
-    }
-
     exports.compile = compile;
-    exports.extractTransforms = extractTransforms;
     exports.normalize = normalize;
     exports.version = version;
 

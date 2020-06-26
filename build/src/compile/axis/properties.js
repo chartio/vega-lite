@@ -1,4 +1,4 @@
-import { isArray } from 'vega-util';
+import { isArray, isObject } from 'vega-util';
 import { isBinned, isBinning } from '../../bin';
 import { X } from '../../channel';
 import { isDiscrete, isFieldDef, toFieldDefBase, valueArray } from '../../channeldef';
@@ -34,7 +34,7 @@ export const axisRules = {
     labelAngle: ({ labelAngle }) => labelAngle,
     labelBaseline: ({ axis, labelAngle, orient, channel }) => axis.labelBaseline || defaultLabelBaseline(labelAngle, orient, channel),
     labelFlush: ({ axis, fieldOrDatumDef, channel }) => { var _a; return (_a = axis.labelFlush) !== null && _a !== void 0 ? _a : defaultLabelFlush(fieldOrDatumDef.type, channel); },
-    labelOverlap: ({ axis, fieldOrDatumDef, scaleType }) => { var _a; return (_a = axis.labelOverlap) !== null && _a !== void 0 ? _a : defaultLabelOverlap(fieldOrDatumDef.type, scaleType); },
+    labelOverlap: ({ axis, fieldOrDatumDef, scaleType }) => { var _a; return (_a = axis.labelOverlap) !== null && _a !== void 0 ? _a : defaultLabelOverlap(fieldOrDatumDef.type, scaleType, isFieldDef(fieldOrDatumDef) && !!fieldOrDatumDef.timeUnit, isFieldDef(fieldOrDatumDef) ? fieldOrDatumDef.sort : undefined); },
     // we already calculate orient in parse
     orient: ({ orient }) => orient,
     tickCount: ({ channel, model, axis, fieldOrDatumDef, scaleType }) => {
@@ -75,7 +75,7 @@ export function gridScale(model, channel) {
     }
     return undefined;
 }
-export function getLabelAngle(model, axis, channel, fieldOrDatumDef, axisConfigs) {
+export function getLabelAngle(fieldOrDatumDef, axis, channel, styleConfig, axisConfigs) {
     const labelAngle = axis === null || axis === void 0 ? void 0 : axis.labelAngle;
     // try axis value
     if (labelAngle !== undefined) {
@@ -83,13 +83,15 @@ export function getLabelAngle(model, axis, channel, fieldOrDatumDef, axisConfigs
     }
     else {
         // try axis config value
-        const { configValue: angle } = getAxisConfig('labelAngle', model.config, axis === null || axis === void 0 ? void 0 : axis.style, axisConfigs);
+        const { configValue: angle } = getAxisConfig('labelAngle', styleConfig, axis === null || axis === void 0 ? void 0 : axis.style, axisConfigs);
         if (angle !== undefined) {
             return normalizeAngle(angle);
         }
         else {
             // get default value
-            if (channel === X && contains([NOMINAL, ORDINAL], fieldOrDatumDef.type)) {
+            if (channel === X &&
+                contains([NOMINAL, ORDINAL], fieldOrDatumDef.type) &&
+                !(isFieldDef(fieldOrDatumDef) && fieldOrDatumDef.timeUnit)) {
                 return 270;
             }
             // no default
@@ -178,9 +180,9 @@ export function defaultLabelFlush(type, channel) {
     }
     return undefined;
 }
-export function defaultLabelOverlap(type, scaleType) {
+export function defaultLabelOverlap(type, scaleType, hasTimeUnit, sort) {
     // do not prevent overlap for nominal data because there is no way to infer what the missing labels are
-    if (type !== 'nominal') {
+    if ((hasTimeUnit && !isObject(sort)) || (type !== 'nominal' && type !== 'ordinal')) {
         if (scaleType === 'log') {
             return 'greedy';
         }

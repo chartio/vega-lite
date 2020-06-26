@@ -1,3 +1,4 @@
+import { normalizeEncoding } from '../encoding';
 import * as log from '../log';
 import { CompositeMarkNormalizer } from './base';
 import { makeCompositeAggregatePartFactory } from './common';
@@ -6,6 +7,8 @@ export const ERRORBAND = 'errorband';
 export const ERRORBAND_PARTS = ['band', 'borders'];
 export const errorBandNormalizer = new CompositeMarkNormalizer(ERRORBAND, normalizeErrorBand);
 export function normalizeErrorBand(spec, { config }) {
+    // Need to initEncoding first so we can infer type
+    spec = Object.assign(Object.assign({}, spec), { encoding: normalizeEncoding(spec.encoding, config) });
     const { transform, continuousAxisChannelDef, continuousAxis, encodingWithoutContinuousAxis, markDef, outerSpec, tooltipEncoding } = errorBarParams(spec, ERRORBAND, config);
     const errorBandDef = markDef;
     const makeErrorBandPart = makeCompositeAggregatePartFactory(errorBandDef, continuousAxis, continuousAxisChannelDef, encodingWithoutContinuousAxis, config.errorband);
