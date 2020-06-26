@@ -1,17 +1,18 @@
-import { isArray, isNumber } from 'vega-util';
+import { isArray, isNumber, isObject } from 'vega-util';
 import { isBinning } from '../../bin';
 import { ANGLE, COLOR, FILL, FILLOPACITY, isXorY, OPACITY, RADIUS, SCALE_CHANNELS, SHAPE, SIZE, STROKE, STROKEDASH, STROKEOPACITY, STROKEWIDTH, THETA, X, Y } from '../../channel';
 import { getFieldOrDatumDef } from '../../channeldef';
 import { getViewConfigDiscreteSize, getViewConfigDiscreteStep } from '../../config';
+import { MAIN } from '../../data';
 import * as log from '../../log';
 import { channelScalePropertyIncompatability, hasContinuousDomain, hasDiscreteDomain, isContinuousToDiscrete, isExtendedScheme, scaleTypeSupportProperty } from '../../scale';
 import { isStep } from '../../spec/base';
 import * as util from '../../util';
 import { isSignalRef } from '../../vega.schema';
+import { signalOrStringValue } from '../common';
 import { getBinSignalName } from '../data/bin';
 import { SignalRefWrapper } from '../signal';
 import { makeExplicit, makeImplicit } from '../split';
-import { signalOrStringValue } from '../common';
 export const RANGE_PROPERTIES = ['range', 'scheme'];
 function getSizeChannel(channel) {
     return channel === 'x' ? 'width' : channel === 'y' ? 'height' : undefined;
@@ -66,20 +67,31 @@ export function parseRangeForChannel(channel, model) {
             }
             else {
                 switch (property) {
-                    case 'range':
-                        if (isArray(specifiedScale.range) && isXorY(channel)) {
-                            return makeExplicit(specifiedScale.range.map(v => {
-                                if (v === 'width' || v === 'height') {
-                                    // get signal for width/height
-                                    // Just like default range logic below, we use SignalRefWrapper to account for potential merges and renames.
-                                    const sizeSignal = model.getName(v);
-                                    const getSignalName = model.getSignalName.bind(model);
-                                    return SignalRefWrapper.fromName(getSignalName, sizeSignal);
-                                }
-                                return v;
-                            }));
+                    case 'range': {
+                        const range = specifiedScale.range;
+                        if (isArray(range)) {
+                            if (isXorY(channel)) {
+                                return makeExplicit(range.map(v => {
+                                    if (v === 'width' || v === 'height') {
+                                        // get signal for width/height
+                                        // Just like default range logic below, we use SignalRefWrapper to account for potential merges and renames.
+                                        const sizeSignal = model.getName(v);
+                                        const getSignalName = model.getSignalName.bind(model);
+                                        return SignalRefWrapper.fromName(getSignalName, sizeSignal);
+                                    }
+                                    return v;
+                                }));
+                            }
                         }
-                        return makeExplicit(specifiedScale.range);
+                        else if (isObject(range)) {
+                            return makeExplicit({
+                                data: model.requestDataName(MAIN),
+                                field: range.field,
+                                sort: { op: 'min', field: model.vgField(channel) }
+                            });
+                        }
+                        return makeExplicit(range);
+                    }
                     case 'scheme':
                         return makeExplicit(parseScheme(specifiedScale[property]));
                 }
@@ -98,7 +110,16 @@ export function parseRangeForChannel(channel, model) {
             }
         }
     }
-    return makeImplicit(defaultRange(channel, model));
+    const { rangeMin, rangeMax } = specifiedScale;
+    const d = defaultRange(channel, model);
+    if ((rangeMin !== undefined || rangeMax !== undefined) &&
+        // it's ok to check just rangeMin's compatibility since rangeMin/rangeMax are the same
+        scaleTypeSupportProperty(scaleType, 'rangeMin') &&
+        isArray(d) &&
+        d.length === 2) {
+        return makeExplicit([rangeMin !== null && rangeMin !== void 0 ? rangeMin : d[0], rangeMax !== null && rangeMax !== void 0 ? rangeMax : d[1]]);
+    }
+    return makeImplicit(d);
 }
 function parseScheme(scheme) {
     if (isExtendedScheme(scheme)) {

@@ -159,8 +159,7 @@ export function markChannelCompatible(encoding, channel, mark) {
     }
     return true;
 }
-export function initEncoding(encoding, markDef, config) {
-    const mark = markDef.type;
+export function initEncoding(encoding, mark, filled, config) {
     return keys(encoding).reduce((normalizedEncoding, channel) => {
         if (!isChannel(channel)) {
             // Drop invalid channel
@@ -186,7 +185,7 @@ export function initEncoding(encoding, markDef, config) {
             }
         }
         // Drop color if either fill or stroke is specified
-        if (channel === COLOR && (markDef.filled ? 'fill' in encoding : 'stroke' in encoding)) {
+        if (channel === COLOR && (filled ? 'fill' in encoding : 'stroke' in encoding)) {
             log.warn(log.message.droppingColor('encoding', { fill: 'fill' in encoding, stroke: 'stroke' in encoding }));
             return normalizedEncoding;
         }
@@ -221,6 +220,16 @@ export function initEncoding(encoding, markDef, config) {
             }
             normalizedEncoding[channel] = initChannelDef(channelDef, channel, config);
         }
+        return normalizedEncoding;
+    }, {});
+}
+/**
+ * For composite marks, we have to call initChannelDef during init so we can infer types earlier.
+ */
+export function normalizeEncoding(encoding, config) {
+    return keys(encoding).reduce((normalizedEncoding, channel) => {
+        const channelDef = encoding[channel];
+        normalizedEncoding[channel] = initChannelDef(channelDef, channel, config, { compositeMark: true });
         return normalizedEncoding;
     }, {});
 }

@@ -57,6 +57,6 @@ export declare class UnitModel extends ModelWithField {
     get mark(): Mark;
     channelHasField(channel: Channel): boolean;
     fieldDef(channel: SingleDefChannel): import("../channeldef").FieldDef<string, any>;
-    typedFieldDef(channel: SingleDefChannel): import("../channeldef").TypedFieldDef<string, any, import("../bin").Bin>;
+    typedFieldDef(channel: SingleDefChannel): import("../channeldef").TypedFieldDef<string, any, boolean | import("../bin").BinParams | "binned">;
 }
 //# sourceMappingURL=unit.d.ts.map

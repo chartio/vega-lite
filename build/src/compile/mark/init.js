@@ -2,12 +2,11 @@ import { isBinned, isBinning } from '../../bin';
 import { isContinuousFieldOrDatumDef, isFieldDef, isNumericDataDef } from '../../channeldef';
 import { isAggregate } from '../../encoding';
 import * as log from '../../log';
-import { AREA, BAR, BAR_CORNER_RADIUS_INDEX as BAR_CORNER_RADIUS_END_INDEX, CIRCLE, IMAGE, isMarkDef, LINE, POINT, RECT, RULE, SQUARE, TEXT, TICK } from '../../mark';
+import { AREA, BAR, BAR_CORNER_RADIUS_INDEX as BAR_CORNER_RADIUS_END_INDEX, CIRCLE, IMAGE, LINE, POINT, RECT, RULE, SQUARE, TEXT, TICK } from '../../mark';
 import { QUANTITATIVE, TEMPORAL } from '../../type';
 import { contains, getFirstDefined } from '../../util';
 import { getMarkConfig, getMarkPropOrConfig } from '../common';
-export function initMarkdef(mark, encoding, config, { graticule }) {
-    const markDef = isMarkDef(mark) ? Object.assign({}, mark) : { type: mark };
+export function initMarkdef(markDef, encoding, config) {
     // set orient, which can be overridden by rules as sometimes the specified orient is invalid.
     const specifiedOrient = getMarkPropOrConfig('orient', markDef, config);
     markDef.orient = orient(markDef.type, encoding, specifiedOrient);
@@ -33,10 +32,6 @@ export function initMarkdef(mark, encoding, config, { graticule }) {
     if (specifiedOpacity === undefined) {
         markDef.opacity = opacity(markDef.type, encoding);
     }
-    const specifiedFilled = markDef.filled;
-    if (specifiedFilled === undefined) {
-        markDef.filled = graticule ? false : filled(markDef, config);
-    }
     // set cursor, which should be pointer if href channel is present unless otherwise specified
     const specifiedCursor = getMarkPropOrConfig('cursor', markDef, config);
     if (specifiedCursor === undefined) {
@@ -59,7 +54,10 @@ function opacity(mark, encoding) {
     }
     return undefined;
 }
-function filled(markDef, config) {
+export function defaultFilled(markDef, config, { graticule }) {
+    if (graticule) {
+        return false;
+    }
     const filledConfig = getMarkConfig('filled', markDef, config);
     const mark = markDef.type;
     return getFirstDefined(filledConfig, mark !== POINT && mark !== LINE && mark !== RULE);

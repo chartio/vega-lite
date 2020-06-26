@@ -23,6 +23,11 @@ export declare const ScaleType: {
 };
 declare type ValueOf<T> = T[keyof T];
 export declare type ScaleType = ValueOf<typeof ScaleType>;
+/**
+ * Index for scale categories -- only scale of the same categories can be merged together.
+ * Current implementation is trying to be conservative and avoid merging scale type that might not work together
+ */
+export declare const SCALE_CATEGORY_INDEX: Record<ScaleType, ScaleType | 'numeric' | 'ordinal-position' | 'discretizing'>;
 export declare const SCALE_TYPES: import("vega").ScaleType[];
 /**
  * Whether the two given scale types can be merged together.
@@ -292,6 +297,14 @@ export interface Scale {
      */
     domainMid?: number | SignalRef;
     /**
+     * Sets the maximum value in the scale domain, overriding the `domain` property. This property is only intended for use with scales having continuous domains.
+     */
+    domainMax?: number | DateTime | SignalRef;
+    /**
+     * Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
+     */
+    domainMin?: number | DateTime | SignalRef;
+    /**
      * If true, reverses the order of the scale range.
      * __Default value:__ `false`.
      */
@@ -303,7 +316,7 @@ export interface Scale {
      *
      * - For [continuous scales](https://vega.github.io/vega-lite/docs/scale.html#continuous), two-element array indicating  minimum and maximum values, or an array with more than two entries for specifying a [piecewise scale](https://vega.github.io/vega-lite/docs/scale.html#piecewise).
      *
-     * - For [discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete) and [discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing) scales, an array of desired output values.
+     * - For [discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete) and [discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing) scales, an array of desired output values or an object with a `field` property representing the range values.  For example, if a field `color` contains CSS color names, we can set `range` to `{field: "color"}`.
      *
      * __Notes:__
      *
@@ -311,7 +324,17 @@ export interface Scale {
      *
      * 2) Any directly specified `range` for `x` and `y` channels will be ignored. Range can be customized via the view's corresponding [size](https://vega.github.io/vega-lite/docs/size.html) (`width` and `height`).
      */
-    range?: RangeEnum | (number | string | number[] | SignalRef)[];
+    range?: RangeEnum | (number | string | number[] | SignalRef)[] | {
+        field: string;
+    };
+    /**
+     * Sets the maximum value in the scale range, overriding the `range` property or the default range. This property is only intended for use with scales having continuous ranges.
+     */
+    rangeMax?: number | string | SignalRef;
+    /**
+     * Sets the minimum value in the scale range, overriding the `range` property or the default range. This property is only intended for use with scales having continuous ranges.
+     */
+    rangeMin?: number | string | SignalRef;
     /**
      * A string indicating a color [scheme](https://vega.github.io/vega-lite/docs/scale.html#scheme) name (e.g., `"category10"` or `"blues"`) or a [scheme parameter object](https://vega.github.io/vega-lite/docs/scale.html#scheme-params).
      *
@@ -422,8 +445,8 @@ export interface Scale {
      */
     interpolate?: ScaleInterpolateEnum | SignalRef | ScaleInterpolateParams;
 }
-export declare const SCALE_PROPERTIES: ("type" | "nice" | "zero" | "range" | "bins" | "interpolate" | "clamp" | "padding" | "domain" | "domainMid" | "reverse" | "round" | "base" | "constant" | "exponent" | "paddingInner" | "paddingOuter" | "align" | "scheme")[];
-export declare const NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTIES: ("nice" | "zero" | "bins" | "interpolate" | "clamp" | "padding" | "domainMid" | "reverse" | "round" | "base" | "constant" | "exponent" | "paddingInner" | "paddingOuter" | "align")[];
+export declare const SCALE_PROPERTIES: ("padding" | "round" | "type" | "range" | "zero" | "base" | "nice" | "domain" | "domainMin" | "domainMax" | "domainMid" | "reverse" | "bins" | "interpolate" | "clamp" | "constant" | "exponent" | "paddingInner" | "paddingOuter" | "align" | "rangeMax" | "rangeMin" | "scheme")[];
+export declare const NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTIES: ("padding" | "round" | "zero" | "base" | "nice" | "domainMin" | "domainMax" | "domainMid" | "reverse" | "bins" | "interpolate" | "clamp" | "constant" | "exponent" | "paddingInner" | "paddingOuter" | "align")[];
 export declare const SCALE_TYPE_INDEX: ScaleTypeIndex;
 export declare function scaleTypeSupportProperty(scaleType: ScaleType, propName: keyof Scale): boolean;
 /**

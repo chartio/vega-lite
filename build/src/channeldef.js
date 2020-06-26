@@ -2,17 +2,18 @@ import { __rest } from "tslib";
 import { isArray, isBoolean, isNumber, isString } from 'vega-util';
 import { isAggregateOp, isArgmaxDef, isArgminDef, isCountingAggregateOp } from './aggregate';
 import { autoMaxBins, binToString, isBinned, isBinning } from './bin';
-import { ANGLE, DESCRIPTION, COLOR, COLUMN, DETAIL, FACET, FILL, FILLOPACITY, HREF, isScaleChannel, isSecondaryRangeChannel, isXorY, KEY, LATITUDE, LATITUDE2, LONGITUDE, LONGITUDE2, OPACITY, ORDER, RADIUS, RADIUS2, rangeType, ROW, SHAPE, SIZE, STROKE, STROKEDASH, STROKEOPACITY, STROKEWIDTH, TEXT, THETA, THETA2, TOOLTIP, URL, X, X2, Y, Y2 } from './channel';
+import { ANGLE, COLOR, COLUMN, DESCRIPTION, DETAIL, FACET, FILL, FILLOPACITY, HREF, isScaleChannel, isSecondaryRangeChannel, isXorY, KEY, LATITUDE, LATITUDE2, LONGITUDE, LONGITUDE2, OPACITY, ORDER, RADIUS, RADIUS2, ROW, SHAPE, SIZE, STROKE, STROKEDASH, STROKEOPACITY, STROKEWIDTH, TEXT, THETA, THETA2, TOOLTIP, URL, X, X2, Y, Y2 } from './channel';
 import { getMarkConfig } from './compile/common';
 import { isCustomFormatType } from './compile/format';
 import { dateTimeToExpr, isDateTime } from './datetime';
 import * as log from './log';
 import { isRectBasedMark } from './mark';
+import { SCALE_CATEGORY_INDEX } from './scale';
 import { isSortByChannel } from './sort';
 import { isFacetFieldDef } from './spec/facet';
 import { getTimeUnitParts, isLocalSingleTimeUnit, normalizeTimeUnit, timeUnitToString } from './timeunit';
 import { getFullName, QUANTITATIVE } from './type';
-import { contains, flatAccessWithDatum, getFirstDefined, internalField, replacePathInField, titleCase, removePathFromField } from './util';
+import { contains, flatAccessWithDatum, getFirstDefined, internalField, omit, removePathFromField, replacePathInField, titleCase } from './util';
 import { isSignalRef } from './vega.schema';
 export function isConditionalSelection(c) {
     return c['selection'];
@@ -25,7 +26,7 @@ export function toFieldDefBase(fieldDef) {
     return Object.assign(Object.assign(Object.assign(Object.assign({}, (timeUnit ? { timeUnit } : {})), (bin ? { bin } : {})), (aggregate ? { aggregate } : {})), { field });
 }
 export function isSortableFieldDef(fieldDef) {
-    return isTypedFieldDef(fieldDef) && 'sort' in fieldDef;
+    return 'sort' in fieldDef;
 }
 export function getBand({ channel, fieldDef, fieldDef2, markDef: mark, stack, config, isMidPoint }) {
     if (isFieldOrDatumDef(fieldDef) && fieldDef.band !== undefined) {
@@ -99,7 +100,7 @@ export function isFieldOrDatumDef(channelDef) {
     return isFieldDef(channelDef) || isDatumDef(channelDef);
 }
 export function isTypedFieldDef(channelDef) {
-    return !!channelDef && (('field' in channelDef && 'type' in channelDef) || channelDef['aggregate'] === 'count');
+    return !!channelDef && ('field' in channelDef || channelDef['aggregate'] === 'count') && 'type' in channelDef;
 }
 export function isValueDef(channelDef) {
     return channelDef && 'value' in channelDef && 'value' in channelDef;
@@ -113,8 +114,17 @@ export function isPositionFieldOrDatumDef(channelDef) {
 export function isMarkPropFieldOrDatumDef(channelDef) {
     return !!channelDef && 'legend' in channelDef;
 }
-export function isTextFieldOrDatumDef(channelDef) {
+export function isStringFieldOrDatumDef(channelDef) {
     return !!channelDef && ('format' in channelDef || 'formatType' in channelDef);
+}
+export function toStringFieldDef(fieldDef) {
+    // add title from guide to title property
+    const guide = getGuide(fieldDef);
+    if (fieldDef.title == undefined && (guide === null || guide === void 0 ? void 0 : guide.title)) {
+        fieldDef = Object.assign(Object.assign({}, fieldDef), { title: guide.title });
+    }
+    // omit properties that don't exist in string field defs
+    return omit(fieldDef, ['legend', 'axis', 'header', 'scale']);
 }
 function isOpFieldDef(fieldDef) {
     return 'op' in fieldDef;
@@ -267,8 +277,7 @@ export function resetTitleFormatter() {
 }
 export function title(fieldOrDatumDef, config, { allowDisabling, includeDefault = true }) {
     var _a, _b;
-    const guide = (_a = getGuide(fieldOrDatumDef)) !== null && _a !== void 0 ? _a : {};
-    const guideTitle = guide.title;
+    const guideTitle = (_a = getGuide(fieldOrDatumDef)) === null || _a === void 0 ? void 0 : _a.title;
     if (!isFieldDef(fieldOrDatumDef)) {
         return guideTitle;
     }
@@ -298,7 +307,7 @@ export function defaultTitle(fieldDef, config) {
 }
 export function getFormatMixins(fieldDef) {
     var _a;
-    if (isTextFieldOrDatumDef(fieldDef)) {
+    if (isStringFieldOrDatumDef(fieldDef)) {
         const { format, formatType } = fieldDef;
         return { format, formatType };
     }
@@ -309,22 +318,38 @@ export function getFormatMixins(fieldDef) {
     }
 }
 export function defaultType(fieldDef, channel) {
-    if (fieldDef.timeUnit) {
+    var _a;
+    switch (channel) {
+        case 'latitude':
+        case 'longitude':
+            return 'quantitative';
+        case 'row':
+        case 'column':
+        case 'facet':
+        case 'shape':
+        case 'strokeDash':
+            return 'nominal';
+    }
+    if (isSortableFieldDef(fieldDef) && isArray(fieldDef.sort)) {
+        return 'ordinal';
+    }
+    const { aggregate, bin, timeUnit } = fieldDef;
+    if (timeUnit) {
         return 'temporal';
     }
-    if (isBinning(fieldDef.bin)) {
+    if (bin || (aggregate && !isArgmaxDef(aggregate) && !isArgminDef(aggregate))) {
         return 'quantitative';
     }
-    switch (rangeType(channel)) {
-        case 'continuous':
-            return 'quantitative';
-        case 'discrete':
-            return 'nominal';
-        case 'flexible': // color
-            return 'nominal';
-        default:
-            return 'quantitative';
+    if (isScaleFieldDef(fieldDef) && ((_a = fieldDef.scale) === null || _a === void 0 ? void 0 : _a.type)) {
+        switch (SCALE_CATEGORY_INDEX[fieldDef.scale.type]) {
+            case 'numeric':
+            case 'discretizing':
+                return 'quantitative';
+            case 'time':
+                return 'temporal';
+        }
     }
+    return 'nominal';
 }
 /**
  * Returns the fieldDef -- either from the outer channelDef or from the condition of channelDef.
@@ -351,7 +376,7 @@ export function getFieldOrDatumDef(channelDef) {
 /**
  * Convert type to full, lowercase type, or augment the fieldDef with a default type if missing.
  */
-export function initChannelDef(channelDef, channel, config) {
+export function initChannelDef(channelDef, channel, config, opt = {}) {
     if (isString(channelDef) || isNumber(channelDef) || isBoolean(channelDef)) {
         const primitiveType = isString(channelDef) ? 'string' : isNumber(channelDef) ? 'number' : 'boolean';
         log.warn(log.message.primitiveChannelDef(channel, primitiveType, channelDef));
@@ -359,21 +384,21 @@ export function initChannelDef(channelDef, channel, config) {
     }
     // If a fieldDef contains a field, we need type.
     if (isFieldOrDatumDef(channelDef)) {
-        return initFieldOrDatumDef(channelDef, channel, config);
+        return initFieldOrDatumDef(channelDef, channel, config, opt);
     }
     else if (hasConditionalFieldOrDatumDef(channelDef)) {
         return Object.assign(Object.assign({}, channelDef), { 
             // Need to cast as normalizeFieldDef normally return FieldDef, but here we know that it is definitely Condition<FieldDef>
-            condition: initFieldOrDatumDef(channelDef.condition, channel, config) });
+            condition: initFieldOrDatumDef(channelDef.condition, channel, config, opt) });
     }
     return channelDef;
 }
-export function initFieldOrDatumDef(fd, channel, config) {
-    if (isTextFieldOrDatumDef(fd)) {
+export function initFieldOrDatumDef(fd, channel, config, opt) {
+    if (isStringFieldOrDatumDef(fd)) {
         const { format, formatType } = fd, rest = __rest(fd, ["format", "formatType"]);
         if (isCustomFormatType(formatType) && !config.customFormatTypes) {
             log.warn(log.message.customFormatTypeNotAllowed(channel));
-            return initFieldOrDatumDef(rest, channel, config);
+            return initFieldOrDatumDef(rest, channel, config, opt);
         }
     }
     else {
@@ -388,12 +413,12 @@ export function initFieldOrDatumDef(fd, channel, config) {
             const _a = fd[guideType], { format, formatType } = _a, newGuide = __rest(_a, ["format", "formatType"]);
             if (isCustomFormatType(formatType) && !config.customFormatTypes) {
                 log.warn(log.message.customFormatTypeNotAllowed(channel));
-                return initFieldOrDatumDef(Object.assign(Object.assign({}, fd), { [guideType]: newGuide }), channel, config);
+                return initFieldOrDatumDef(Object.assign(Object.assign({}, fd), { [guideType]: newGuide }), channel, config, opt);
             }
         }
     }
     if (isFieldDef(fd)) {
-        return initFieldDef(fd, channel);
+        return initFieldDef(fd, channel, opt);
     }
     return initDatumDef(fd);
 }
@@ -406,11 +431,11 @@ function initDatumDef(datumDef) {
     type = isNumber(datum) ? 'quantitative' : isString(datum) ? 'nominal' : isDateTime(datum) ? 'temporal' : undefined;
     return Object.assign(Object.assign({}, datumDef), { type });
 }
-export function initFieldDef(fd, channel) {
+export function initFieldDef(fd, channel, { compositeMark = false } = {}) {
     const { aggregate, timeUnit, bin, field } = fd;
     const fieldDef = Object.assign({}, fd);
     // Drop invalid aggregate
-    if (aggregate && !isAggregateOp(aggregate) && !isArgmaxDef(aggregate) && !isArgminDef(aggregate)) {
+    if (!compositeMark && aggregate && !isAggregateOp(aggregate) && !isArgmaxDef(aggregate) && !isArgminDef(aggregate)) {
         log.warn(log.message.invalidAggregate(aggregate));
         delete fieldDef.aggregate;
     }
@@ -426,7 +451,7 @@ export function initFieldDef(fd, channel) {
         fieldDef.bin = normalizeBin(bin, channel);
     }
     if (isBinned(bin) && !isXorY(channel)) {
-        log.warn(`Channel ${channel} should not be used with "binned" bin.`);
+        log.warn(log.message.channelShouldNotBeUsedForBinned(channel));
     }
     // Normalize Type
     if (isTypedFieldDef(fieldDef)) {
@@ -446,12 +471,11 @@ export function initFieldDef(fd, channel) {
     else if (!isSecondaryRangeChannel(channel)) {
         // If type is empty / invalid, then augment with default type
         const newType = defaultType(fieldDef, channel);
-        log.warn(log.message.missingFieldType(channel, newType));
         fieldDef['type'] = newType;
     }
     if (isTypedFieldDef(fieldDef)) {
-        const { compatible, warning } = channelCompatibility(fieldDef, channel);
-        if (!compatible) {
+        const { compatible, warning } = channelCompatibility(fieldDef, channel) || {};
+        if (compatible === false) {
             log.warn(warning);
         }
     }

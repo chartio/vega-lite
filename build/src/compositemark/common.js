@@ -4,12 +4,13 @@ import { isContinuousFieldOrDatumDef, isFieldDef, isFieldOrDatumDefForTimeFormat
 import { fieldDefs } from '../encoding';
 import * as log from '../log';
 import { isMarkDef } from '../mark';
-import { getFirstDefined } from '../util';
+import { getFirstDefined, hash, isEmpty, omit, unique } from '../util';
 import { isSignalRef } from '../vega.schema';
+import { toStringFieldDef } from './../channeldef';
 export function filterTooltipWithAggregatedField(oldEncoding) {
     const { tooltip } = oldEncoding, filteredEncoding = __rest(oldEncoding, ["tooltip"]);
     if (!tooltip) {
-        return { filteredEncoding: oldEncoding };
+        return { filteredEncoding };
     }
     let customTooltipWithAggregatedField;
     let customTooltipWithoutAggregatedField;
@@ -50,32 +51,34 @@ export function getCompositeMarkTooltip(tooltipSummary, continuousAxisChannelDef
         return { tooltip: encodingWithoutContinuousAxis.tooltip };
     }
     const fiveSummaryTooltip = tooltipSummary.map(({ fieldPrefix, titlePrefix }) => {
-        const mainTitle = withFieldName ? ` of ${continuousAxisChannelDef.field}` : '';
+        const mainTitle = withFieldName ? ` of ${getTitle(continuousAxisChannelDef)}` : '';
         return {
             field: fieldPrefix + continuousAxisChannelDef.field,
             type: continuousAxisChannelDef.type,
             title: isSignalRef(titlePrefix) ? { signal: titlePrefix + `"${escape(mainTitle)}"` } : titlePrefix + mainTitle
         };
     });
+    const tooltipFieldDefs = fieldDefs(encodingWithoutContinuousAxis).map(toStringFieldDef);
     return {
         tooltip: [
             ...fiveSummaryTooltip,
             // need to cast because TextFieldDef supports fewer types of bin
-            ...fieldDefs(encodingWithoutContinuousAxis)
+            ...unique(tooltipFieldDefs, hash)
         ]
     };
 }
 export function getTitle(continuousAxisChannelDef) {
     const { axis, title, field } = continuousAxisChannelDef;
-    return axis && axis.title !== undefined ? undefined : getFirstDefined(title, field);
+    return getFirstDefined(axis === null || axis === void 0 ? void 0 : axis.title, title, field);
 }
 export function makeCompositeAggregatePartFactory(compositeMarkDef, continuousAxis, continuousAxisChannelDef, sharedEncoding, compositeMarkConfig) {
     const { scale, axis } = continuousAxisChannelDef;
     return ({ partName, mark, positionPrefix, endPositionPrefix = undefined, aria, extraEncoding = {} }) => {
         const title = getTitle(continuousAxisChannelDef);
+        const axisWithoutTitle = omit(axis, ['title']);
         return partLayerMixins(compositeMarkDef, partName, compositeMarkConfig, aria, {
             mark,
-            encoding: Object.assign(Object.assign(Object.assign({ [continuousAxis]: Object.assign(Object.assign(Object.assign({ field: positionPrefix + '_' + continuousAxisChannelDef.field, type: continuousAxisChannelDef.type }, (title !== undefined ? { title } : {})), (scale !== undefined ? { scale } : {})), (axis !== undefined ? { axis } : {})) }, (isString(endPositionPrefix)
+            encoding: Object.assign(Object.assign(Object.assign({ [continuousAxis]: Object.assign(Object.assign(Object.assign({ field: positionPrefix + '_' + continuousAxisChannelDef.field, type: continuousAxisChannelDef.type }, (title !== undefined ? { title } : {})), (scale !== undefined ? { scale } : {})), (isEmpty(axisWithoutTitle) ? {} : { axis: axisWithoutTitle })) }, (isString(endPositionPrefix)
                 ? {
                     [continuousAxis + '2']: {
                         field: endPositionPrefix + '_' + continuousAxisChannelDef.field

@@ -165,22 +165,36 @@ export interface FieldDefBase<F, B extends Bin = Bin> extends BandMixins {
 export declare function toFieldDefBase(fieldDef: FieldDef<string>): FieldDefBase<string>;
 export interface TypeMixins<T extends Type> {
     /**
-     * The encoded field's type of measurement (`"quantitative"`, `"temporal"`, `"ordinal"`, or `"nominal"`).
+     * The type of measurement (`"quantitative"`, `"temporal"`, `"ordinal"`, or `"nominal"`) for the encoded field or constant value (`datum`).
      * It can also be a `"geojson"` type for encoding ['geoshape'](https://vega.github.io/vega-lite/docs/geoshape.html).
      *
+     * Since Vega-Lite 4.14.0, Vega-Lite automatically infers data types in many cases as discussed below. However, type is required for a field if:
+     * (1) the field is not nominal and the field encoding has no specified `aggregate` (except `argmin` and `argmax`), `bin`, scale type, custom `sort` order, nor `timeUnit`
+     * or (2) if you wish to use an ordinal scale for a field with `bin` or `timeUnit`.
+     *
+     * __Default value:__
+     *
+     * 1) For a data `field`, `"nominal"` is the default data type unless the field encoding has `aggregate`, `channel`, `bin`, scale type, `sort`, or `timeUnit` that satisfies the following criteria:
+     * - `"quantitative"` is the default type if (1) the encoded field contains `bin` or `aggregate` except `"argmin"` and `"argmax"`, (2) the encoding channel is `latitude` or `longitude` channel or (3) if the specified scale type is [a quantitative scale](https://vega.github.io/vega-lite/docs/scale.html#type).
+     * - `"temporal"` is the default type if (1) the encoded field contains `timeUnit` or (2) the specified scale type is a time or utc scale
+     * - `ordinal""` is the default type if (1) the encoded field contains a [custom `sort` order](https://vega.github.io/vega-lite/docs/sort.html#specifying-custom-sort-order) or (2) the specified scale type is an ordinal/point/band scale.
+     *
+     * 2) For a constant value in data domain (`datum`):
+     * - `"quantitative"` if the datum is a number
+     * - `"nominal"` if the datum is a string
+     * - `"temporal"` if the datum is [a date time object](https://vega.github.io/vega-lite/docs/datetime.html)
      *
      * __Note:__
-     *
-     * - Data values for a temporal field can be either a date-time string (e.g., `"2015-03-07 12:32:17"`, `"17:01"`, `"2015-03-16"`. `"2015"`) or a timestamp number (e.g., `1552199579097`).
      * - Data `type` describes the semantics of the data rather than the primitive data types (number, string, etc.). The same primitive data type can have different types of measurement. For example, numeric data can represent quantitative, ordinal, or nominal data.
+     * - Data values for a temporal field can be either a date-time string (e.g., `"2015-03-07 12:32:17"`, `"17:01"`, `"2015-03-16"`. `"2015"`) or a timestamp number (e.g., `1552199579097`).
      * - When using with [`bin`](https://vega.github.io/vega-lite/docs/bin.html), the `type` property can be either `"quantitative"` (for using a linear bin scale) or [`"ordinal"` (for using an ordinal bin scale)](https://vega.github.io/vega-lite/docs/type.html#cast-bin).
-     * - When using with [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html), the `type` property can be either `"temporal"` (for using a temporal scale) or [`"ordinal"` (for using an ordinal scale)](https://vega.github.io/vega-lite/docs/type.html#cast-bin).
-     * - When using with [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html), the `type` property refers to the post-aggregation data type. For example, we can calculate count `distinct` of a categorical field `"cat"` using `{"aggregate": "distinct", "field": "cat", "type": "quantitative"}`. The `"type"` of the aggregate output is `"quantitative"`.
-     * - Secondary channels (e.g., `x2`, `y2`, `xError`, `yError`) do not have `type` as they have exactly the same type as their primary channels (e.g., `x`, `y`).
+     * - When using with [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html), the `type` property can be either `"temporal"` (default, for using a temporal scale) or [`"ordinal"` (for using an ordinal scale)](https://vega.github.io/vega-lite/docs/type.html#cast-bin).
+     * - When using with [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html), the `type` property refers to the post-aggregation data type. For example, we can calculate count `distinct` of a categorical field `"cat"` using `{"aggregate": "distinct", "field": "cat"}`. The `"type"` of the aggregate output is `"quantitative"`.
+     * - Secondary channels (e.g., `x2`, `y2`, `xError`, `yError`) do not have `type` as they must have exactly the same type as their primary channels (e.g., `x`, `y`).
      *
      * __See also:__ [`type`](https://vega.github.io/vega-lite/docs/type.html) documentation.
      */
-    type: T;
+    type?: T;
 }
 /**
  *  Definition object for a data field, its type and transformation of an encoding channel.
@@ -329,6 +343,7 @@ export interface OrderFieldDef<F extends Field> extends FieldDefWithoutScale<F> 
      */
     sort?: SortOrder;
 }
+export declare type OrderValueDef = ConditionValueDefMixins<number> & NumericValueDef;
 export interface StringFieldDef<F extends Field> extends FieldDefWithoutScale<F, StandardType>, FormatMixins {
 }
 export declare type FieldDef<F extends Field, T extends Type = any> = SecondaryFieldDef<F> | TypedFieldDef<F, T>;
@@ -360,7 +375,8 @@ export declare function isValueDef<F extends Field>(channelDef: ChannelDef<F>): 
 export declare function isScaleFieldDef<F extends Field>(channelDef: ChannelDef<F>): channelDef is ScaleFieldDef<F>;
 export declare function isPositionFieldOrDatumDef<F extends Field>(channelDef: ChannelDef<F>): channelDef is PositionFieldDef<F> | PositionDatumDef<F>;
 export declare function isMarkPropFieldOrDatumDef<F extends Field>(channelDef: ChannelDef<F>): channelDef is MarkPropFieldDef<F, any> | MarkPropDatumDef<F>;
-export declare function isTextFieldOrDatumDef<F extends Field>(channelDef: ChannelDef<F>): channelDef is StringFieldDef<F> | StringDatumDef<F>;
+export declare function isStringFieldOrDatumDef<F extends Field>(channelDef: ChannelDef<F>): channelDef is StringFieldDef<F> | StringDatumDef<F>;
+export declare function toStringFieldDef<F extends Field>(fieldDef: FieldDef<F>): StringFieldDef<F>;
 export interface FieldRefOption {
     /** Exclude bin, aggregate, timeUnit */
     nofn?: boolean;
@@ -394,14 +410,14 @@ export declare function resetTitleFormatter(): void;
 export declare function title(fieldOrDatumDef: TypedFieldDef<string> | SecondaryFieldDef<string> | DatumDef, config: Config, { allowDisabling, includeDefault }: {
     allowDisabling: boolean;
     includeDefault?: boolean;
-}): string | SignalRef | string[];
+}): string | string[] | SignalRef;
 export declare function getGuide(fieldDef: TypedFieldDef<string> | SecondaryFieldDef<string> | DatumDef): Guide;
 export declare function defaultTitle(fieldDef: FieldDefBase<string>, config: Config): string;
 export declare function getFormatMixins(fieldDef: TypedFieldDef<string> | DatumDef): {
     format: string | Record<string, unknown>;
     formatType: string;
 };
-export declare function defaultType(fieldDef: TypedFieldDef<Field>, channel: Channel): Type;
+export declare function defaultType<T extends TypedFieldDef<Field>>(fieldDef: T, channel: Channel): Type;
 /**
  * Returns the fieldDef -- either from the outer channelDef or from the condition of channelDef.
  * @param channelDef
@@ -411,9 +427,15 @@ export declare function getFieldOrDatumDef<F extends Field = string, CD extends 
 /**
  * Convert type to full, lowercase type, or augment the fieldDef with a default type if missing.
  */
-export declare function initChannelDef(channelDef: ChannelDef<string>, channel: Channel, config: Config): ChannelDef<string>;
-export declare function initFieldOrDatumDef(fd: FieldDef<string, any> | DatumDef, channel: Channel, config: Config): FieldDef<string, any> | DatumDef;
-export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel): {
+export declare function initChannelDef(channelDef: ChannelDef<string>, channel: Channel, config: Config, opt?: {
+    compositeMark?: boolean;
+}): ChannelDef<string>;
+export declare function initFieldOrDatumDef(fd: FieldDef<string, any> | DatumDef, channel: Channel, config: Config, opt: {
+    compositeMark?: boolean;
+}): FieldDef<string, any> | DatumDef;
+export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel, { compositeMark }?: {
+    compositeMark?: boolean;
+}): {
     /**
      * __Required.__ A string defining the name of the field from which to pull a data value
      * or an object defining iterated values from the [`repeat`](https://vega.github.io/vega-lite/docs/repeat.html) operator.
@@ -435,7 +457,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      *
      * __See also:__ [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html) documentation.
      */
-    timeUnit?: "day" | "week" | "month" | "year" | "quarter" | "dayofyear" | "date" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
+    timeUnit?: "day" | "week" | "month" | "year" | "date" | "quarter" | "dayofyear" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
     /**
      * Aggregation function for the field
      * (e.g., `"mean"`, `"sum"`, `"median"`, `"min"`, `"max"`, `"count"`).
@@ -444,7 +466,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      *
      * __See also:__ [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html) documentation.
      */
-    aggregate?: "average" | "count" | "distinct" | "max" | "mean" | "median" | "min" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgmaxDef | import("./aggregate").ArgminDef | "boxplot" | "errorbar" | "errorband";
+    aggregate?: "count" | "min" | "max" | "average" | "distinct" | "mean" | "median" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgminDef | import("./aggregate").ArgmaxDef | "boxplot" | "errorbar" | "errorband";
     /**
      * A flag for binning a `quantitative` field, [an object defining binning parameters](https://vega.github.io/vega-lite/docs/bin.html#params), or indicating that the data for `x` or `y` channel are binned before they are imported into Vega-Lite (`"binned"`).
      *
@@ -466,7 +488,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      * @maximum 1
      */
     band?: number;
-    title?: string | SignalRef | string[];
+    title?: string | string[] | SignalRef;
 } | {
     /**
      * __Required.__ A string defining the name of the field from which to pull a data value
@@ -489,7 +511,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      *
      * __See also:__ [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html) documentation.
      */
-    timeUnit?: "day" | "week" | "month" | "year" | "quarter" | "dayofyear" | "date" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
+    timeUnit?: "day" | "week" | "month" | "year" | "date" | "quarter" | "dayofyear" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
     /**
      * Aggregation function for the field
      * (e.g., `"mean"`, `"sum"`, `"median"`, `"min"`, `"max"`, `"count"`).
@@ -498,7 +520,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      *
      * __See also:__ [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html) documentation.
      */
-    aggregate?: "average" | "count" | "distinct" | "max" | "mean" | "median" | "min" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgmaxDef | import("./aggregate").ArgminDef | "boxplot" | "errorbar" | "errorband";
+    aggregate?: "count" | "min" | "max" | "average" | "distinct" | "mean" | "median" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgminDef | import("./aggregate").ArgmaxDef | "boxplot" | "errorbar" | "errorband";
     /**
      * A flag for binning a `quantitative` field, [an object defining binning parameters](https://vega.github.io/vega-lite/docs/bin.html#params), or indicating that the data for `x` or `y` channel are binned before they are imported into Vega-Lite (`"binned"`).
      *
@@ -510,7 +532,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      *
      * __See also:__ [`bin`](https://vega.github.io/vega-lite/docs/bin.html) documentation.
      */
-    bin?: Bin;
+    bin?: boolean | BinParams | "binned";
     /**
      * For rect-based marks (`rect`, `bar`, and `image`), mark size relative to bandwidth of [band scales](https://vega.github.io/vega-lite/docs/scale.html#band), bins or time units. If set to `1`, the mark size is set to the bandwidth, the bin interval, or the time unit interval. If set to `0.5`, the mark size is half of the bandwidth or the time unit interval.
      *
@@ -520,27 +542,41 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      * @maximum 1
      */
     band?: number;
-    title?: string | SignalRef | string[];
+    title?: string | string[] | SignalRef;
     /**
-     * The encoded field's type of measurement (`"quantitative"`, `"temporal"`, `"ordinal"`, or `"nominal"`).
+     * The type of measurement (`"quantitative"`, `"temporal"`, `"ordinal"`, or `"nominal"`) for the encoded field or constant value (`datum`).
      * It can also be a `"geojson"` type for encoding ['geoshape'](https://vega.github.io/vega-lite/docs/geoshape.html).
      *
+     * Since Vega-Lite 4.14.0, Vega-Lite automatically infers data types in many cases as discussed below. However, type is required for a field if:
+     * (1) the field is not nominal and the field encoding has no specified `aggregate` (except `argmin` and `argmax`), `bin`, scale type, custom `sort` order, nor `timeUnit`
+     * or (2) if you wish to use an ordinal scale for a field with `bin` or `timeUnit`.
+     *
+     * __Default value:__
+     *
+     * 1) For a data `field`, `"nominal"` is the default data type unless the field encoding has `aggregate`, `channel`, `bin`, scale type, `sort`, or `timeUnit` that satisfies the following criteria:
+     * - `"quantitative"` is the default type if (1) the encoded field contains `bin` or `aggregate` except `"argmin"` and `"argmax"`, (2) the encoding channel is `latitude` or `longitude` channel or (3) if the specified scale type is [a quantitative scale](https://vega.github.io/vega-lite/docs/scale.html#type).
+     * - `"temporal"` is the default type if (1) the encoded field contains `timeUnit` or (2) the specified scale type is a time or utc scale
+     * - `ordinal""` is the default type if (1) the encoded field contains a [custom `sort` order](https://vega.github.io/vega-lite/docs/sort.html#specifying-custom-sort-order) or (2) the specified scale type is an ordinal/point/band scale.
+     *
+     * 2) For a constant value in data domain (`datum`):
+     * - `"quantitative"` if the datum is a number
+     * - `"nominal"` if the datum is a string
+     * - `"temporal"` if the datum is [a date time object](https://vega.github.io/vega-lite/docs/datetime.html)
      *
      * __Note:__
-     *
-     * - Data values for a temporal field can be either a date-time string (e.g., `"2015-03-07 12:32:17"`, `"17:01"`, `"2015-03-16"`. `"2015"`) or a timestamp number (e.g., `1552199579097`).
      * - Data `type` describes the semantics of the data rather than the primitive data types (number, string, etc.). The same primitive data type can have different types of measurement. For example, numeric data can represent quantitative, ordinal, or nominal data.
+     * - Data values for a temporal field can be either a date-time string (e.g., `"2015-03-07 12:32:17"`, `"17:01"`, `"2015-03-16"`. `"2015"`) or a timestamp number (e.g., `1552199579097`).
      * - When using with [`bin`](https://vega.github.io/vega-lite/docs/bin.html), the `type` property can be either `"quantitative"` (for using a linear bin scale) or [`"ordinal"` (for using an ordinal bin scale)](https://vega.github.io/vega-lite/docs/type.html#cast-bin).
-     * - When using with [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html), the `type` property can be either `"temporal"` (for using a temporal scale) or [`"ordinal"` (for using an ordinal scale)](https://vega.github.io/vega-lite/docs/type.html#cast-bin).
-     * - When using with [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html), the `type` property refers to the post-aggregation data type. For example, we can calculate count `distinct` of a categorical field `"cat"` using `{"aggregate": "distinct", "field": "cat", "type": "quantitative"}`. The `"type"` of the aggregate output is `"quantitative"`.
-     * - Secondary channels (e.g., `x2`, `y2`, `xError`, `yError`) do not have `type` as they have exactly the same type as their primary channels (e.g., `x`, `y`).
+     * - When using with [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html), the `type` property can be either `"temporal"` (default, for using a temporal scale) or [`"ordinal"` (for using an ordinal scale)](https://vega.github.io/vega-lite/docs/type.html#cast-bin).
+     * - When using with [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html), the `type` property refers to the post-aggregation data type. For example, we can calculate count `distinct` of a categorical field `"cat"` using `{"aggregate": "distinct", "field": "cat"}`. The `"type"` of the aggregate output is `"quantitative"`.
+     * - Secondary channels (e.g., `x2`, `y2`, `xError`, `yError`) do not have `type` as they must have exactly the same type as their primary channels (e.g., `x`, `y`).
      *
      * __See also:__ [`type`](https://vega.github.io/vega-lite/docs/type.html) documentation.
      */
-    type: any;
+    type?: any;
 } | {
     sort: {
-        encoding: "x" | "y" | "color" | "fill" | "stroke" | "opacity" | "fillOpacity" | "strokeOpacity" | "strokeWidth" | "size" | "shape" | "text";
+        encoding: "stroke" | "color" | "text" | "shape" | "x" | "y" | "fill" | "opacity" | "fillOpacity" | "strokeOpacity" | "strokeWidth" | "size";
         order?: undefined;
     };
     /**
@@ -564,7 +600,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      *
      * __See also:__ [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html) documentation.
      */
-    timeUnit?: "day" | "week" | "month" | "year" | "quarter" | "dayofyear" | "date" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
+    timeUnit?: "day" | "week" | "month" | "year" | "date" | "quarter" | "dayofyear" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
     /**
      * Aggregation function for the field
      * (e.g., `"mean"`, `"sum"`, `"median"`, `"min"`, `"max"`, `"count"`).
@@ -573,7 +609,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      *
      * __See also:__ [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html) documentation.
      */
-    aggregate?: "average" | "count" | "distinct" | "max" | "mean" | "median" | "min" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgmaxDef | import("./aggregate").ArgminDef | "boxplot" | "errorbar" | "errorband";
+    aggregate?: "count" | "min" | "max" | "average" | "distinct" | "mean" | "median" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgminDef | import("./aggregate").ArgmaxDef | "boxplot" | "errorbar" | "errorband";
     /**
      * A flag for binning a `quantitative` field, [an object defining binning parameters](https://vega.github.io/vega-lite/docs/bin.html#params), or indicating that the data for `x` or `y` channel are binned before they are imported into Vega-Lite (`"binned"`).
      *
@@ -595,27 +631,41 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      * @maximum 1
      */
     band?: number;
-    title?: string | SignalRef | string[];
+    title?: string | string[] | SignalRef;
     /**
-     * The encoded field's type of measurement (`"quantitative"`, `"temporal"`, `"ordinal"`, or `"nominal"`).
+     * The type of measurement (`"quantitative"`, `"temporal"`, `"ordinal"`, or `"nominal"`) for the encoded field or constant value (`datum`).
      * It can also be a `"geojson"` type for encoding ['geoshape'](https://vega.github.io/vega-lite/docs/geoshape.html).
      *
+     * Since Vega-Lite 4.14.0, Vega-Lite automatically infers data types in many cases as discussed below. However, type is required for a field if:
+     * (1) the field is not nominal and the field encoding has no specified `aggregate` (except `argmin` and `argmax`), `bin`, scale type, custom `sort` order, nor `timeUnit`
+     * or (2) if you wish to use an ordinal scale for a field with `bin` or `timeUnit`.
+     *
+     * __Default value:__
+     *
+     * 1) For a data `field`, `"nominal"` is the default data type unless the field encoding has `aggregate`, `channel`, `bin`, scale type, `sort`, or `timeUnit` that satisfies the following criteria:
+     * - `"quantitative"` is the default type if (1) the encoded field contains `bin` or `aggregate` except `"argmin"` and `"argmax"`, (2) the encoding channel is `latitude` or `longitude` channel or (3) if the specified scale type is [a quantitative scale](https://vega.github.io/vega-lite/docs/scale.html#type).
+     * - `"temporal"` is the default type if (1) the encoded field contains `timeUnit` or (2) the specified scale type is a time or utc scale
+     * - `ordinal""` is the default type if (1) the encoded field contains a [custom `sort` order](https://vega.github.io/vega-lite/docs/sort.html#specifying-custom-sort-order) or (2) the specified scale type is an ordinal/point/band scale.
+     *
+     * 2) For a constant value in data domain (`datum`):
+     * - `"quantitative"` if the datum is a number
+     * - `"nominal"` if the datum is a string
+     * - `"temporal"` if the datum is [a date time object](https://vega.github.io/vega-lite/docs/datetime.html)
      *
      * __Note:__
-     *
-     * - Data values for a temporal field can be either a date-time string (e.g., `"2015-03-07 12:32:17"`, `"17:01"`, `"2015-03-16"`. `"2015"`) or a timestamp number (e.g., `1552199579097`).
      * - Data `type` describes the semantics of the data rather than the primitive data types (number, string, etc.). The same primitive data type can have different types of measurement. For example, numeric data can represent quantitative, ordinal, or nominal data.
+     * - Data values for a temporal field can be either a date-time string (e.g., `"2015-03-07 12:32:17"`, `"17:01"`, `"2015-03-16"`. `"2015"`) or a timestamp number (e.g., `1552199579097`).
      * - When using with [`bin`](https://vega.github.io/vega-lite/docs/bin.html), the `type` property can be either `"quantitative"` (for using a linear bin scale) or [`"ordinal"` (for using an ordinal bin scale)](https://vega.github.io/vega-lite/docs/type.html#cast-bin).
-     * - When using with [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html), the `type` property can be either `"temporal"` (for using a temporal scale) or [`"ordinal"` (for using an ordinal scale)](https://vega.github.io/vega-lite/docs/type.html#cast-bin).
-     * - When using with [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html), the `type` property refers to the post-aggregation data type. For example, we can calculate count `distinct` of a categorical field `"cat"` using `{"aggregate": "distinct", "field": "cat", "type": "quantitative"}`. The `"type"` of the aggregate output is `"quantitative"`.
-     * - Secondary channels (e.g., `x2`, `y2`, `xError`, `yError`) do not have `type` as they have exactly the same type as their primary channels (e.g., `x`, `y`).
+     * - When using with [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html), the `type` property can be either `"temporal"` (default, for using a temporal scale) or [`"ordinal"` (for using an ordinal scale)](https://vega.github.io/vega-lite/docs/type.html#cast-bin).
+     * - When using with [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html), the `type` property refers to the post-aggregation data type. For example, we can calculate count `distinct` of a categorical field `"cat"` using `{"aggregate": "distinct", "field": "cat"}`. The `"type"` of the aggregate output is `"quantitative"`.
+     * - Secondary channels (e.g., `x2`, `y2`, `xError`, `yError`) do not have `type` as they must have exactly the same type as their primary channels (e.g., `x`, `y`).
      *
      * __See also:__ [`type`](https://vega.github.io/vega-lite/docs/type.html) documentation.
      */
-    type: StandardType;
+    type?: StandardType;
 } | {
     sort: {
-        encoding: "x" | "y" | "color" | "fill" | "stroke" | "opacity" | "fillOpacity" | "strokeOpacity" | "strokeWidth" | "size" | "shape" | "text";
+        encoding: "stroke" | "color" | "text" | "shape" | "x" | "y" | "fill" | "opacity" | "fillOpacity" | "strokeOpacity" | "strokeWidth" | "size";
         order: string;
     };
     /**
@@ -639,7 +689,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      *
      * __See also:__ [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html) documentation.
      */
-    timeUnit?: "day" | "week" | "month" | "year" | "quarter" | "dayofyear" | "date" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
+    timeUnit?: "day" | "week" | "month" | "year" | "date" | "quarter" | "dayofyear" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
     /**
      * Aggregation function for the field
      * (e.g., `"mean"`, `"sum"`, `"median"`, `"min"`, `"max"`, `"count"`).
@@ -648,7 +698,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      *
      * __See also:__ [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html) documentation.
      */
-    aggregate?: "average" | "count" | "distinct" | "max" | "mean" | "median" | "min" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgmaxDef | import("./aggregate").ArgminDef | "boxplot" | "errorbar" | "errorband";
+    aggregate?: "count" | "min" | "max" | "average" | "distinct" | "mean" | "median" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgminDef | import("./aggregate").ArgmaxDef | "boxplot" | "errorbar" | "errorband";
     /**
      * A flag for binning a `quantitative` field, [an object defining binning parameters](https://vega.github.io/vega-lite/docs/bin.html#params), or indicating that the data for `x` or `y` channel are binned before they are imported into Vega-Lite (`"binned"`).
      *
@@ -670,59 +720,73 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      * @maximum 1
      */
     band?: number;
-    title?: string | SignalRef | string[];
+    title?: string | string[] | SignalRef;
     /**
-     * The encoded field's type of measurement (`"quantitative"`, `"temporal"`, `"ordinal"`, or `"nominal"`).
+     * The type of measurement (`"quantitative"`, `"temporal"`, `"ordinal"`, or `"nominal"`) for the encoded field or constant value (`datum`).
      * It can also be a `"geojson"` type for encoding ['geoshape'](https://vega.github.io/vega-lite/docs/geoshape.html).
      *
+     * Since Vega-Lite 4.14.0, Vega-Lite automatically infers data types in many cases as discussed below. However, type is required for a field if:
+     * (1) the field is not nominal and the field encoding has no specified `aggregate` (except `argmin` and `argmax`), `bin`, scale type, custom `sort` order, nor `timeUnit`
+     * or (2) if you wish to use an ordinal scale for a field with `bin` or `timeUnit`.
+     *
+     * __Default value:__
+     *
+     * 1) For a data `field`, `"nominal"` is the default data type unless the field encoding has `aggregate`, `channel`, `bin`, scale type, `sort`, or `timeUnit` that satisfies the following criteria:
+     * - `"quantitative"` is the default type if (1) the encoded field contains `bin` or `aggregate` except `"argmin"` and `"argmax"`, (2) the encoding channel is `latitude` or `longitude` channel or (3) if the specified scale type is [a quantitative scale](https://vega.github.io/vega-lite/docs/scale.html#type).
+     * - `"temporal"` is the default type if (1) the encoded field contains `timeUnit` or (2) the specified scale type is a time or utc scale
+     * - `ordinal""` is the default type if (1) the encoded field contains a [custom `sort` order](https://vega.github.io/vega-lite/docs/sort.html#specifying-custom-sort-order) or (2) the specified scale type is an ordinal/point/band scale.
+     *
+     * 2) For a constant value in data domain (`datum`):
+     * - `"quantitative"` if the datum is a number
+     * - `"nominal"` if the datum is a string
+     * - `"temporal"` if the datum is [a date time object](https://vega.github.io/vega-lite/docs/datetime.html)
      *
      * __Note:__
-     *
-     * - Data values for a temporal field can be either a date-time string (e.g., `"2015-03-07 12:32:17"`, `"17:01"`, `"2015-03-16"`. `"2015"`) or a timestamp number (e.g., `1552199579097`).
      * - Data `type` describes the semantics of the data rather than the primitive data types (number, string, etc.). The same primitive data type can have different types of measurement. For example, numeric data can represent quantitative, ordinal, or nominal data.
+     * - Data values for a temporal field can be either a date-time string (e.g., `"2015-03-07 12:32:17"`, `"17:01"`, `"2015-03-16"`. `"2015"`) or a timestamp number (e.g., `1552199579097`).
      * - When using with [`bin`](https://vega.github.io/vega-lite/docs/bin.html), the `type` property can be either `"quantitative"` (for using a linear bin scale) or [`"ordinal"` (for using an ordinal bin scale)](https://vega.github.io/vega-lite/docs/type.html#cast-bin).
-     * - When using with [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html), the `type` property can be either `"temporal"` (for using a temporal scale) or [`"ordinal"` (for using an ordinal scale)](https://vega.github.io/vega-lite/docs/type.html#cast-bin).
-     * - When using with [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html), the `type` property refers to the post-aggregation data type. For example, we can calculate count `distinct` of a categorical field `"cat"` using `{"aggregate": "distinct", "field": "cat", "type": "quantitative"}`. The `"type"` of the aggregate output is `"quantitative"`.
-     * - Secondary channels (e.g., `x2`, `y2`, `xError`, `yError`) do not have `type` as they have exactly the same type as their primary channels (e.g., `x`, `y`).
+     * - When using with [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html), the `type` property can be either `"temporal"` (default, for using a temporal scale) or [`"ordinal"` (for using an ordinal scale)](https://vega.github.io/vega-lite/docs/type.html#cast-bin).
+     * - When using with [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html), the `type` property refers to the post-aggregation data type. For example, we can calculate count `distinct` of a categorical field `"cat"` using `{"aggregate": "distinct", "field": "cat"}`. The `"type"` of the aggregate output is `"quantitative"`.
+     * - Secondary channels (e.g., `x2`, `y2`, `xError`, `yError`) do not have `type` as they must have exactly the same type as their primary channels (e.g., `x`, `y`).
      *
      * __See also:__ [`type`](https://vega.github.io/vega-lite/docs/type.html) documentation.
      */
-    type: StandardType;
+    type?: StandardType;
 } | {
     header: {
-        labelOrient: import("vega").AxisOrient;
-        titleOrient: import("vega").AxisOrient;
+        labelOrient: import("vega").Orient;
+        titleOrient: import("vega").Orient;
         titleAnchor?: import("vega").TitleAnchor;
-        titleAlign?: SignalRef | "left" | "right" | "center";
+        titleAlign?: SignalRef | "left" | "center" | "right";
         titleAngle?: number;
-        titleBaseline?: SignalRef | "top" | "bottom" | "alphabetic" | "middle" | "line-top" | "line-bottom";
-        titleColor?: string | SignalRef;
-        titleFont?: string | SignalRef;
+        titleBaseline?: SignalRef | "alphabetic" | "top" | "middle" | "bottom" | "line-top" | "line-bottom";
+        titleColor?: import("vega").ScaleField;
+        titleFont?: import("vega").ScaleField;
         titleFontSize?: number | SignalRef;
-        titleFontStyle?: string | SignalRef;
+        titleFontStyle?: import("vega").ScaleField;
         titleFontWeight?: SignalRef | "normal" | "bold" | "lighter" | "bolder" | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
         titleLimit?: number | SignalRef;
         titleLineHeight?: number | SignalRef;
         titlePadding?: number | SignalRef;
         labels?: boolean;
-        labelAlign?: SignalRef | "left" | "right" | "center";
-        labelBaseline?: SignalRef | "top" | "bottom" | "alphabetic" | "middle" | "line-top" | "line-bottom";
+        labelAlign?: SignalRef | "left" | "center" | "right";
+        labelBaseline?: SignalRef | "alphabetic" | "top" | "middle" | "bottom" | "line-top" | "line-bottom";
         labelAnchor?: import("vega").TitleAnchor;
         labelExpr?: string;
         labelAngle?: number;
-        labelColor?: string | SignalRef;
-        labelFont?: string | SignalRef;
+        labelColor?: import("vega").ScaleField;
+        labelFont?: import("vega").ScaleField;
         labelFontSize?: number | SignalRef;
-        labelFontStyle?: string | SignalRef;
+        labelFontStyle?: import("vega").ScaleField;
         labelFontWeight?: SignalRef | "normal" | "bold" | "lighter" | "bolder" | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
         labelLimit?: number | SignalRef;
         labelLineHeight?: number | SignalRef;
         labelPadding?: number | SignalRef;
         format?: string | Record<string, unknown>;
         formatType?: string;
-        title?: string | SignalRef | string[];
+        title?: string | string[] | SignalRef;
     };
-    sort?: string[] | number[] | boolean[] | DateTime[] | "ascending" | "descending" | import("./sort").EncodingSortField<string>;
+    sort?: string[] | number[] | "ascending" | "descending" | boolean[] | DateTime[] | import("./sort").EncodingSortField<string>;
     /**
      * __Required.__ A string defining the name of the field from which to pull a data value
      * or an object defining iterated values from the [`repeat`](https://vega.github.io/vega-lite/docs/repeat.html) operator.
@@ -744,7 +808,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      *
      * __See also:__ [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html) documentation.
      */
-    timeUnit?: "day" | "week" | "month" | "year" | "quarter" | "dayofyear" | "date" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
+    timeUnit?: "day" | "week" | "month" | "year" | "date" | "quarter" | "dayofyear" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
     /**
      * Aggregation function for the field
      * (e.g., `"mean"`, `"sum"`, `"median"`, `"min"`, `"max"`, `"count"`).
@@ -753,7 +817,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      *
      * __See also:__ [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html) documentation.
      */
-    aggregate?: "average" | "count" | "distinct" | "max" | "mean" | "median" | "min" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgmaxDef | import("./aggregate").ArgminDef | "boxplot" | "errorbar" | "errorband";
+    aggregate?: "count" | "min" | "max" | "average" | "distinct" | "mean" | "median" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgminDef | import("./aggregate").ArgmaxDef | "boxplot" | "errorbar" | "errorband";
     /**
      * A flag for binning a `quantitative` field, [an object defining binning parameters](https://vega.github.io/vega-lite/docs/bin.html#params), or indicating that the data for `x` or `y` channel are binned before they are imported into Vega-Lite (`"binned"`).
      *
@@ -775,24 +839,38 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      * @maximum 1
      */
     band?: number;
-    title?: string | SignalRef | string[];
+    title?: string | string[] | SignalRef;
     /**
-     * The encoded field's type of measurement (`"quantitative"`, `"temporal"`, `"ordinal"`, or `"nominal"`).
+     * The type of measurement (`"quantitative"`, `"temporal"`, `"ordinal"`, or `"nominal"`) for the encoded field or constant value (`datum`).
      * It can also be a `"geojson"` type for encoding ['geoshape'](https://vega.github.io/vega-lite/docs/geoshape.html).
      *
+     * Since Vega-Lite 4.14.0, Vega-Lite automatically infers data types in many cases as discussed below. However, type is required for a field if:
+     * (1) the field is not nominal and the field encoding has no specified `aggregate` (except `argmin` and `argmax`), `bin`, scale type, custom `sort` order, nor `timeUnit`
+     * or (2) if you wish to use an ordinal scale for a field with `bin` or `timeUnit`.
+     *
+     * __Default value:__
+     *
+     * 1) For a data `field`, `"nominal"` is the default data type unless the field encoding has `aggregate`, `channel`, `bin`, scale type, `sort`, or `timeUnit` that satisfies the following criteria:
+     * - `"quantitative"` is the default type if (1) the encoded field contains `bin` or `aggregate` except `"argmin"` and `"argmax"`, (2) the encoding channel is `latitude` or `longitude` channel or (3) if the specified scale type is [a quantitative scale](https://vega.github.io/vega-lite/docs/scale.html#type).
+     * - `"temporal"` is the default type if (1) the encoded field contains `timeUnit` or (2) the specified scale type is a time or utc scale
+     * - `ordinal""` is the default type if (1) the encoded field contains a [custom `sort` order](https://vega.github.io/vega-lite/docs/sort.html#specifying-custom-sort-order) or (2) the specified scale type is an ordinal/point/band scale.
+     *
+     * 2) For a constant value in data domain (`datum`):
+     * - `"quantitative"` if the datum is a number
+     * - `"nominal"` if the datum is a string
+     * - `"temporal"` if the datum is [a date time object](https://vega.github.io/vega-lite/docs/datetime.html)
      *
      * __Note:__
-     *
-     * - Data values for a temporal field can be either a date-time string (e.g., `"2015-03-07 12:32:17"`, `"17:01"`, `"2015-03-16"`. `"2015"`) or a timestamp number (e.g., `1552199579097`).
      * - Data `type` describes the semantics of the data rather than the primitive data types (number, string, etc.). The same primitive data type can have different types of measurement. For example, numeric data can represent quantitative, ordinal, or nominal data.
+     * - Data values for a temporal field can be either a date-time string (e.g., `"2015-03-07 12:32:17"`, `"17:01"`, `"2015-03-16"`. `"2015"`) or a timestamp number (e.g., `1552199579097`).
      * - When using with [`bin`](https://vega.github.io/vega-lite/docs/bin.html), the `type` property can be either `"quantitative"` (for using a linear bin scale) or [`"ordinal"` (for using an ordinal bin scale)](https://vega.github.io/vega-lite/docs/type.html#cast-bin).
-     * - When using with [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html), the `type` property can be either `"temporal"` (for using a temporal scale) or [`"ordinal"` (for using an ordinal scale)](https://vega.github.io/vega-lite/docs/type.html#cast-bin).
-     * - When using with [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html), the `type` property refers to the post-aggregation data type. For example, we can calculate count `distinct` of a categorical field `"cat"` using `{"aggregate": "distinct", "field": "cat", "type": "quantitative"}`. The `"type"` of the aggregate output is `"quantitative"`.
-     * - Secondary channels (e.g., `x2`, `y2`, `xError`, `yError`) do not have `type` as they have exactly the same type as their primary channels (e.g., `x`, `y`).
+     * - When using with [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html), the `type` property can be either `"temporal"` (default, for using a temporal scale) or [`"ordinal"` (for using an ordinal scale)](https://vega.github.io/vega-lite/docs/type.html#cast-bin).
+     * - When using with [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html), the `type` property refers to the post-aggregation data type. For example, we can calculate count `distinct` of a categorical field `"cat"` using `{"aggregate": "distinct", "field": "cat"}`. The `"type"` of the aggregate output is `"quantitative"`.
+     * - Secondary channels (e.g., `x2`, `y2`, `xError`, `yError`) do not have `type` as they must have exactly the same type as their primary channels (e.g., `x`, `y`).
      *
      * __See also:__ [`type`](https://vega.github.io/vega-lite/docs/type.html) documentation.
      */
-    type: StandardType;
+    type?: StandardType;
 };
 export declare function normalizeBin(bin: BinParams | boolean | 'binned', channel?: Channel): BinParams;
 export declare function channelCompatibility(fieldDef: TypedFieldDef<Field>, channel: Channel): {

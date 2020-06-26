@@ -1,7 +1,8 @@
 import { isArray } from 'vega-util';
 import { isBinned, isBinning, isBinParams } from '../../bin';
 import { COLOR, FILL, POLAR_POSITION_SCALE_CHANNELS, POSITION_SCALE_CHANNELS, POSITION_SCALE_CHANNEL_INDEX, STROKE } from '../../channel';
-import { getFieldDef, getFieldOrDatumDef, isFieldDef } from '../../channeldef';
+import { getFieldDef, getFieldOrDatumDef, isFieldDef, valueExpr } from '../../channeldef';
+import { isDateTime } from '../../datetime';
 import * as log from '../../log';
 import { channelScalePropertyIncompatability, hasContinuousDomain, isContinuousToContinuous, isContinuousToDiscrete, ScaleType, scaleTypeSupportProperty } from '../../scale';
 import * as util from '../../util';
@@ -46,8 +47,22 @@ function parseUnitScaleProperty(model, property) {
         }
         if (supportedByScaleType && channelIncompatability === undefined) {
             if (specifiedValue !== undefined) {
-                // copyKeyFromObject ensures type safety
-                localScaleCmpt.copyKeyFromObject(property, specifiedScale);
+                const timeUnit = fieldOrDatumDef['timeUnit'];
+                const type = fieldOrDatumDef.type;
+                switch (property) {
+                    // domainMax/Min to signal if the value is a datetime object
+                    case 'domainMax':
+                    case 'domainMin':
+                        if (isDateTime(specifiedScale[property]) || type === 'temporal' || timeUnit) {
+                            localScaleCmpt.set(property, { signal: valueExpr(specifiedScale[property], { type, timeUnit }) }, true);
+                        }
+                        else {
+                            localScaleCmpt.set(property, specifiedScale[property], true);
+                        }
+                        break;
+                    default:
+                        localScaleCmpt.copyKeyFromObject(property, specifiedScale);
+                }
             }
             else {
                 const value = property in scaleRules

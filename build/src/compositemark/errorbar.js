@@ -1,6 +1,6 @@
 import { __rest } from "tslib";
 import { isContinuousFieldOrDatumDef, isFieldOrDatumDef, title } from '../channeldef';
-import { extractTransformsFromEncoding } from '../encoding';
+import { extractTransformsFromEncoding, normalizeEncoding } from '../encoding';
 import * as log from '../log';
 import { isMarkDef } from '../mark';
 import { replaceAll, titleCase } from '../util';
@@ -10,6 +10,8 @@ export const ERRORBAR = 'errorbar';
 export const ERRORBAR_PARTS = ['ticks', 'rule'];
 export const errorBarNormalizer = new CompositeMarkNormalizer(ERRORBAR, normalizeErrorBar);
 export function normalizeErrorBar(spec, { config }) {
+    // Need to initEncoding first so we can infer type
+    spec = Object.assign(Object.assign({}, spec), { encoding: normalizeEncoding(spec.encoding, config) });
     const { transform, continuousAxisChannelDef, continuousAxis, encodingWithoutContinuousAxis, ticksOrient, markDef, outerSpec, tooltipEncoding } = errorBarParams(spec, ERRORBAR, config);
     const makeErrorBarPart = makeCompositeAggregatePartFactory(markDef, continuousAxis, continuousAxisChannelDef, encodingWithoutContinuousAxis, config.errorbar);
     const tick = { type: 'tick', orient: ticksOrient };

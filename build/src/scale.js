@@ -3,7 +3,7 @@ import { isString, toSet } from 'vega-util';
 import * as CHANNEL from './channel';
 import { CHANNELS, isColorChannel } from './channel';
 import * as log from './log';
-import { TYPES, ORDINAL, NOMINAL, TEMPORAL, QUANTITATIVE } from './type';
+import { NOMINAL, ORDINAL, QUANTITATIVE, TEMPORAL, TYPES } from './type';
 import { contains, keys } from './util';
 export const ScaleType = {
     // Continuous - Quantitative
@@ -31,7 +31,7 @@ export const ScaleType = {
  * Index for scale categories -- only scale of the same categories can be merged together.
  * Current implementation is trying to be conservative and avoid merging scale type that might not work together
  */
-const SCALE_CATEGORY_INDEX = {
+export const SCALE_CATEGORY_INDEX = {
     linear: 'numeric',
     log: 'numeric',
     pow: 'numeric',
@@ -151,9 +151,13 @@ export function isDomainUnionWith(domain) {
 const SCALE_PROPERTY_INDEX = {
     type: 1,
     domain: 1,
+    domainMax: 1,
+    domainMin: 1,
     domainMid: 1,
     align: 1,
     range: 1,
+    rangeMax: 1,
+    rangeMin: 1,
     scheme: 1,
     bins: 1,
     // Other properties
@@ -174,7 +178,7 @@ const SCALE_PROPERTY_INDEX = {
     paddingOuter: 1
 };
 export const SCALE_PROPERTIES = keys(SCALE_PROPERTY_INDEX);
-const { type, domain, range, scheme } = SCALE_PROPERTY_INDEX, NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTY_INDEX = __rest(SCALE_PROPERTY_INDEX, ["type", "domain", "range", "scheme"]);
+const { type, domain, range, rangeMax, rangeMin, scheme } = SCALE_PROPERTY_INDEX, NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTY_INDEX = __rest(SCALE_PROPERTY_INDEX, ["type", "domain", "range", "rangeMax", "rangeMin", "scheme"]);
 export const NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTIES = keys(NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTY_INDEX);
 export const SCALE_TYPE_INDEX = generateScaleTypeIndex();
 export function scaleTypeSupportProperty(scaleType, propName) {
@@ -192,13 +196,17 @@ export function scaleTypeSupportProperty(scaleType, propName) {
         case 'round':
             return isContinuousToContinuous(scaleType) || scaleType === 'band' || scaleType === 'point';
         case 'padding':
+        case 'rangeMin':
+        case 'rangeMax':
             return isContinuousToContinuous(scaleType) || contains(['point', 'band'], scaleType);
         case 'paddingOuter':
         case 'align':
             return contains(['point', 'band'], scaleType);
         case 'paddingInner':
             return scaleType === 'band';
+        case 'domainMax':
         case 'domainMid':
+        case 'domainMin':
         case 'clamp':
             return isContinuousToContinuous(scaleType);
         case 'nice':
@@ -236,6 +244,8 @@ export function channelScalePropertyIncompatability(channel, propName) {
         case 'type':
         case 'bins':
         case 'domain':
+        case 'domainMax':
+        case 'domainMin':
         case 'range':
         case 'base':
         case 'exponent':
@@ -244,6 +254,8 @@ export function channelScalePropertyIncompatability(channel, propName) {
         case 'padding':
         case 'paddingInner':
         case 'paddingOuter':
+        case 'rangeMax':
+        case 'rangeMin':
         case 'reverse':
         case 'round':
         case 'clamp':
