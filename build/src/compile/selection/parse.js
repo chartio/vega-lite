@@ -7,6 +7,7 @@ import { duplicate, keys, logicalExpr, varName } from '../../util';
 import { OutputNode } from '../data/dataflow';
 import { FilterNode } from '../data/filter';
 import { forEachTransform } from './transforms/transforms';
+import { DataSourceType } from '../../data';
 export function parseUnitSelection(model, selDefs) {
     var _a;
     const selCmpts = {};
@@ -93,7 +94,7 @@ export function materializeSelections(model, main) {
     forEachSelection(model, selCmpt => {
         const selection = selCmpt.name;
         const lookupName = model.getName(`lookup_${selection}`);
-        model.component.data.outputNodes[lookupName] = selCmpt.materialized = new OutputNode(new FilterNode(main, model, { selection }), lookupName, 'lookup', model.component.data.outputNodeRefCounts);
+        model.component.data.outputNodes[lookupName] = selCmpt.materialized = new OutputNode(new FilterNode(main, model, { selection }), lookupName, DataSourceType.Lookup, model.component.data.outputNodeRefCounts);
     });
 }
 //# sourceMappingURL=parse.js.map

@@ -1,10 +1,10 @@
 import { Axis as VgAxis, Legend as VgLegend, NewSignal, Projection as VgProjection, SignalRef, Title as VgTitle } from 'vega';
-import { Channel, ScaleChannel, SingleDefChannel } from '../channel';
+import { Channel, ScaleChannel, SingleDefChannel, ExtendedChannel } from '../channel';
 import { FieldDef, FieldRefOption } from '../channeldef';
 import { Config } from '../config';
 import { Data, DataSourceType } from '../data';
 import { Resolve } from '../resolve';
-import { GenericCompositionLayoutWithColumns, LayoutSizeMixins, SpecType, ViewBackground } from '../spec/base';
+import { GenericCompositionLayoutWithColumns, LayoutSizeField, LayoutSizeMixins, SpecType, ViewBackground } from '../spec/base';
 import { NormalizedSpec } from '../spec/index';
 import { TitleParams } from '../title';
 import { Transform } from '../transform';
@@ -121,6 +121,7 @@ export declare abstract class Model {
      */
     assembleGroup(signals?: NewSignal[]): any;
     getName(text: string): string;
+    getDataName(type: DataSourceType): string;
     /**
      * Request a data source name for the given data source type and mark that data source as required.
      * This method should be called in parse, so that all used data source can be correctly instantiated in assembleData().
@@ -160,15 +161,19 @@ export declare abstract class Model {
      * Returns true if the model has a signalRef for an axis orient.
      */
     hasAxisOrientSignalRef(): boolean;
+    /**
+     * Returns true if the model has a static value (i.e. not a step) set for the given size dimension.
+     */
+    hasStaticOuterDimension(dimension: LayoutSizeField): boolean;
 }
 /** Abstract class for UnitModel and FacetModel. Both of which can contain fieldDefs as a part of its own specification. */
 export declare abstract class ModelWithField extends Model {
     abstract fieldDef(channel: SingleDefChannel): FieldDef<any>;
     /** Get "field" reference for Vega */
     vgField(channel: SingleDefChannel, opt?: FieldRefOption): string;
-    protected abstract getMapping(): Partial<Record<Channel, any>>;
+    protected abstract getMapping(): Partial<Record<ExtendedChannel, any>>;
     reduceFieldDef<T, U>(f: (acc: U, fd: FieldDef<string>, c: Channel) => U, init: T): T;
-    forEachFieldDef(f: (fd: FieldDef<string>, c: Channel) => void, t?: any): void;
+    forEachFieldDef(f: (fd: FieldDef<string>, c: ExtendedChannel) => void, t?: any): void;
     abstract channelHasField(channel: Channel): boolean;
 }
 //# sourceMappingURL=model.d.ts.map

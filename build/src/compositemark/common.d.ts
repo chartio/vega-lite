@@ -31,15 +31,14 @@ export declare function filterTooltipWithAggregatedField<F extends Field>(oldEnc
 };
 export declare function getCompositeMarkTooltip(tooltipSummary: CompositeMarkTooltipSummary[], continuousAxisChannelDef: PositionFieldDef<string>, encodingWithoutContinuousAxis: Encoding<string>, withFieldName?: boolean): Encoding<string>;
 export declare function getTitle(continuousAxisChannelDef: PositionFieldDef<string>): string | string[] | SignalRef;
-export declare function makeCompositeAggregatePartFactory<P extends PartsMixins<any>>(compositeMarkDef: GenericCompositeMarkDef<any> & P, continuousAxis: 'x' | 'y', continuousAxisChannelDef: PositionFieldDef<string>, sharedEncoding: Encoding<string>, compositeMarkConfig: P): ({ partName, mark, positionPrefix, endPositionPrefix, aria, extraEncoding }: {
+export declare function makeCompositeAggregatePartFactory<P extends PartsMixins<any>>(compositeMarkDef: GenericCompositeMarkDef<any> & P, continuousAxis: 'x' | 'y', continuousAxisChannelDef: PositionFieldDef<string>, sharedEncoding: Encoding<string>, compositeMarkConfig: P): ({ partName, mark, positionPrefix, endPositionPrefix, extraEncoding }: {
     partName: keyof P;
     mark: Mark | MarkDef;
     positionPrefix: string;
     endPositionPrefix?: string;
-    aria?: boolean;
     extraEncoding?: Encoding<string>;
 }) => NormalizedUnitSpec[];
-export declare function partLayerMixins<P extends PartsMixins<any>>(markDef: GenericCompositeMarkDef<any> & P, part: keyof P, compositeMarkConfig: P, aria: boolean, partBaseSpec: NormalizedUnitSpec): NormalizedUnitSpec[];
+export declare function partLayerMixins<P extends PartsMixins<any>>(markDef: GenericCompositeMarkDef<any> & P, part: keyof P, compositeMarkConfig: P, partBaseSpec: NormalizedUnitSpec): NormalizedUnitSpec[];
 export declare function compositeMarkContinuousAxis<M extends CompositeMark>(spec: GenericUnitSpec<Encoding<string>, CompositeMark | CompositeMarkDef>, orient: Orientation, compositeMark: M): {
     continuousAxisChannelDef: PositionFieldDef<string>;
     continuousAxisChannelDef2: SecondaryFieldDef<string>;

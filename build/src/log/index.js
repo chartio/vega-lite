@@ -83,6 +83,9 @@ export function reset() {
     current = main;
     return current;
 }
+export function error(...args) {
+    current.error(...args);
+}
 export function warn(...args) {
     current.warn(...args);
 }

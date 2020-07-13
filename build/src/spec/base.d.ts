@@ -79,6 +79,7 @@ export interface LayoutSizeMixins {
      */
     height?: number | 'container' | Step;
 }
+export declare type LayoutSizeField = keyof LayoutSizeMixins;
 export declare function isFrameMixins(o: any): o is FrameMixins;
 export interface FrameMixins extends LayoutSizeMixins {
     /**

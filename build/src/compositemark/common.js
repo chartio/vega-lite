@@ -4,7 +4,7 @@ import { isContinuousFieldOrDatumDef, isFieldDef, isFieldOrDatumDefForTimeFormat
 import { fieldDefs } from '../encoding';
 import * as log from '../log';
 import { isMarkDef } from '../mark';
-import { getFirstDefined, hash, isEmpty, omit, unique } from '../util';
+import { getFirstDefined, hash, unique } from '../util';
 import { isSignalRef } from '../vega.schema';
 import { toStringFieldDef } from './../channeldef';
 export function filterTooltipWithAggregatedField(oldEncoding) {
@@ -68,17 +68,16 @@ export function getCompositeMarkTooltip(tooltipSummary, continuousAxisChannelDef
     };
 }
 export function getTitle(continuousAxisChannelDef) {
-    const { axis, title, field } = continuousAxisChannelDef;
-    return getFirstDefined(axis === null || axis === void 0 ? void 0 : axis.title, title, field);
+    const { title, field } = continuousAxisChannelDef;
+    return getFirstDefined(title, field);
 }
 export function makeCompositeAggregatePartFactory(compositeMarkDef, continuousAxis, continuousAxisChannelDef, sharedEncoding, compositeMarkConfig) {
     const { scale, axis } = continuousAxisChannelDef;
-    return ({ partName, mark, positionPrefix, endPositionPrefix = undefined, aria, extraEncoding = {} }) => {
+    return ({ partName, mark, positionPrefix, endPositionPrefix = undefined, extraEncoding = {} }) => {
         const title = getTitle(continuousAxisChannelDef);
-        const axisWithoutTitle = omit(axis, ['title']);
-        return partLayerMixins(compositeMarkDef, partName, compositeMarkConfig, aria, {
+        return partLayerMixins(compositeMarkDef, partName, compositeMarkConfig, {
             mark,
-            encoding: Object.assign(Object.assign(Object.assign({ [continuousAxis]: Object.assign(Object.assign(Object.assign({ field: positionPrefix + '_' + continuousAxisChannelDef.field, type: continuousAxisChannelDef.type }, (title !== undefined ? { title } : {})), (scale !== undefined ? { scale } : {})), (isEmpty(axisWithoutTitle) ? {} : { axis: axisWithoutTitle })) }, (isString(endPositionPrefix)
+            encoding: Object.assign(Object.assign(Object.assign({ [continuousAxis]: Object.assign(Object.assign(Object.assign({ field: positionPrefix + '_' + continuousAxisChannelDef.field, type: continuousAxisChannelDef.type }, (title !== undefined ? { title } : {})), (scale !== undefined ? { scale } : {})), (axis !== undefined ? { axis } : {})) }, (isString(endPositionPrefix)
                 ? {
                     [continuousAxis + '2']: {
                         field: endPositionPrefix + '_' + continuousAxisChannelDef.field
@@ -88,12 +87,12 @@ export function makeCompositeAggregatePartFactory(compositeMarkDef, continuousAx
         });
     };
 }
-export function partLayerMixins(markDef, part, compositeMarkConfig, aria, partBaseSpec) {
+export function partLayerMixins(markDef, part, compositeMarkConfig, partBaseSpec) {
     const { clip, color, opacity } = markDef;
     const mark = markDef.type;
     if (markDef[part] || (markDef[part] === undefined && compositeMarkConfig[part])) {
         return [
-            Object.assign(Object.assign({}, partBaseSpec), { mark: Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, compositeMarkConfig[part]), (clip ? { clip } : {})), (color ? { color } : {})), (opacity ? { opacity } : {})), (isMarkDef(partBaseSpec.mark) ? partBaseSpec.mark : { type: partBaseSpec.mark })), { style: `${mark}-${part}` }), (isBoolean(markDef[part]) ? {} : markDef[part])), (aria === false ? { aria } : {})) })
+            Object.assign(Object.assign({}, partBaseSpec), { mark: Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, compositeMarkConfig[part]), (clip ? { clip } : {})), (color ? { color } : {})), (opacity ? { opacity } : {})), (isMarkDef(partBaseSpec.mark) ? partBaseSpec.mark : { type: partBaseSpec.mark })), { style: `${mark}-${part}` }), (isBoolean(markDef[part]) ? {} : markDef[part])) })
         ];
     }
     return [];

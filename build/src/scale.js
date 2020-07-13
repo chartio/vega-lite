@@ -1,9 +1,9 @@
 import { __rest } from "tslib";
 import { isString, toSet } from 'vega-util';
 import * as CHANNEL from './channel';
-import { CHANNELS, isColorChannel } from './channel';
+import { isColorChannel } from './channel';
 import * as log from './log';
-import { NOMINAL, ORDINAL, QUANTITATIVE, TEMPORAL, TYPES } from './type';
+import { NOMINAL, ORDINAL, QUANTITATIVE, TEMPORAL } from './type';
 import { contains, keys } from './util';
 export const ScaleType = {
     // Continuous - Quantitative
@@ -180,7 +180,6 @@ const SCALE_PROPERTY_INDEX = {
 export const SCALE_PROPERTIES = keys(SCALE_PROPERTY_INDEX);
 const { type, domain, range, rangeMax, rangeMin, scheme } = SCALE_PROPERTY_INDEX, NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTY_INDEX = __rest(SCALE_PROPERTY_INDEX, ["type", "domain", "range", "rangeMax", "rangeMin", "scheme"]);
 export const NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTIES = keys(NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTY_INDEX);
-export const SCALE_TYPE_INDEX = generateScaleTypeIndex();
 export function scaleTypeSupportProperty(scaleType, propName) {
     switch (propName) {
         case 'type':
@@ -315,28 +314,5 @@ export function channelSupportScaleType(channel, scaleType) {
         case CHANNEL.SHAPE:
             return scaleType === 'ordinal'; // shape = lookup only
     }
-}
-export function getSupportedScaleType(channel, fieldDefType) {
-    return SCALE_TYPE_INDEX[generateScaleTypeIndexKey(channel, fieldDefType)];
-}
-// generates ScaleTypeIndex where keys are encoding channels and values are list of valid ScaleTypes
-function generateScaleTypeIndex() {
-    var _a;
-    const index = {};
-    for (const channel of CHANNELS) {
-        for (const fieldDefType of TYPES) {
-            for (const scaleType of SCALE_TYPES) {
-                const key = generateScaleTypeIndexKey(channel, fieldDefType);
-                if (channelSupportScaleType(channel, scaleType) && scaleTypeSupportDataType(scaleType, fieldDefType)) {
-                    index[key] = (_a = index[key]) !== null && _a !== void 0 ? _a : [];
-                    index[key].push(scaleType);
-                }
-            }
-        }
-    }
-    return index;
-}
-function generateScaleTypeIndexKey(channel, fieldDefType) {
-    return channel + '_' + fieldDefType;
 }
 //# sourceMappingURL=scale.js.map

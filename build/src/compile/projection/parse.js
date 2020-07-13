@@ -1,7 +1,7 @@
 import { hasOwnProperty } from 'vega-util';
 import { LATITUDE, LATITUDE2, LONGITUDE, LONGITUDE2, SHAPE } from '../../channel';
 import { getFieldOrDatumDef } from '../../channeldef';
-import { MAIN } from '../../data';
+import { DataSourceType } from '../../data';
 import { PROJECTION_PROPERTIES } from '../../projection';
 import { GEOJSON } from '../../type';
 import { duplicate, every, stringify } from '../../util';
@@ -41,7 +41,7 @@ function gatherFitData(model) {
     }
     if (data.length === 0) {
         // main source is geojson, so we can just use that
-        data.push(model.requestDataName(MAIN));
+        data.push(model.requestDataName(DataSourceType.Main));
     }
     return data;
 }

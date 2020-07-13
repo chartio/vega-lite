@@ -18,7 +18,7 @@ export function normalizeErrorBand(spec, { config }) {
     const interpolate = Object.assign(Object.assign({}, (errorBandDef.interpolate ? { interpolate: errorBandDef.interpolate } : {})), (errorBandDef.tension && errorBandDef.interpolate ? { tension: errorBandDef.tension } : {}));
     if (is2D) {
         bandMark = Object.assign(Object.assign(Object.assign({}, bandMark), interpolate), { ariaRoleDescription: 'errorband' });
-        bordersMark = Object.assign(Object.assign({}, bordersMark), interpolate);
+        bordersMark = Object.assign(Object.assign(Object.assign({}, bordersMark), interpolate), { aria: false });
     }
     else if (errorBandDef.interpolate) {
         log.warn(log.message.errorBand1DNotSupport('interpolate'));
@@ -38,14 +38,12 @@ export function normalizeErrorBand(spec, { config }) {
                 partName: 'borders',
                 mark: bordersMark,
                 positionPrefix: 'lower',
-                aria: false,
                 extraEncoding: tooltipEncoding
             }),
             ...makeErrorBandPart({
                 partName: 'borders',
                 mark: bordersMark,
                 positionPrefix: 'upper',
-                aria: false,
                 extraEncoding: tooltipEncoding
             })
         ] });

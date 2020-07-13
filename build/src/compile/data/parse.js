@@ -1,5 +1,5 @@
 import { AncestorParse } from '.';
-import { isGenerator, isGraticuleGenerator, isInlineData, isNamedData, isSequenceGenerator, isUrlData, MAIN, RAW } from '../../data';
+import { isGenerator, isGraticuleGenerator, isInlineData, isNamedData, isSequenceGenerator, isUrlData, DataSourceType } from '../../data';
 import * as log from '../../log';
 import { isAggregate, isBin, isCalculate, isDensity, isFilter, isFlatten, isFold, isImpute, isJoinAggregate, isLoess, isLookup, isPivot, isQuantile, isRegression, isSample, isStack, isTimeUnit, isWindow } from '../../transform';
 import { deepEqual, mergeDeep } from '../../util';
@@ -319,8 +319,8 @@ export function parseData(model) {
         head = CalculateNode.parseAllForSortIndex(head, model);
     }
     // add an output node pre aggregation
-    const rawName = model.getName(RAW);
-    const raw = new OutputNode(head, rawName, RAW, outputNodeRefCounts);
+    const rawName = model.getDataName(DataSourceType.Raw);
+    const raw = new OutputNode(head, rawName, DataSourceType.Raw, outputNodeRefCounts);
     outputNodes[rawName] = raw;
     head = raw;
     if (isUnitModel(model)) {
@@ -338,8 +338,8 @@ export function parseData(model) {
         head = (_j = FilterInvalidNode.make(head, model)) !== null && _j !== void 0 ? _j : head;
     }
     // output node for marks
-    const mainName = model.getName(MAIN);
-    const main = new OutputNode(head, mainName, MAIN, outputNodeRefCounts);
+    const mainName = model.getDataName(DataSourceType.Main);
+    const main = new OutputNode(head, mainName, DataSourceType.Main, outputNodeRefCounts);
     outputNodes[mainName] = main;
     head = main;
     if (isUnitModel(model)) {

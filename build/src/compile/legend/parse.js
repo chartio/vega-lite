@@ -49,6 +49,7 @@ function getLegendDefWithScale(model, channel) {
     }
     return { [channel]: scale };
 }
+// eslint-disable-next-line @typescript-eslint/ban-types
 function isExplicit(value, property, legend, fieldDef) {
     switch (property) {
         case 'disable':
@@ -99,6 +100,10 @@ export function parseLegendForChannel(model, channel) {
         direction
     };
     for (const property of LEGEND_COMPONENT_PROPERTIES) {
+        if ((legendType === 'gradient' && property.startsWith('symbol')) ||
+            (legendType === 'symbol' && property.startsWith('gradient'))) {
+            continue;
+        }
         const value = property in legendRules ? legendRules[property](ruleParams) : legend[property];
         if (value !== undefined) {
             const explicit = isExplicit(value, property, legend, model.fieldDef(channel));

@@ -8805,23 +8805,6 @@
             "$ref": "#/definitions/Transform"
           },
           "type": "array"
-        },
-        "width": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "enum": [
-                "container"
-              ],
-              "type": "string"
-            },
-            {
-              "$ref": "#/definitions/Step"
-            }
-          ],
-          "description": "The width of a visualization.\n\n- For a plot with a continuous x-field, width should be a number.\n- For a plot with either a discrete x-field or no x-field, width can be either a number indicating a fixed width or an object in the form of `{step: number}` defining the width per discrete step. (No x-field is equivalent to having one discrete step.)\n- To enable responsive sizing on width, it should be set to `\"container\"`.\n\n__Default value:__\nBased on `config.view.continuousWidth` for a plot with a continuous x-field and `config.view.discreteWidth` otherwise.\n\n__Note:__ For plots with [`row` and `column` channels](https://vega.github.io/vega-lite/docs/encoding.html#facet), this represents the width of a single view and the `\"container\"` option cannot be used.\n\n__See also:__ [`width`](https://vega.github.io/vega-lite/docs/size.html) documentation."
         }
       },
       "required": [
@@ -8896,23 +8879,6 @@
             "$ref": "#/definitions/Transform"
           },
           "type": "array"
-        },
-        "width": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "enum": [
-                "container"
-              ],
-              "type": "string"
-            },
-            {
-              "$ref": "#/definitions/Step"
-            }
-          ],
-          "description": "The width of a visualization.\n\n- For a plot with a continuous x-field, width should be a number.\n- For a plot with either a discrete x-field or no x-field, width can be either a number indicating a fixed width or an object in the form of `{step: number}` defining the width per discrete step. (No x-field is equivalent to having one discrete step.)\n- To enable responsive sizing on width, it should be set to `\"container\"`.\n\n__Default value:__\nBased on `config.view.continuousWidth` for a plot with a continuous x-field and `config.view.discreteWidth` otherwise.\n\n__Note:__ For plots with [`row` and `column` channels](https://vega.github.io/vega-lite/docs/encoding.html#facet), this represents the width of a single view and the `\"container\"` option cannot be used.\n\n__See also:__ [`width`](https://vega.github.io/vega-lite/docs/size.html) documentation."
         }
       },
       "required": [
@@ -21891,23 +21857,6 @@
         "usermeta": {
           "$ref": "#/definitions/Dict<unknown>",
           "description": "Optional metadata that will be passed to Vega.\nThis object is completely ignored by Vega and Vega-Lite and can be used for custom metadata."
-        },
-        "width": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "enum": [
-                "container"
-              ],
-              "type": "string"
-            },
-            {
-              "$ref": "#/definitions/Step"
-            }
-          ],
-          "description": "The width of a visualization.\n\n- For a plot with a continuous x-field, width should be a number.\n- For a plot with either a discrete x-field or no x-field, width can be either a number indicating a fixed width or an object in the form of `{step: number}` defining the width per discrete step. (No x-field is equivalent to having one discrete step.)\n- To enable responsive sizing on width, it should be set to `\"container\"`.\n\n__Default value:__\nBased on `config.view.continuousWidth` for a plot with a continuous x-field and `config.view.discreteWidth` otherwise.\n\n__Note:__ For plots with [`row` and `column` channels](https://vega.github.io/vega-lite/docs/encoding.html#facet), this represents the width of a single view and the `\"container\"` option cannot be used.\n\n__See also:__ [`width`](https://vega.github.io/vega-lite/docs/size.html) documentation."
         }
       },
       "required": [

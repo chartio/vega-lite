@@ -6,7 +6,7 @@ import { GenericUnitSpec, NormalizedLayerSpec } from '../spec';
 import { CompositeMarkNormalizer } from './base';
 import { GenericCompositeMarkDef, PartsMixins } from './common';
 import { ErrorBarCenter, ErrorBarExtent, ErrorEncoding } from './errorbar';
-export declare type ErrorBandUnitSpec<EE = {}> = GenericUnitSpec<ErrorEncoding<Field> & EE, ErrorBand | ErrorBandDef>;
+export declare type ErrorBandUnitSpec<EE = undefined> = GenericUnitSpec<ErrorEncoding<Field> & EE, ErrorBand | ErrorBandDef>;
 export declare const ERRORBAND: "errorband";
 export declare type ErrorBand = typeof ERRORBAND;
 export declare const ERRORBAND_PARTS: readonly ["band", "borders"];

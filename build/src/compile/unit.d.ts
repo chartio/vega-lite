@@ -1,6 +1,6 @@
 import { NewSignal } from 'vega';
 import { Axis } from '../axis';
-import { Channel, ScaleChannel, SingleDefChannel } from '../channel';
+import { Channel, ScaleChannel, SingleDefChannel, PositionChannel, NonPositionScaleChannel } from '../channel';
 import { Config } from '../config';
 import * as vlEncoding from '../encoding';
 import { Encoding } from '../encoding';
@@ -37,8 +37,8 @@ export declare class UnitModel extends ModelWithField {
      * @param channel
      */
     scaleDomain(channel: ScaleChannel): Domain;
-    axis(channel: Channel): Axis;
-    legend(channel: Channel): Legend;
+    axis(channel: PositionChannel): Axis;
+    legend(channel: NonPositionScaleChannel): Legend;
     private initScales;
     private initAxes;
     private initLegend;

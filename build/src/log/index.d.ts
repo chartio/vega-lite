@@ -27,6 +27,7 @@ export declare function set(newLogger: LoggerInterface): LoggerInterface;
  * Reset the main logger to use the default Vega Logger.
  */
 export declare function reset(): LoggerInterface;
+export declare function error(...args: readonly any[]): void;
 export declare function warn(...args: readonly any[]): void;
 export declare function info(...args: readonly any[]): void;
 export declare function debug(...args: readonly any[]): void;

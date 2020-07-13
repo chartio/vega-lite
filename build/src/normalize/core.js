@@ -1,6 +1,7 @@
 import { __rest } from "tslib";
 import { isArray } from 'vega-util';
 import { COLUMN, FACET, ROW } from '../channel';
+import { hasConditionalFieldOrDatumDef, isFieldOrDatumDef, isValueDef } from '../channeldef';
 import { boxPlotNormalizer } from '../compositemark/boxplot';
 import { errorBandNormalizer } from '../compositemark/errorband';
 import { errorBarNormalizer } from '../compositemark/errorbar';
@@ -10,7 +11,8 @@ import { isFacetMapping } from '../spec/facet';
 import { SpecMapper } from '../spec/map';
 import { isLayerRepeatSpec } from '../spec/repeat';
 import { isUnitSpec } from '../spec/unit';
-import { keys, omit, varName, isEmpty } from '../util';
+import { isEmpty, keys, omit, varName } from '../util';
+import { isSignalRef } from '../vega.schema';
 import { PathOverlayNormalizer } from './pathoverlay';
 import { RangeStepNormalizer } from './rangestep';
 import { replaceRepeaterInEncoding, replaceRepeaterInFacet } from './repeater';
@@ -42,7 +44,8 @@ export class CoreNormalizer extends SpecMapper {
     // This is for normalizing non-facet unit
     mapUnit(spec, params) {
         const { parentEncoding, parentProjection } = params;
-        const specWithReplacedEncoding = Object.assign(Object.assign({}, spec), { encoding: replaceRepeaterInEncoding(spec.encoding, params.repeater) });
+        const encoding = replaceRepeaterInEncoding(spec.encoding, params.repeater);
+        const specWithReplacedEncoding = Object.assign(Object.assign({}, spec), (encoding ? { encoding } : {}));
         if (parentEncoding || parentProjection) {
             return this.mapUnitWithParentEncodingOrProjection(specWithReplacedEncoding, params);
         }
@@ -190,22 +193,42 @@ export class CoreNormalizer extends SpecMapper {
         // Special handling for extended layer spec
         var { parentEncoding, parentProjection } = _a, otherParams = __rest(_a, ["parentEncoding", "parentProjection"]);
         const { encoding, projection } = spec, rest = __rest(spec, ["encoding", "projection"]);
-        const params = Object.assign(Object.assign({}, otherParams), { parentEncoding: mergeEncoding({ parentEncoding, encoding }), parentProjection: mergeProjection({ parentProjection, projection }) });
+        const params = Object.assign(Object.assign({}, otherParams), { parentEncoding: mergeEncoding({ parentEncoding, encoding, layer: true }), parentProjection: mergeProjection({ parentProjection, projection }) });
         return super.mapLayer(rest, params);
     }
 }
-function mergeEncoding(opt) {
-    const { parentEncoding, encoding } = opt;
-    if (parentEncoding && encoding) {
-        keys(parentEncoding).reduce((o, key) => {
-            if (encoding[key]) {
-                o.push(key);
+function mergeEncoding({ parentEncoding, encoding = {}, layer }) {
+    let merged = {};
+    if (parentEncoding) {
+        const channels = new Set([...keys(parentEncoding), ...keys(encoding)]);
+        for (const channel of channels) {
+            const channelDef = encoding[channel];
+            const parentChannelDef = parentEncoding[channel];
+            if (isFieldOrDatumDef(channelDef)) {
+                // Field/Datum Def can inherit properties from its parent
+                // Note that parentChannelDef doesn't have to be a field/datum def if the channelDef is already one.
+                const mergedChannelDef = Object.assign(Object.assign({}, parentChannelDef), channelDef);
+                merged[channel] = mergedChannelDef;
             }
-            return o;
-        }, []);
+            else if (hasConditionalFieldOrDatumDef(channelDef)) {
+                merged[channel] = Object.assign(Object.assign({}, channelDef), { condition: Object.assign(Object.assign({}, parentChannelDef), channelDef.condition) });
+            }
+            else if (channelDef) {
+                merged[channel] = channelDef;
+            }
+            else if (layer ||
+                isValueDef(parentChannelDef) ||
+                isSignalRef(parentChannelDef) ||
+                isFieldOrDatumDef(parentChannelDef) ||
+                isArray(parentChannelDef)) {
+                merged[channel] = parentChannelDef;
+            }
+        }
     }
-    const merged = Object.assign(Object.assign({}, (parentEncoding !== null && parentEncoding !== void 0 ? parentEncoding : {})), (encoding !== null && encoding !== void 0 ? encoding : {}));
-    return isEmpty(merged) ? undefined : merged;
+    else {
+        merged = encoding;
+    }
+    return !merged || isEmpty(merged) ? undefined : merged;
 }
 function mergeProjection(opt) {
     const { parentProjection, projection } = opt;

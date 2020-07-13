@@ -3,7 +3,7 @@ import { isBinning } from '../../bin';
 import { ANGLE, COLOR, FILL, FILLOPACITY, isXorY, OPACITY, RADIUS, SCALE_CHANNELS, SHAPE, SIZE, STROKE, STROKEDASH, STROKEOPACITY, STROKEWIDTH, THETA, X, Y } from '../../channel';
 import { getFieldOrDatumDef } from '../../channeldef';
 import { getViewConfigDiscreteSize, getViewConfigDiscreteStep } from '../../config';
-import { MAIN } from '../../data';
+import { DataSourceType } from '../../data';
 import * as log from '../../log';
 import { channelScalePropertyIncompatability, hasContinuousDomain, hasDiscreteDomain, isContinuousToDiscrete, isExtendedScheme, scaleTypeSupportProperty } from '../../scale';
 import { isStep } from '../../spec/base';
@@ -13,6 +13,7 @@ import { signalOrStringValue } from '../common';
 import { getBinSignalName } from '../data/bin';
 import { SignalRefWrapper } from '../signal';
 import { makeExplicit, makeImplicit } from '../split';
+import { isFacetModel } from "../model";
 export const RANGE_PROPERTIES = ['range', 'scheme'];
 function getSizeChannel(channel) {
     return channel === 'x' ? 'width' : channel === 'y' ? 'height' : undefined;
@@ -85,7 +86,7 @@ export function parseRangeForChannel(channel, model) {
                         }
                         else if (isObject(range)) {
                             return makeExplicit({
-                                data: model.requestDataName(MAIN),
+                                data: model.requestDataName(DataSourceType.Main),
                                 field: range.field,
                                 sort: { op: 'min', field: model.vgField(channel) }
                             });
@@ -141,13 +142,13 @@ function defaultRange(channel, model) {
             if (util.contains(['point', 'band'], scaleType)) {
                 if (channel === X && !size.width) {
                     const w = getViewConfigDiscreteSize(config.view, 'width');
-                    if (isStep(w)) {
+                    if (isStep(w) && (!isFacetModel(model.parent) || !model.parent.hasStaticOuterDimension('width'))) {
                         return w;
                     }
                 }
                 else if (channel === Y && !size.height) {
                     const h = getViewConfigDiscreteSize(config.view, 'height');
-                    if (isStep(h)) {
+                    if (isStep(h) && (!isFacetModel(model.parent) || !model.parent.hasStaticOuterDimension('height'))) {
                         return h;
                     }
                 }

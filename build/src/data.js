@@ -19,6 +19,12 @@ export function isSphereGenerator(data) {
 export function isGraticuleGenerator(data) {
     return 'graticule' in data;
 }
-export const MAIN = 'main';
-export const RAW = 'raw';
+export var DataSourceType;
+(function (DataSourceType) {
+    DataSourceType[DataSourceType["Raw"] = 0] = "Raw";
+    DataSourceType[DataSourceType["Main"] = 1] = "Main";
+    DataSourceType[DataSourceType["Row"] = 2] = "Row";
+    DataSourceType[DataSourceType["Column"] = 3] = "Column";
+    DataSourceType[DataSourceType["Lookup"] = 4] = "Lookup";
+})(DataSourceType || (DataSourceType = {}));
 //# sourceMappingURL=data.js.map

@@ -1,9 +1,10 @@
-import { array, isArray, isObject, isString, stringValue } from 'vega-util';
+import { array, isArray, isObject, isString } from 'vega-util';
 import { isBinned } from '../../../bin';
 import { getMainRangeChannel, isXorY } from '../../../channel';
-import { getFieldDef, getFormatMixins, hasConditionalFieldDef, isFieldDef, isTypedFieldDef, title, vgField } from '../../../channeldef';
+import { defaultTitle, getFieldDef, getFormatMixins, hasConditionalFieldDef, isFieldDef, isTypedFieldDef, vgField } from '../../../channeldef';
 import { forEach } from '../../../encoding';
 import { entries } from '../../../util';
+import { isSignalRef } from '../../../vega.schema';
 import { getMarkPropOrConfig } from '../../common';
 import { binFormatExpression, formatSignalRef } from '../../format';
 import { wrapCondition } from './conditional';
@@ -35,7 +36,10 @@ export function tooltip(model, opt = {}) {
             }
             else if (isObject(markTooltip)) {
                 // `tooltip` is `{fields: 'encodings' | 'fields'}`
-                if (markTooltip.content === 'encoding') {
+                if (isSignalRef(markTooltip)) {
+                    return markTooltip;
+                }
+                else if (markTooltip.content === 'encoding') {
                     return tooltipRefForEncoding(encoding, stack, config, opt);
                 }
                 else {
@@ -56,7 +60,8 @@ export function tooltipData(encoding, stack, config, { reactiveGeom } = {}) {
             ? fDef
             : Object.assign(Object.assign({}, fDef), { type: encoding[mainChannel].type // for secondary field def, copy type from main channel
              });
-        const key = array(title(fieldDef, config, { allowDisabling: false })).join(', ');
+        const title = fieldDef.title || defaultTitle(fieldDef, config);
+        const key = array(title).join(', ');
         let value;
         if (isXorY(channel)) {
             const channel2 = channel === 'x' ? 'x2' : 'y2';
@@ -88,14 +93,14 @@ export function tooltipData(encoding, stack, config, { reactiveGeom } = {}) {
     const out = {};
     for (const { channel, key, value } of tuples) {
         if (!toSkip[channel] && !out[key]) {
-            out[stringValue(key)] = value;
+            out[key] = value;
         }
     }
     return out;
 }
 export function tooltipRefForEncoding(encoding, stack, config, { reactiveGeom } = {}) {
     const data = tooltipData(encoding, stack, config, { reactiveGeom });
-    const keyValues = entries(data).map(({ key, value }) => `${key}: ${value}`);
+    const keyValues = entries(data).map(({ key, value }) => `"${key}": ${value}`);
     return keyValues.length > 0 ? { signal: `{${keyValues.join(', ')}}` } : undefined;
 }
 //# sourceMappingURL=tooltip.js.map

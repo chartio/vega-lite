@@ -118,11 +118,6 @@ export function isStringFieldOrDatumDef(channelDef) {
     return !!channelDef && ('format' in channelDef || 'formatType' in channelDef);
 }
 export function toStringFieldDef(fieldDef) {
-    // add title from guide to title property
-    const guide = getGuide(fieldDef);
-    if (fieldDef.title == undefined && (guide === null || guide === void 0 ? void 0 : guide.title)) {
-        fieldDef = Object.assign(Object.assign({}, fieldDef), { title: guide.title });
-    }
     // omit properties that don't exist in string field defs
     return omit(fieldDef, ['legend', 'axis', 'header', 'scale']);
 }

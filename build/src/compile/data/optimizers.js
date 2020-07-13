@@ -1,4 +1,4 @@
-import { MAIN } from '../../data';
+import { DataSourceType } from '../../data';
 import { fieldIntersection, hash, hasIntersection, isEmpty, keys, some } from '../../util';
 import { requiresSelectionId } from '../selection';
 import { AggregateNode } from './aggregate';
@@ -215,7 +215,7 @@ export function moveFacetDown(node) {
     }
 }
 function moveMainDownToFacet(node) {
-    if (node instanceof OutputNode && node.type === MAIN) {
+    if (node instanceof OutputNode && node.type === DataSourceType.Main) {
         if (node.numChildren() === 1) {
             const child = node.children[0];
             if (!(child instanceof FacetNode)) {
