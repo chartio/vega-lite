@@ -146,7 +146,7 @@
           "fill": {"value": "#000"},
           "ariaRoleDescription": {"value": "circle"},
           "description": {
-            "signal": "\"health\" + \": \" + (format(datum[\"health\"], \"\")) + \"; \" + \"income\" + \": \" + (format(datum[\"income\"], \"\")) + \"; \" + \"population\" + \": \" + (format(datum[\"population\"], \"\"))"
+            "signal": "\"health: \" + (format(datum[\"health\"], \"\")) + \"; income: \" + (format(datum[\"income\"], \"\")) + \"; population: \" + (format(datum[\"population\"], \"\"))"
           },
           "x": {"scale": "x", "field": "income"},
           "y": [
@@ -239,7 +239,6 @@
   "legends": [
     {
       "size": "size",
-      "gradientLength": {"signal": "clamp(height, 64, 200)"},
       "symbolType": "circle",
       "title": "population",
       "encode": {

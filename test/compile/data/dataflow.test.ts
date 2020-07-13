@@ -1,5 +1,7 @@
-import {PlaceholderDataFlowNode} from './util';
 import {OutputNode} from '../../../src/compile/data/dataflow';
+import {DataSourceType} from '../../../src/data';
+import * as log from '../../../src/log';
+import {PlaceholderDataFlowNode} from './util';
 
 describe('compile/data/dataflow', () => {
   describe('DataFlowNode', () => {
@@ -132,16 +134,20 @@ describe('compile/data/dataflow', () => {
         expect(a.children).toEqual([b]);
       });
 
-      it('should not add the same child twice', () => {
-        const a = new PlaceholderDataFlowNode(null, 'a');
-        const b = new PlaceholderDataFlowNode(null, 'b');
+      it(
+        'should not add the same child twice',
+        log.wrap(localWrapper => {
+          const a = new PlaceholderDataFlowNode(null, 'a');
+          const b = new PlaceholderDataFlowNode(null, 'b');
 
-        a.addChild(b);
-        a.addChild(b);
+          a.addChild(b);
+          a.addChild(b);
 
-        expect(b.parent).toBeNull();
-        expect(a.children).toEqual([b]);
-      });
+          expect(b.parent).toBeNull();
+          expect(a.children).toEqual([b]);
+          expect(localWrapper.warns[0]).toEqual(log.message.ADD_SAME_CHILD_TWICE);
+        })
+      );
     });
 
     describe('clone', () => {
@@ -156,14 +162,14 @@ describe('compile/data/dataflow', () => {
   describe('OutputNode', () => {
     describe('dependentFields', () => {
       it('should return empty set', () => {
-        const flatten = new OutputNode(null, 'src', 'main', {});
+        const flatten = new OutputNode(null, 'src', DataSourceType.Main, {});
         expect(flatten.dependentFields()).toEqual(new Set());
       });
     });
 
     describe('producedFields', () => {
       it('should return empty set', () => {
-        const flatten = new OutputNode(null, 'src', 'main', {});
+        const flatten = new OutputNode(null, 'src', DataSourceType.Main, {});
         expect(flatten.producedFields()).toEqual(new Set());
       });
     });

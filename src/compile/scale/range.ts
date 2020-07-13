@@ -3,7 +3,6 @@ import {isArray, isNumber, isObject} from 'vega-util';
 import {isBinning} from '../../bin';
 import {
   ANGLE,
-  Channel,
   COLOR,
   FILL,
   FILLOPACITY,
@@ -24,7 +23,7 @@ import {
 } from '../../channel';
 import {getFieldOrDatumDef, ScaleDatumDef, ScaleFieldDef} from '../../channeldef';
 import {Config, getViewConfigDiscreteSize, getViewConfigDiscreteStep, ViewConfig} from '../../config';
-import {MAIN} from '../../data';
+import {DataSourceType} from '../../data';
 import * as log from '../../log';
 import {Mark} from '../../mark';
 import {
@@ -47,6 +46,7 @@ import {SignalRefWrapper} from '../signal';
 import {Explicit, makeExplicit, makeImplicit} from '../split';
 import {UnitModel} from '../unit';
 import {ScaleComponentIndex} from './component';
+import {isFacetModel} from "../model";
 
 export const RANGE_PROPERTIES: (keyof Scale)[] = ['range', 'scheme'];
 
@@ -132,7 +132,7 @@ export function parseRangeForChannel(channel: ScaleChannel, model: UnitModel): E
               }
             } else if (isObject(range)) {
               return makeExplicit({
-                data: model.requestDataName(MAIN),
+                data: model.requestDataName(DataSourceType.Main),
                 field: range.field,
                 sort: {op: 'min', field: model.vgField(channel)}
               });
@@ -204,12 +204,12 @@ function defaultRange(channel: ScaleChannel, model: UnitModel): VgRange {
       if (util.contains(['point', 'band'], scaleType)) {
         if (channel === X && !size.width) {
           const w = getViewConfigDiscreteSize(config.view, 'width');
-          if (isStep(w)) {
+          if (isStep(w) && (!isFacetModel(model.parent) || !model.parent.hasStaticOuterDimension('width'))) {
             return w;
           }
         } else if (channel === Y && !size.height) {
           const h = getViewConfigDiscreteSize(config.view, 'height');
-          if (isStep(h)) {
+          if (isStep(h) && (!isFacetModel(model.parent) || !model.parent.hasStaticOuterDimension('height'))) {
             return h;
           }
         }
@@ -306,7 +306,7 @@ export function defaultContinuousToDiscreteCount(
   scaleType: 'quantile' | 'quantize' | 'threshold',
   config: Config,
   domain: Domain,
-  channel: Channel
+  channel: ScaleChannel
 ) {
   switch (scaleType) {
     case 'quantile':

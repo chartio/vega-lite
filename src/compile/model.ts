@@ -14,7 +14,8 @@ import {
   isChannel,
   isScaleChannel,
   ScaleChannel,
-  SingleDefChannel
+  SingleDefChannel,
+  ExtendedChannel
 } from '../channel';
 import {ChannelDef, FieldDef, FieldRefOption, getFieldDef, vgField} from '../channeldef';
 import {Config} from '../config';
@@ -27,6 +28,8 @@ import {isFacetSpec} from '../spec';
 import {
   extractCompositionLayout,
   GenericCompositionLayoutWithColumns,
+  isStep,
+  LayoutSizeField,
   LayoutSizeMixins,
   SpecType,
   ViewBackground
@@ -469,13 +472,17 @@ export abstract class Model {
     return varName((this.name ? this.name + '_' : '') + text);
   }
 
+  public getDataName(type: DataSourceType) {
+    return this.getName(DataSourceType[type].toLowerCase());
+  }
+
   /**
    * Request a data source name for the given data source type and mark that data source as required.
    * This method should be called in parse, so that all used data source can be correctly instantiated in assembleData().
    * You can lookup the correct dataset name in assemble with `lookupDataSource`.
    */
   public requestDataName(name: DataSourceType) {
-    const fullName = this.getName(name);
+    const fullName = this.getDataName(name);
 
     // Increase ref count. This is critical because otherwise we won't create a data source.
     // We also increase the ref counts on OutputNode.getSource() calls.
@@ -653,6 +660,13 @@ export abstract class Model {
       this.component.axes.y?.some(a => a.hasOrientSignalRef())
     );
   }
+
+  /**
+   * Returns true if the model has a static value (i.e. not a step) set for the given size dimension.
+   */
+  public hasStaticOuterDimension(dimension: LayoutSizeField) {
+    return this.size[dimension] && !isStep(this.size[dimension]);
+  }
 }
 
 /** Abstract class for UnitModel and FacetModel. Both of which can contain fieldDefs as a part of its own specification. */
@@ -670,7 +684,7 @@ export abstract class ModelWithField extends Model {
     return vgField(fieldDef, opt);
   }
 
-  protected abstract getMapping(): Partial<Record<Channel, any>>;
+  protected abstract getMapping(): Partial<Record<ExtendedChannel, any>>;
 
   public reduceFieldDef<T, U>(f: (acc: U, fd: FieldDef<string>, c: Channel) => U, init: T): T {
     return reduce(
@@ -686,10 +700,10 @@ export abstract class ModelWithField extends Model {
     );
   }
 
-  public forEachFieldDef(f: (fd: FieldDef<string>, c: Channel) => void, t?: any) {
+  public forEachFieldDef(f: (fd: FieldDef<string>, c: ExtendedChannel) => void, t?: any) {
     forEach(
       this.getMapping(),
-      (cd: ChannelDef, c: Channel) => {
+      (cd, c) => {
         const fieldDef = getFieldDef(cd);
         if (fieldDef) {
           f(fieldDef, c);
@@ -698,5 +712,6 @@ export abstract class ModelWithField extends Model {
       t
     );
   }
+
   public abstract channelHasField(channel: Channel): boolean;
 }

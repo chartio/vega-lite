@@ -30,7 +30,7 @@
           "fill": {"value": "#4c78a8"},
           "ariaRoleDescription": {"value": "circle"},
           "description": {
-            "signal": "\"Horsepower\" + \": \" + (format(datum[\"Horsepower\"], \"\")) + \"; \" + \"Miles_per_Gallon\" + \": \" + (format(datum[\"Miles_per_Gallon\"], \"\"))"
+            "signal": "\"Horsepower: \" + (format(datum[\"Horsepower\"], \"\")) + \"; Miles_per_Gallon: \" + (format(datum[\"Miles_per_Gallon\"], \"\"))"
           },
           "x": {"scale": "x", "field": "Horsepower"},
           "y": {"scale": "y", "field": "Miles_per_Gallon"},
@@ -116,7 +116,6 @@
   "legends": [
     {
       "opacity": "opacity",
-      "gradientLength": {"signal": "clamp(height, 64, 200)"},
       "symbolType": "circle",
       "title": "Miles_per_Gallon",
       "encode": {

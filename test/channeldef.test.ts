@@ -1,5 +1,5 @@
 import {COUNTING_OPS} from '../src/aggregate';
-import {Channel, CHANNELS} from '../src/channel';
+import {CHANNELS} from '../src/channel';
 import {
   channelCompatibility,
   defaultTitle,
@@ -126,10 +126,10 @@ describe('fieldDef', () => {
     });
 
     it('converts header orient to labelOrient and titleOrient', () => {
-      const fieldDef: FacetFieldDef<string> = {field: 1 as any, type: 'quantitative', header: {orient: 'bottom'}};
+      const fieldDef: FacetFieldDef<string> = {field: 1 as any, type: 'nominal', header: {orient: 'bottom'}};
       expect(initChannelDef(fieldDef, 'row', defaultConfig)).toEqual({
         field: '1',
-        type: 'quantitative',
+        type: 'nominal',
         header: {labelOrient: 'bottom', titleOrient: 'bottom'}
       });
     });
@@ -203,12 +203,12 @@ describe('fieldDef', () => {
   describe('channelCompatability', () => {
     describe('row/column', () => {
       it('is incompatible with continuous field', () => {
-        for (const channel of ['row', 'column'] as Channel[]) {
+        for (const channel of ['row', 'column'] as const) {
           expect(!channelCompatibility({field: 'a', type: 'quantitative'}, channel).compatible).toBeTruthy();
         }
       });
       it('is compatible with discrete field', () => {
-        for (const channel of ['row', 'column'] as Channel[]) {
+        for (const channel of ['row', 'column'] as const) {
           expect(channelCompatibility({field: 'a', type: 'nominal'}, channel).compatible).toBeTruthy();
         }
       });
@@ -216,12 +216,12 @@ describe('fieldDef', () => {
 
     describe('x/y/color/text/detail', () => {
       it('is compatible with continuous field', () => {
-        for (const channel of ['x', 'y', 'color', 'text', 'detail'] as Channel[]) {
+        for (const channel of ['x', 'y', 'color', 'text', 'detail'] as const) {
           expect(channelCompatibility({field: 'a', type: 'quantitative'}, channel).compatible).toBeTruthy();
         }
       });
       it('is compatible with discrete field', () => {
-        for (const channel of ['x', 'y', 'color', 'text', 'detail'] as Channel[]) {
+        for (const channel of ['x', 'y', 'color', 'text', 'detail'] as const) {
           expect(channelCompatibility({field: 'a', type: 'nominal'}, channel).compatible).toBeTruthy();
         }
       });
@@ -229,19 +229,19 @@ describe('fieldDef', () => {
 
     describe('opacity/size/x2/y2', () => {
       it('is compatible with continuous field', () => {
-        for (const channel of ['opacity', 'size', 'x2', 'y2'] as Channel[]) {
+        for (const channel of ['opacity', 'size', 'x2', 'y2'] as const) {
           expect(channelCompatibility({field: 'a', type: 'quantitative'}, channel).compatible).toBeTruthy();
         }
       });
 
       it('is compatible with binned field', () => {
-        for (const channel of ['opacity', 'size', 'x2', 'y2'] as Channel[]) {
+        for (const channel of ['opacity', 'size', 'x2', 'y2'] as const) {
           expect(channelCompatibility({bin: true, field: 'a', type: 'quantitative'}, channel).compatible).toBeTruthy();
         }
       });
 
       it('is incompatible with nominal field', () => {
-        for (const channel of ['opacity', 'size', 'x2', 'y2'] as Channel[]) {
+        for (const channel of ['opacity', 'size', 'x2', 'y2'] as const) {
           expect(!channelCompatibility({field: 'a', type: 'nominal'}, channel).compatible).toBeTruthy();
         }
       });

@@ -5,7 +5,9 @@ import {getFirstDefined} from '../../util';
 import {isVgRangeStep, VgRangeStep} from '../../vega.schema';
 import {isFacetModel, Model} from '../model';
 import {ScaleComponent} from '../scale/component';
-import {LayoutSizeType} from './component';
+import {getSizeTypeFromLayoutSizeType, LayoutSizeType} from './component';
+import {isFacetMapping} from '../../spec/facet';
+import {FacetModel} from "../facet";
 
 export function assembleLayoutSignals(model: Model): NewSignal[] {
   return [
@@ -26,7 +28,14 @@ export function sizeSignals(model: Model, sizeType: LayoutSizeType): (NewSignal 
   // Read size signal name from name map, just in case it is the top-level size signal that got renamed.
   const name = model.getSizeSignalRef(sizeType).signal;
 
-  if (size === 'step') {
+  if (isFacetModel(model.parent) && model.parent.hasStaticOuterDimension(getSizeTypeFromLayoutSizeType(sizeType))) {
+    return [
+      {
+        name,
+        update: autosizedFacetExpr(model.parent, sizeType)
+      }
+    ];
+  } else if (size === 'step') {
     const scaleComponent = model.getScaleComponent(channel);
 
     if (scaleComponent) {
@@ -124,4 +133,16 @@ export function sizeExpr(scaleName: string, scaleComponent: ScaleComponent, card
         // it's equivalent to have paddingInner = 1 since there is only n-1 steps between n points.
         1;
   return `bandspace(${cardinality}, ${paddingInner}, ${paddingOuter}) * ${scaleName}_step`;
+}
+
+export function autosizedFacetExpr(model: FacetModel, sizeType: LayoutSizeType) {
+  const channel = sizeType === 'width' ? 'column' : 'row';
+  if (!model.facet[channel] && isFacetMapping(model.facet)) {
+    // no faceting on this channel so just pass through the overall dimension of this channel
+    return sizeType;
+  }
+  // if the facet operator defines an explicit row or column channel, the compiled vega spec includes the '(row|column)_domain' data
+  // otherwise the facet operator is itself is a facet field definition, the compiled vega spec instead includes the 'facet_domain_(row|column)' data
+  const domain = !isFacetMapping(model.facet) ? `facet_domain_${channel}` : `${channel}_domain`;
+  return `${sizeType} / length(data('${domain}'))`;
 }

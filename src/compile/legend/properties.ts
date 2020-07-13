@@ -1,6 +1,6 @@
 import {LabelOverlap, LegendOrient, LegendType, Orientation, SignalRef, SymbolShape} from 'vega';
 import {isArray} from 'vega-util';
-import {Channel, isColorChannel, NonPositionChannel} from '../../channel';
+import {isColorChannel} from '../../channel';
 import {DatumDef, MarkPropFieldOrDatumDef, title as fieldDefTitle, TypedFieldDef, valueArray} from '../../channeldef';
 import {Config} from '../../config';
 import {Encoding} from '../../encoding';
@@ -13,28 +13,22 @@ import {isSignalRef} from '../../vega.schema';
 import {guideFormat, guideFormatType} from '../format';
 import {Model} from '../model';
 import {UnitModel} from '../unit';
+import {NonPositionScaleChannel} from './../../channel';
 import {LegendComponentProps} from './component';
 import {getFirstConditionValue} from './encode';
 
 export interface LegendRuleParams {
   legend: Legend;
-  channel: NonPositionChannel;
+  channel: NonPositionScaleChannel;
   model: UnitModel;
   markDef: MarkDef;
   encoding: Encoding<string>;
-
   fieldOrDatumDef: MarkPropFieldOrDatumDef<string>;
-
   legendConfig: LegendConfig;
-
   config: Config;
-
   scaleType: ScaleType;
-
   orient: LegendOrient;
-
   legendType: LegendType;
-
   direction: Orientation;
 }
 
@@ -93,7 +87,7 @@ export function values(legend: Legend, fieldOrDatumDef: TypedFieldDef<string> | 
 
 export function defaultSymbolType(
   mark: Mark,
-  channel: Channel,
+  channel: NonPositionScaleChannel,
   shapeChannelDef: Encoding<string>['shape'],
   markShape: SymbolShape | SignalRef
 ): SymbolShape | SignalRef {
@@ -135,7 +129,7 @@ export function clipHeight(legendType: LegendType) {
 
 export function getLegendType(params: {
   legend: Legend;
-  channel: Channel;
+  channel: NonPositionScaleChannel;
   timeUnit?: TimeUnit;
   scaleType: ScaleType;
 }): LegendType {
@@ -149,7 +143,7 @@ export function defaultType({
   timeUnit,
   scaleType
 }: {
-  channel: Channel;
+  channel: NonPositionScaleChannel;
   timeUnit?: TimeUnit;
   scaleType: ScaleType;
 }): LegendType {

@@ -1,10 +1,17 @@
 /**
  * Collection of all Vega-Lite Error Messages
  */
-
 import {AggregateOp} from 'vega';
 import {Aggregate} from '../aggregate';
-import {Channel, FacetChannel, GeoPositionChannel, getSizeChannel, PositionScaleChannel} from '../channel';
+import {
+  Channel,
+  FacetChannel,
+  GeoPositionChannel,
+  getSizeChannel,
+  PositionScaleChannel,
+  ScaleChannel,
+  ExtendedChannel
+} from '../channel';
 import {HiddenCompositeAggregate, TypedFieldDef, Value} from '../channeldef';
 import {SplitParentProperty} from '../compile/split';
 import {CompositeMark} from '../compositemark';
@@ -74,7 +81,7 @@ export function selectionNotFound(name: string) {
 export const SCALE_BINDINGS_CONTINUOUS =
   'Scale bindings are currently only supported for scales with unbinned, continuous domains.';
 
-export const LEGEND_BINDINGS_PROJECT_LENGTH =
+export const LEGEND_BINDINGS_MUST_HAVE_PROJECTION =
   'Legend bindings are only supported for selections over an individual field or encoding channel.';
 export function noSameUnitLookup(name: string) {
   return (
@@ -109,6 +116,8 @@ export function differentParse(field: string, local: string, ancestor: string) {
   return `An ancestor parsed field "${field}" as ${ancestor} but a child wants to parse the field as ${local}.`;
 }
 
+export const ADD_SAME_CHILD_TWICE = 'Attempt to add the same child twice.';
+
 // TRANSFORMS
 export function invalidTransformIgnored(transform: any) {
   return `Ignoring an invalid transform: ${stringify(transform)}.`;
@@ -119,7 +128,7 @@ export const NO_FIELDS_NEEDS_AS =
 
 // ENCODING & FACET
 
-export function customFormatTypeNotAllowed(channel: Channel) {
+export function customFormatTypeNotAllowed(channel: ExtendedChannel) {
   return `Config.customFormatTypes is not true, thus custom format type and format for channel ${channel} are dropped.`;
 }
 
@@ -133,7 +142,7 @@ export function projectionOverridden(opt: {parentProjection: Projection; project
 export const REPLACE_ANGLE_WITH_THETA = 'Arc marks uses theta channel rather than angle, replacing angle with theta.';
 
 export function primitiveChannelDef(
-  channel: Channel,
+  channel: ExtendedChannel,
   type: 'string' | 'number' | 'boolean',
   value: Exclude<Value, null>
 ) {
@@ -162,7 +171,7 @@ export function droppingColor(type: 'encoding' | 'property', opt: {fill?: boolea
   }.`;
 }
 
-export function emptyFieldDef(fieldDef: TypedFieldDef<string>, channel: Channel) {
+export function emptyFieldDef(fieldDef: unknown, channel: ExtendedChannel) {
   return `Dropping ${stringify(
     fieldDef
   )} from channel "${channel}" since it does not contain any data field, datum, value, or signal.`;
@@ -174,15 +183,19 @@ export function latLongDeprecated(channel: Channel, type: Type, newChannel: GeoP
 export const LINE_WITH_VARYING_SIZE =
   'Line marks cannot encode size with a non-groupby field. You may want to use trail marks instead.';
 
-export function incompatibleChannel(channel: Channel, markOrFacet: Mark | 'facet' | CompositeMark, when?: string) {
+export function incompatibleChannel(
+  channel: ExtendedChannel,
+  markOrFacet: Mark | 'facet' | CompositeMark,
+  when?: string
+) {
   return `${channel} dropped as it is incompatible with "${markOrFacet}"${when ? ` when ${when}` : ''}.`;
 }
 
-export function invalidEncodingChannel(channel: string) {
+export function invalidEncodingChannel(channel: ExtendedChannel) {
   return `${channel}-encoding is dropped as ${channel} is not a valid encoding channel.`;
 }
 
-export function facetChannelShouldBeDiscrete(channel: string) {
+export function facetChannelShouldBeDiscrete(channel: FacetChannel) {
   return `${channel} encoding should be discrete (ordinal / nominal / binned).`;
 }
 
@@ -337,10 +350,6 @@ export function errorBarContinuousAxisHasCustomizedAggregate(
   return `Continuous axis should not have customized aggregation function ${aggregate}; ${compositeMark} already agregates the axis.`;
 }
 
-export function errorBarCenterIsNotNeeded(extent: ErrorBarExtent, mark: 'errorbar' | 'errorband') {
-  return `Center is not needed to be specified in ${mark} when extent is ${extent}.`;
-}
-
 export function errorBand1DNotSupport(property: 'interpolate' | 'tension') {
   return `1D error band does not support ${property}.`;
 }
@@ -350,10 +359,10 @@ export function channelRequiredForBinned(channel: Channel) {
   return `Channel ${channel} is required for "binned" bin.`;
 }
 
-export function channelShouldNotBeUsedForBinned(channel: Channel) {
+export function channelShouldNotBeUsedForBinned(channel: ExtendedChannel) {
   return `Channel ${channel} should not be used with "binned" bin.`;
 }
 
-export function domainRequiredForThresholdScale(channel: Channel) {
+export function domainRequiredForThresholdScale(channel: ScaleChannel) {
   return `Domain for ${channel} is required for threshold scale.`;
 }

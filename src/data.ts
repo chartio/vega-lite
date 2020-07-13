@@ -83,6 +83,7 @@ export type DataSource = UrlData | InlineData | NamedData;
 
 export type Data = DataSource | Generator;
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export type InlineDataset = number[] | string[] | boolean[] | object[] | string | object;
 
 export interface DataBase {
@@ -147,10 +148,13 @@ export function isGraticuleGenerator(data: Partial<Data> | Partial<VgData>): dat
   return 'graticule' in data;
 }
 
-export type DataSourceType = 'raw' | 'main' | 'row' | 'column' | 'lookup';
-
-export const MAIN = 'main' as const;
-export const RAW = 'raw' as const;
+export enum DataSourceType {
+  Raw,
+  Main,
+  Row,
+  Column,
+  Lookup
+}
 
 export type Generator = SequenceGenerator | SphereGenerator | GraticuleGenerator;
 
@@ -196,6 +200,7 @@ export interface SphereGenerator extends GeneratorBase {
   /**
    * Generate sphere GeoJSON data for the full globe.
    */
+  // eslint-disable-next-line @typescript-eslint/ban-types
   sphere: true | {};
 }
 
