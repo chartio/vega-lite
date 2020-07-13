@@ -11,7 +11,8 @@ function rangeFormula(model, fieldDef, channel, config) {
     var _a, _b;
     if (binRequiresRange(fieldDef, channel)) {
         // read format from axis or legend, if there is no format then use config.numberFormat
-        const guide = isUnitModel(model) ? (_b = (_a = model.axis(channel)) !== null && _a !== void 0 ? _a : model.legend(channel)) !== null && _b !== void 0 ? _b : {} : {};
+        const guide = isUnitModel(model)
+            ? (_b = (_a = model.axis(channel)) !== null && _a !== void 0 ? _a : model.legend(channel)) !== null && _b !== void 0 ? _b : {} : {};
         const startField = vgField(fieldDef, { expr: 'datum' });
         const endField = vgField(fieldDef, { expr: 'datum', binSuffix: 'end' });
         return {

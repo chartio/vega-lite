@@ -4,9 +4,9 @@ import { getMarkPropOrConfig } from '../compile/common';
 import { extractTransformsFromEncoding, normalizeEncoding } from '../encoding';
 import * as log from '../log';
 import { isMarkDef } from '../mark';
+import { isEmpty, omit } from '../util';
 import { CompositeMarkNormalizer } from './base';
 import { compositeMarkContinuousAxis, compositeMarkOrient, filterTooltipWithAggregatedField, getCompositeMarkTooltip, getTitle, makeCompositeAggregatePartFactory, partLayerMixins } from './common';
-import { omit, isEmpty } from '../util';
 export const BOXPLOT = 'boxplot';
 export const BOXPLOT_PARTS = ['box', 'median', 'outliers', 'rule', 'ticks'];
 export const boxPlotNormalizer = new CompositeMarkNormalizer(BOXPLOT, normalizeBoxPlot);
@@ -47,7 +47,7 @@ export function normalizeBoxPlot(spec, { config }) {
         { fieldPrefix: boxPlotType === 'min-max' ? 'lower_whisker_' : 'min_', titlePrefix: 'Min' }
     ], continuousAxisChannelDef, encodingWithoutContinuousAxis);
     // ## Whisker Layers
-    const endTick = { type: 'tick', color: 'black', opacity: 1, orient: ticksOrient, invalid: null };
+    const endTick = { type: 'tick', color: 'black', opacity: 1, orient: ticksOrient, invalid: null, aria: false };
     const whiskerTooltipEncoding = boxPlotType === 'min-max'
         ? fiveSummaryTooltipEncoding // for min-max, show five-summary tooltip for whisker
         : // for tukey / k-IQR, just show upper/lower-whisker
@@ -58,32 +58,28 @@ export function normalizeBoxPlot(spec, { config }) {
     const whiskerLayers = [
         ...makeBoxPlotExtent({
             partName: 'rule',
-            mark: { type: 'rule', invalid: null },
+            mark: { type: 'rule', invalid: null, aria: false },
             positionPrefix: 'lower_whisker',
             endPositionPrefix: 'lower_box',
-            aria: false,
             extraEncoding: whiskerTooltipEncoding
         }),
         ...makeBoxPlotExtent({
             partName: 'rule',
-            mark: { type: 'rule', invalid: null },
+            mark: { type: 'rule', invalid: null, aria: false },
             positionPrefix: 'upper_box',
             endPositionPrefix: 'upper_whisker',
-            aria: false,
             extraEncoding: whiskerTooltipEncoding
         }),
         ...makeBoxPlotExtent({
             partName: 'ticks',
             mark: endTick,
             positionPrefix: 'lower_whisker',
-            aria: false,
             extraEncoding: whiskerTooltipEncoding
         }),
         ...makeBoxPlotExtent({
             partName: 'ticks',
             mark: endTick,
             positionPrefix: 'upper_whisker',
-            aria: false,
             extraEncoding: whiskerTooltipEncoding
         })
     ];
@@ -93,15 +89,14 @@ export function normalizeBoxPlot(spec, { config }) {
         ...(boxPlotType !== 'tukey' ? whiskerLayers : []),
         ...makeBoxPlotBox({
             partName: 'box',
-            mark: Object.assign(Object.assign({ type: 'bar' }, (sizeValue ? { size: sizeValue } : {})), { orient: boxOrient, invalid: null }),
+            mark: Object.assign(Object.assign({ type: 'bar' }, (sizeValue ? { size: sizeValue } : {})), { orient: boxOrient, invalid: null, ariaRoleDescription: 'box' }),
             positionPrefix: 'lower_box',
             endPositionPrefix: 'upper_box',
-            aria: false,
             extraEncoding: fiveSummaryTooltipEncoding
         }),
         ...makeBoxPlotMidTick({
             partName: 'median',
-            mark: Object.assign(Object.assign(Object.assign({ type: 'tick', invalid: null }, (isObject(config.boxplot.median) && config.boxplot.median.color ? { color: config.boxplot.median.color } : {})), (sizeValue ? { size: sizeValue } : {})), { orient: ticksOrient, ariaRoleDescription: 'box' }),
+            mark: Object.assign(Object.assign(Object.assign({ type: 'tick', invalid: null }, (isObject(config.boxplot.median) && config.boxplot.median.color ? { color: config.boxplot.median.color } : {})), (sizeValue ? { size: sizeValue } : {})), { orient: ticksOrient, aria: false }),
             positionPrefix: 'mid_box',
             extraEncoding: fiveSummaryTooltipEncoding
         })
@@ -161,7 +156,7 @@ export function normalizeBoxPlot(spec, { config }) {
         const { scale, axis } = continuousAxisChannelDef;
         const title = getTitle(continuousAxisChannelDef);
         const axisWithoutTitle = omit(axis, ['title']);
-        const outlierLayersMixins = partLayerMixins(markDef, 'outliers', config.boxplot, true, {
+        const outlierLayersMixins = partLayerMixins(markDef, 'outliers', config.boxplot, {
             transform: [{ filter: `(${fieldExpr} < ${lowerWhiskerExpr}) || (${fieldExpr} > ${upperWhiskerExpr})` }],
             mark: 'point',
             encoding: Object.assign(Object.assign({ [continuousAxis]: Object.assign(Object.assign(Object.assign({ field: continuousAxisChannelDef.field, type: continuousAxisChannelDef.type }, (title !== undefined ? { title } : {})), (scale !== undefined ? { scale } : {})), (isEmpty(axisWithoutTitle) ? {} : { axis: axisWithoutTitle })) }, encodingWithoutSizeColorContinuousAxisAndTooltip), (customTooltipWithoutAggregatedField ? { tooltip: customTooltipWithoutAggregatedField } : {}))

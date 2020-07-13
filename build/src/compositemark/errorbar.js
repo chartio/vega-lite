@@ -14,20 +14,18 @@ export function normalizeErrorBar(spec, { config }) {
     spec = Object.assign(Object.assign({}, spec), { encoding: normalizeEncoding(spec.encoding, config) });
     const { transform, continuousAxisChannelDef, continuousAxis, encodingWithoutContinuousAxis, ticksOrient, markDef, outerSpec, tooltipEncoding } = errorBarParams(spec, ERRORBAR, config);
     const makeErrorBarPart = makeCompositeAggregatePartFactory(markDef, continuousAxis, continuousAxisChannelDef, encodingWithoutContinuousAxis, config.errorbar);
-    const tick = { type: 'tick', orient: ticksOrient };
+    const tick = { type: 'tick', orient: ticksOrient, aria: false };
     const layer = [
         ...makeErrorBarPart({
             partName: 'ticks',
             mark: tick,
             positionPrefix: 'lower',
-            aria: false,
             extraEncoding: tooltipEncoding
         }),
         ...makeErrorBarPart({
             partName: 'ticks',
             mark: tick,
             positionPrefix: 'upper',
-            aria: false,
             extraEncoding: tooltipEncoding
         }),
         ...makeErrorBarPart({
@@ -224,9 +222,6 @@ function errorBarAggregationAndCalculation(markDef, continuousAxisChannelDef, co
             tooltipTitleWithFieldName = true;
         }
         else {
-            if (markDef.center && markDef.extent) {
-                log.warn(log.message.errorBarCenterIsNotNeeded(markDef.extent, compositeMark));
-            }
             let centerOp;
             let lowerExtentOp;
             let upperExtentOp;

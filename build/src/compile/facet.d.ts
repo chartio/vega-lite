@@ -1,5 +1,5 @@
 import { NewSignal } from 'vega';
-import { Channel } from '../channel';
+import { ExtendedChannel } from '../channel';
 import { FieldRefOption, TypedFieldDef } from '../channeldef';
 import { Config } from '../config';
 import { EncodingSortField } from '../sort';
@@ -14,8 +14,8 @@ export declare class FacetModel extends ModelWithField {
     readonly children: Model[];
     constructor(spec: NormalizedFacetSpec, parent: Model, parentGivenName: string, config: Config);
     private initFacet;
-    channelHasField(channel: Channel): boolean;
-    fieldDef(channel: Channel): TypedFieldDef<string>;
+    channelHasField(channel: ExtendedChannel): boolean;
+    fieldDef(channel: ExtendedChannel): TypedFieldDef<string>;
     parseData(): void;
     parseLayoutSize(): void;
     parseSelections(): void;

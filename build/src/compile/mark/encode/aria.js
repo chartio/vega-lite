@@ -49,8 +49,8 @@ export function description(model) {
     return {
         description: {
             signal: entries(data)
-                .map(({ key, value }) => `${key} + ": " + (${value})`)
-                .join(' + "; " + ')
+                .map(({ key, value }, index) => `"${index > 0 ? '; ' : ''}${key}: " + (${value})`)
+                .join(' + ')
         }
     };
 }

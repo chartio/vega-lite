@@ -1,3 +1,4 @@
+import * as log from '../../log';
 import { uniqueId } from '../../util';
 /**
  * A node in the dataflow tree.
@@ -38,7 +39,7 @@ export class DataFlowNode {
     addChild(child, loc) {
         // do not add the same child twice
         if (this._children.indexOf(child) > -1) {
-            console.warn('Attempt to add the same child twice.');
+            log.warn(log.message.ADD_SAME_CHILD_TWICE);
             return;
         }
         if (loc !== undefined) {

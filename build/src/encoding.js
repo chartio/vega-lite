@@ -228,8 +228,8 @@ export function initEncoding(encoding, mark, filled, config) {
  */
 export function normalizeEncoding(encoding, config) {
     return keys(encoding).reduce((normalizedEncoding, channel) => {
-        const channelDef = encoding[channel];
-        normalizedEncoding[channel] = initChannelDef(channelDef, channel, config, { compositeMark: true });
+        const newChannelDef = initChannelDef(encoding[channel], channel, config, { compositeMark: true });
+        normalizedEncoding[channel] = newChannelDef;
         return normalizedEncoding;
     }, {});
 }

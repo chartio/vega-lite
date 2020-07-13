@@ -14,14 +14,17 @@ export const legendEncodeRules = {
     entries
 };
 export function symbols(symbolsSpec, { fieldOrDatumDef, model, channel, legendCmpt, legendType }) {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     if (legendType !== 'symbol') {
         return undefined;
     }
     const { markDef, encoding, config, mark } = model;
     const filled = markDef.filled && mark !== 'trail';
     let out = Object.assign(Object.assign({}, applyMarkConfig({}, model, FILL_STROKE_CONFIG)), mixins.color(model, { filled })); // FIXME: remove this when VgEncodeEntry is compatible with SymbolEncodeEntry
-    const opacity = (_a = getMaxValue(encoding.opacity)) !== null && _a !== void 0 ? _a : markDef.opacity;
+    const symbolOpacity = (_a = legendCmpt.get('symbolOpacity')) !== null && _a !== void 0 ? _a : config.legend.symbolOpacity;
+    const symbolFillColor = (_b = legendCmpt.get('symbolFillColor')) !== null && _b !== void 0 ? _b : config.legend.symbolFillColor;
+    const symbolStrokeColor = (_c = legendCmpt.get('symbolStrokeColor')) !== null && _c !== void 0 ? _c : config.legend.symbolStrokeColor;
+    const opacity = symbolOpacity === undefined ? (_d = getMaxValue(encoding.opacity)) !== null && _d !== void 0 ? _d : markDef.opacity : undefined;
     if (out.fill) {
         // for fill legend, we don't want any fill in symbol
         if (channel === 'fill' || (filled && channel === COLOR)) {
@@ -30,16 +33,16 @@ export function symbols(symbolsSpec, { fieldOrDatumDef, model, channel, legendCm
         else {
             if (out.fill['field']) {
                 // For others, set fill to some opaque value (or nothing if a color is already set)
-                if (legendCmpt.get('symbolFillColor')) {
+                if (symbolFillColor) {
                     delete out.fill;
                 }
                 else {
-                    out.fill = signalOrValueRef((_b = config.legend.symbolBaseFillColor) !== null && _b !== void 0 ? _b : 'black');
+                    out.fill = signalOrValueRef((_e = config.legend.symbolBaseFillColor) !== null && _e !== void 0 ? _e : 'black');
                     out.fillOpacity = signalOrValueRef(opacity !== null && opacity !== void 0 ? opacity : 1);
                 }
             }
             else if (isArray(out.fill)) {
-                const fill = (_e = (_d = getFirstConditionValue((_c = encoding.fill) !== null && _c !== void 0 ? _c : encoding.color)) !== null && _d !== void 0 ? _d : markDef.fill) !== null && _e !== void 0 ? _e : (filled && markDef.color);
+                const fill = (_h = (_g = getFirstConditionValue((_f = encoding.fill) !== null && _f !== void 0 ? _f : encoding.color)) !== null && _g !== void 0 ? _g : markDef.fill) !== null && _h !== void 0 ? _h : (filled && markDef.color);
                 if (fill) {
                     out.fill = signalOrValueRef(fill);
                 }
@@ -51,7 +54,7 @@ export function symbols(symbolsSpec, { fieldOrDatumDef, model, channel, legendCm
             delete out.stroke;
         }
         else {
-            if (out.stroke['field']) {
+            if (out.stroke['field'] || symbolStrokeColor) {
                 // For others, remove stroke field
                 delete out.stroke;
             }
@@ -78,12 +81,15 @@ export function symbols(symbolsSpec, { fieldOrDatumDef, model, channel, legendCm
     out = Object.assign(Object.assign({}, out), symbolsSpec);
     return isEmpty(out) ? undefined : out;
 }
-export function gradient(gradientSpec, { model, legendType }) {
+export function gradient(gradientSpec, { model, legendType, legendCmpt }) {
+    var _a;
     if (legendType !== 'gradient') {
         return undefined;
     }
+    const { config, markDef, encoding } = model;
     let out = {};
-    const opacity = getMaxValue(model.encoding.opacity) || model.markDef.opacity;
+    const gradientOpacity = (_a = legendCmpt.get('gradientOpacity')) !== null && _a !== void 0 ? _a : config.legend.gradientOpacity;
+    const opacity = gradientOpacity === undefined ? getMaxValue(encoding.opacity) || markDef.opacity : undefined;
     if (opacity) {
         // only apply opacity if it is neither zero or undefined
         out.opacity = signalOrValueRef(opacity);

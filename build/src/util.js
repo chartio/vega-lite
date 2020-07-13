@@ -13,6 +13,7 @@ export const duplicate = clone_;
  * pick(object, ['a', 'c']);
  * // → {'a': 1, 'c': 3}
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function pick(obj, props) {
     const copy = {};
     for (const prop of props) {
@@ -26,6 +27,7 @@ export function pick(obj, props) {
  * The opposite of _.pick; this method creates an object composed of the own
  * and inherited enumerable string keyed properties of object that are not omitted.
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function omit(obj, props) {
     const copy = Object.assign({}, obj);
     for (const prop of props) {
@@ -180,6 +182,7 @@ export function fieldIntersection(a, b) {
     }
     return hasIntersection(prefixGenerator(a), prefixGenerator(b));
 }
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function isEmpty(obj) {
     return keys(obj).length === 0;
 }

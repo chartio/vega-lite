@@ -1,6 +1,3 @@
-/**
- * Collection of all Vega-Lite Error Messages
- */
 import { getSizeChannel } from '../channel';
 import { stringify } from '../util';
 export function invalidSpec(spec) {
@@ -43,7 +40,7 @@ export function selectionNotFound(name) {
     return `Cannot find a selection named "${name}".`;
 }
 export const SCALE_BINDINGS_CONTINUOUS = 'Scale bindings are currently only supported for scales with unbinned, continuous domains.';
-export const LEGEND_BINDINGS_PROJECT_LENGTH = 'Legend bindings are only supported for selections over an individual field or encoding channel.';
+export const LEGEND_BINDINGS_MUST_HAVE_PROJECTION = 'Legend bindings are only supported for selections over an individual field or encoding channel.';
 export function noSameUnitLookup(name) {
     return (`Cannot define and lookup the "${name}" selection in the same view. ` +
         `Try moving the lookup into a second, layered view?`);
@@ -66,6 +63,7 @@ export function unrecognizedParse(p) {
 export function differentParse(field, local, ancestor) {
     return `An ancestor parsed field "${field}" as ${ancestor} but a child wants to parse the field as ${local}.`;
 }
+export const ADD_SAME_CHILD_TWICE = 'Attempt to add the same child twice.';
 // TRANSFORMS
 export function invalidTransformIgnored(transform) {
     return `Ignoring an invalid transform: ${stringify(transform)}.`;
@@ -205,9 +203,6 @@ export function errorBarCenterIsUsedWithWrongExtent(center, extent, mark) {
 }
 export function errorBarContinuousAxisHasCustomizedAggregate(aggregate, compositeMark) {
     return `Continuous axis should not have customized aggregation function ${aggregate}; ${compositeMark} already agregates the axis.`;
-}
-export function errorBarCenterIsNotNeeded(extent, mark) {
-    return `Center is not needed to be specified in ${mark} when extent is ${extent}.`;
 }
 export function errorBand1DNotSupport(property) {
     return `1D error band does not support ${property}.`;

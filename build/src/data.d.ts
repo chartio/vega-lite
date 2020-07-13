@@ -104,9 +104,13 @@ export declare function isGenerator(data: Partial<Data> | Partial<VgData>): data
 export declare function isSequenceGenerator(data: Partial<Data> | Partial<VgData>): data is SequenceGenerator;
 export declare function isSphereGenerator(data: Partial<Data> | Partial<VgData>): data is SphereGenerator;
 export declare function isGraticuleGenerator(data: Partial<Data> | Partial<VgData>): data is GraticuleGenerator;
-export declare type DataSourceType = 'raw' | 'main' | 'row' | 'column' | 'lookup';
-export declare const MAIN: "main";
-export declare const RAW: "raw";
+export declare enum DataSourceType {
+    Raw = 0,
+    Main = 1,
+    Row = 2,
+    Column = 3,
+    Lookup = 4
+}
 export declare type Generator = SequenceGenerator | SphereGenerator | GraticuleGenerator;
 export interface GeneratorBase {
     /**

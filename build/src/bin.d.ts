@@ -1,4 +1,4 @@
-import { Channel } from './channel';
+import { ExtendedChannel } from './channel';
 import { SelectionExtent } from './selection';
 export interface BaseBin {
     /**
@@ -81,5 +81,5 @@ export declare function isBinning(bin: BinParams | boolean | 'binned'): bin is B
 export declare function isBinned(bin: BinParams | boolean | 'binned'): bin is 'binned' | BinParams;
 export declare function isBinParams(bin: BinParams | boolean | 'binned'): bin is BinParams;
 export declare function isSelectionExtent(extent: BinExtent): extent is SelectionExtent;
-export declare function autoMaxBins(channel?: Channel): number;
+export declare function autoMaxBins(channel?: ExtendedChannel): number;
 //# sourceMappingURL=bin.d.ts.map

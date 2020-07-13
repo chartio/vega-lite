@@ -447,7 +447,6 @@ export interface Scale {
 }
 export declare const SCALE_PROPERTIES: ("padding" | "round" | "type" | "range" | "zero" | "base" | "nice" | "domain" | "domainMin" | "domainMax" | "domainMid" | "reverse" | "bins" | "interpolate" | "clamp" | "constant" | "exponent" | "paddingInner" | "paddingOuter" | "align" | "rangeMax" | "rangeMin" | "scheme")[];
 export declare const NON_TYPE_DOMAIN_RANGE_VEGA_SCALE_PROPERTIES: ("padding" | "round" | "zero" | "base" | "nice" | "domainMin" | "domainMax" | "domainMid" | "reverse" | "bins" | "interpolate" | "clamp" | "constant" | "exponent" | "paddingInner" | "paddingOuter" | "align")[];
-export declare const SCALE_TYPE_INDEX: ScaleTypeIndex;
 export declare function scaleTypeSupportProperty(scaleType: ScaleType, propName: keyof Scale): boolean;
 /**
  * Returns undefined if the input channel supports the input scale property name
@@ -455,9 +454,5 @@ export declare function scaleTypeSupportProperty(scaleType: ScaleType, propName:
 export declare function channelScalePropertyIncompatability(channel: Channel, propName: keyof Scale): string;
 export declare function scaleTypeSupportDataType(specifiedType: ScaleType, fieldDefType: Type): boolean;
 export declare function channelSupportScaleType(channel: Channel, scaleType: ScaleType): boolean;
-export declare function getSupportedScaleType(channel: Channel, fieldDefType: Type): import("vega").ScaleType[];
-export interface ScaleTypeIndex {
-    [channel: string]: ScaleType[];
-}
 export {};
 //# sourceMappingURL=scale.d.ts.map

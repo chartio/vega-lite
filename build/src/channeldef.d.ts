@@ -2,7 +2,7 @@ import { Gradient, SignalRef, Text } from 'vega';
 import { Aggregate } from './aggregate';
 import { Axis } from './axis';
 import { Bin, BinParams } from './bin';
-import { Channel } from './channel';
+import { Channel, ExtendedChannel } from './channel';
 import { CompositeAggregate } from './compositemark';
 import { Config } from './config';
 import { DateTime } from './datetime';
@@ -30,8 +30,7 @@ export interface ValueDef<V extends Value = Value> {
      */
     value: V;
 }
-export declare type XValueDef = ValueDef<number | 'width' | SignalRef>;
-export declare type YValueDef = ValueDef<number | 'height' | SignalRef>;
+export declare type PositionValueDef = ValueDef<number | 'width' | 'height' | SignalRef>;
 export declare type NumericValueDef = ValueDef<number | SignalRef>;
 /**
  * A ValueDef with Condition<ValueDef | FieldDef> where either the condition or the value are optional.
@@ -50,12 +49,7 @@ export declare type ValueDefWithCondition<F extends FieldDef<any> | DatumDef<any
     condition?: Conditional<F> | Conditional<ValueDef<V | SignalRef>> | Conditional<ValueDef<V | SignalRef>>[];
 };
 export declare type StringValueDefWithCondition<F extends Field, T extends Type = StandardType> = ValueDefWithCondition<MarkPropFieldOrDatumDef<F, T>, string | null>;
-export declare type ColorGradientValueDefWithCondition<F extends Field, T extends Type = StandardType> = ValueDefWithCondition<MarkPropFieldOrDatumDef<F, T>, Gradient | string | null>;
-export declare type NumericValueDefWithCondition<F extends Field> = ValueDefWithCondition<MarkPropFieldOrDatumDef<F, StandardType>, number>;
-export declare type NumericArrayValueDefWithCondition<F extends Field> = ValueDefWithCondition<MarkPropFieldOrDatumDef<F, StandardType>, number[]>;
 export declare type TypeForShape = 'nominal' | 'ordinal' | 'geojson';
-export declare type ShapeValueDefWithCondition<F extends Field> = StringValueDefWithCondition<F, TypeForShape>;
-export declare type TextValueDefWithCondition<F extends Field> = ValueDefWithCondition<StringFieldDef<F>, Text>;
 export declare type Conditional<CD extends FieldDef<any> | DatumDef | ValueDef<any> | SignalRef> = ConditionalPredicate<CD> | ConditionalSelection<CD>;
 export declare type ConditionalPredicate<CD extends FieldDef<any> | DatumDef | ValueDef<any> | SignalRef> = {
     /**
@@ -88,17 +82,13 @@ export interface ConditionValueDefMixins<V extends Value = Value> {
  * }
  */
 export declare type FieldOrDatumDefWithCondition<F extends FieldDef<any, any> | DatumDef<any>, V extends Value = Value> = F & ConditionValueDefMixins<V | SignalRef>;
-export declare type ColorGradientFieldDefWithCondition<F extends Field> = FieldOrDatumDefWithCondition<MarkPropFieldDef<F, StandardType>, Gradient | string | null>;
-export declare type ColorGradientDatumDefWithCondition<F extends Field> = FieldOrDatumDefWithCondition<DatumDef<F>, Gradient | string | null>;
-export declare type NumericFieldDefWithCondition<F extends Field> = FieldOrDatumDefWithCondition<MarkPropFieldDef<F, StandardType>, number>;
-export declare type NumericDatumDefWithCondition<F extends Field> = FieldOrDatumDefWithCondition<DatumDef<F>, number>;
-export declare type NumericArrayFieldDefWithCondition<F extends Field> = FieldOrDatumDefWithCondition<MarkPropFieldDef<F, StandardType>, number[]>;
-export declare type NumericArrayDatumDefWithCondition<F extends Field> = FieldOrDatumDefWithCondition<DatumDef<F>, number[]>;
-export declare type ShapeFieldDefWithCondition<F extends Field> = FieldOrDatumDefWithCondition<MarkPropFieldDef<F, TypeForShape>, string | null>;
-export declare type TextFieldDefWithCondition<F extends Field> = FieldOrDatumDefWithCondition<StringFieldDef<F>, Text>;
-export declare type TextDatumDefWithCondition<F extends Field> = FieldOrDatumDefWithCondition<StringDatumDef<F>, Text>;
+export declare type MarkPropDef<F extends Field, V extends Value, T extends Type = StandardType> = FieldOrDatumDefWithCondition<MarkPropFieldDef<F, T>, V> | FieldOrDatumDefWithCondition<DatumDef<F>, V> | ValueDefWithCondition<MarkPropFieldOrDatumDef<F, T>, V>;
+export declare type ColorDef<F extends Field> = MarkPropDef<F, Gradient | string | null>;
+export declare type NumericMarkPropDef<F extends Field> = MarkPropDef<F, number>;
+export declare type NumericArrayMarkPropDef<F extends Field> = MarkPropDef<F, number[]>;
+export declare type ShapeDef<F extends Field> = MarkPropDef<F, string | null, TypeForShape>;
 export declare type StringFieldDefWithCondition<F extends Field> = FieldOrDatumDefWithCondition<StringFieldDef<F>, string>;
-export declare type StringDatumDefWithCondition<F extends Field> = FieldOrDatumDefWithCondition<StringDatumDef<F>, string>;
+export declare type TextDef<F extends Field> = FieldOrDatumDefWithCondition<StringFieldDef<F>, Text> | FieldOrDatumDefWithCondition<StringDatumDef<F>, Text> | ValueDefWithCondition<StringFieldDef<F>, Text>;
 /**
  * A ValueDef with optional Condition<ValueDef | FieldDef>
  * {
@@ -247,12 +237,14 @@ export declare type ScaleDatumDef<F extends Field = string> = ScaleMixins & Datu
  * A field definition of a secondary channel that shares a scale with another primary channel. For example, `x2`, `xError` and `xError2` share the same scale with `x`.
  */
 export declare type SecondaryFieldDef<F extends Field> = FieldDefBase<F, null> & TitleMixins;
+export declare type Position2Def<F extends Field> = SecondaryFieldDef<F> | DatumDef<F> | PositionValueDef;
 export declare type SecondaryChannelDef<F extends Field> = Encoding<F>['x2' | 'y2'];
 /**
  * Field Def without scale (and without bin: "binned" support).
  */
 export declare type FieldDefWithoutScale<F extends Field, T extends Type = StandardType> = TypedFieldDef<F, T>;
 export declare type LatLongFieldDef<F extends Field> = FieldDefBase<F, null> & TitleMixins & Partial<TypeMixins<'quantitative'>>;
+export declare type LatLongDef<F extends Field> = LatLongFieldDef<F> | DatumDef<F> | NumericValueDef;
 export declare type PositionFieldDefBase<F extends Field> = ScaleFieldDef<F, StandardType, boolean | BinParams | 'binned' | null> & PositionBaseMixins;
 export declare type PositionDatumDefBase<F extends Field> = ScaleDatumDef<F> & PositionBaseMixins;
 export interface PositionBaseMixins {
@@ -289,6 +281,7 @@ export interface BandMixins {
 }
 export declare type PositionFieldDef<F extends Field> = PositionFieldDefBase<F> & PositionMixins;
 export declare type PositionDatumDef<F extends Field> = PositionDatumDefBase<F> & PositionMixins;
+export declare type PositionDef<F extends Field> = PositionFieldDef<F> | PositionDatumDef<F> | PositionValueDef;
 export interface PositionMixins {
     /**
      * An object defining properties of axis's gridlines, ticks and labels.
@@ -308,8 +301,7 @@ export interface PositionMixins {
      */
     impute?: ImputeParams | null;
 }
-export declare type PolarFieldDef<F extends Field> = PositionFieldDefBase<F>;
-export declare type PolarDatumDef<F extends Field> = PositionDatumDefBase<F>;
+export declare type PolarDef<F extends Field> = PositionFieldDefBase<F> | PositionDatumDefBase<F> | PositionValueDef;
 export declare function getBand({ channel, fieldDef, fieldDef2, markDef: mark, stack, config, isMidPoint }: {
     isMidPoint?: boolean;
     channel: Channel;
@@ -354,7 +346,7 @@ export declare function isConditionalDef<CD extends ChannelDef<any> | GuideEncod
 /**
  * Return if a channelDef is a ConditionalValueDef with ConditionFieldDef
  */
-export declare function hasConditionalFieldDef<F extends Field>(channelDef: ChannelDef<F>): channelDef is {
+export declare function hasConditionalFieldDef<F extends Field>(channelDef: Partial<ChannelDef<F>>): channelDef is {
     condition: Conditional<TypedFieldDef<F>>;
 };
 export declare function hasConditionalFieldOrDatumDef<F extends Field>(channelDef: ChannelDef<F>): channelDef is {
@@ -363,15 +355,15 @@ export declare function hasConditionalFieldOrDatumDef<F extends Field>(channelDe
 export declare function hasConditionalValueDef<F extends Field>(channelDef: ChannelDef<F>): channelDef is ValueDef<any> & {
     condition: Conditional<ValueDef<any>> | Conditional<ValueDef<any>>[];
 };
-export declare function isFieldDef<F extends Field>(channelDef: ChannelDef<F> | FieldDefBase<F> | DatumDef<F, any>): channelDef is FieldDefBase<F> | TypedFieldDef<F> | SecondaryFieldDef<F>;
+export declare function isFieldDef<F extends Field>(channelDef: Partial<ChannelDef<F>> | FieldDefBase<F> | DatumDef<F, any>): channelDef is FieldDefBase<F> | TypedFieldDef<F> | SecondaryFieldDef<F>;
 export declare function channelDefType<F extends Field>(channelDef: ChannelDef<F>): Type | undefined;
-export declare function isDatumDef<F extends Field>(channelDef: ChannelDef<F> | FieldDefBase<F> | DatumDef<F, any>): channelDef is DatumDef<F, any>;
+export declare function isDatumDef<F extends Field>(channelDef: Partial<ChannelDef<F>> | FieldDefBase<F> | DatumDef<F, any>): channelDef is DatumDef<F, any>;
 export declare function isContinuousFieldOrDatumDef<F extends Field>(cd: ChannelDef<F>): cd is TypedFieldDef<F> | DatumDef<F, number>;
 export declare function isQuantitativeFieldOrDatumDef<F extends Field>(cd: ChannelDef<F>): boolean;
 export declare function isNumericDataDef<F extends Field>(cd: ChannelDef<F>): cd is DatumDef<F, number>;
-export declare function isFieldOrDatumDef<F extends Field>(channelDef: ChannelDef<F>): channelDef is FieldDef<F, any> | DatumDef<F>;
+export declare function isFieldOrDatumDef<F extends Field>(channelDef: Partial<ChannelDef<F>>): channelDef is FieldDef<F, any> | DatumDef<F>;
 export declare function isTypedFieldDef<F extends Field>(channelDef: ChannelDef<F>): channelDef is TypedFieldDef<F>;
-export declare function isValueDef<F extends Field>(channelDef: ChannelDef<F>): channelDef is ValueDef<any>;
+export declare function isValueDef<F extends Field>(channelDef: Partial<ChannelDef<F>>): channelDef is ValueDef<any>;
 export declare function isScaleFieldDef<F extends Field>(channelDef: ChannelDef<F>): channelDef is ScaleFieldDef<F>;
 export declare function isPositionFieldOrDatumDef<F extends Field>(channelDef: ChannelDef<F>): channelDef is PositionFieldDef<F> | PositionDatumDef<F>;
 export declare function isMarkPropFieldOrDatumDef<F extends Field>(channelDef: ChannelDef<F>): channelDef is MarkPropFieldDef<F, any> | MarkPropDatumDef<F>;
@@ -417,7 +409,7 @@ export declare function getFormatMixins(fieldDef: TypedFieldDef<string> | DatumD
     format: string | Record<string, unknown>;
     formatType: string;
 };
-export declare function defaultType<T extends TypedFieldDef<Field>>(fieldDef: T, channel: Channel): Type;
+export declare function defaultType<T extends TypedFieldDef<Field>>(fieldDef: T, channel: ExtendedChannel): Type;
 /**
  * Returns the fieldDef -- either from the outer channelDef or from the condition of channelDef.
  * @param channelDef
@@ -427,13 +419,13 @@ export declare function getFieldOrDatumDef<F extends Field = string, CD extends 
 /**
  * Convert type to full, lowercase type, or augment the fieldDef with a default type if missing.
  */
-export declare function initChannelDef(channelDef: ChannelDef<string>, channel: Channel, config: Config, opt?: {
+export declare function initChannelDef(channelDef: ChannelDef<string>, channel: ExtendedChannel, config: Config, opt?: {
     compositeMark?: boolean;
 }): ChannelDef<string>;
-export declare function initFieldOrDatumDef(fd: FieldDef<string, any> | DatumDef, channel: Channel, config: Config, opt: {
+export declare function initFieldOrDatumDef(fd: FieldDef<string, any> | DatumDef, channel: ExtendedChannel, config: Config, opt: {
     compositeMark?: boolean;
 }): FieldDef<string, any> | DatumDef;
-export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel, { compositeMark }?: {
+export declare function initFieldDef(fd: FieldDef<string, any>, channel: ExtendedChannel, { compositeMark }?: {
     compositeMark?: boolean;
 }): {
     /**
@@ -872,8 +864,8 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Channel
      */
     type?: StandardType;
 };
-export declare function normalizeBin(bin: BinParams | boolean | 'binned', channel?: Channel): BinParams;
-export declare function channelCompatibility(fieldDef: TypedFieldDef<Field>, channel: Channel): {
+export declare function normalizeBin(bin: BinParams | boolean | 'binned', channel?: ExtendedChannel): BinParams;
+export declare function channelCompatibility(fieldDef: TypedFieldDef<Field>, channel: ExtendedChannel): {
     compatible: boolean;
     warning?: string;
 };

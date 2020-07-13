@@ -3,7 +3,7 @@
  */
 import { AggregateOp } from 'vega';
 import { Aggregate } from '../aggregate';
-import { Channel, FacetChannel, GeoPositionChannel, PositionScaleChannel } from '../channel';
+import { Channel, FacetChannel, GeoPositionChannel, PositionScaleChannel, ScaleChannel, ExtendedChannel } from '../channel';
 import { HiddenCompositeAggregate, TypedFieldDef, Value } from '../channeldef';
 import { SplitParentProperty } from '../compile/split';
 import { CompositeMark } from '../compositemark';
@@ -27,7 +27,7 @@ export declare function nearestNotSupportForContinuous(mark: string): string;
 export declare function selectionNotSupported(mark: CompositeMark): string;
 export declare function selectionNotFound(name: string): string;
 export declare const SCALE_BINDINGS_CONTINUOUS = "Scale bindings are currently only supported for scales with unbinned, continuous domains.";
-export declare const LEGEND_BINDINGS_PROJECT_LENGTH = "Legend bindings are only supported for selections over an individual field or encoding channel.";
+export declare const LEGEND_BINDINGS_MUST_HAVE_PROJECTION = "Legend bindings are only supported for selections over an individual field or encoding channel.";
 export declare function noSameUnitLookup(name: string): string;
 export declare const NEEDS_SAME_SELECTION = "The same selection must be used to override scale domains in a layered view.";
 export declare const INTERVAL_INITIALIZED_WITH_X_Y = "Interval selections should be initialized using \"x\" and/or \"y\" keys.";
@@ -36,15 +36,16 @@ export declare function columnsNotSupportByRowCol(type: 'facet' | 'repeat'): str
 export declare const CONCAT_CANNOT_SHARE_AXIS = "Axes cannot be shared in concatenated or repeated views yet (https://github.com/vega/vega-lite/issues/2415).";
 export declare function unrecognizedParse(p: string): string;
 export declare function differentParse(field: string, local: string, ancestor: string): string;
+export declare const ADD_SAME_CHILD_TWICE = "Attempt to add the same child twice.";
 export declare function invalidTransformIgnored(transform: any): string;
 export declare const NO_FIELDS_NEEDS_AS = "If \"from.fields\" is not specified, \"as\" has to be a string that specifies the key to be used for the data from the secondary source.";
-export declare function customFormatTypeNotAllowed(channel: Channel): string;
+export declare function customFormatTypeNotAllowed(channel: ExtendedChannel): string;
 export declare function projectionOverridden(opt: {
     parentProjection: Projection;
     projection: Projection;
 }): string;
 export declare const REPLACE_ANGLE_WITH_THETA = "Arc marks uses theta channel rather than angle, replacing angle with theta.";
-export declare function primitiveChannelDef(channel: Channel, type: 'string' | 'number' | 'boolean', value: Exclude<Value, null>): string;
+export declare function primitiveChannelDef(channel: ExtendedChannel, type: 'string' | 'number' | 'boolean', value: Exclude<Value, null>): string;
 export declare function invalidFieldType(type: Type): string;
 export declare function invalidFieldTypeForCountAggregate(type: Type, aggregate: Aggregate | string): string;
 export declare function invalidAggregate(aggregate: AggregateOp | string): string;
@@ -53,12 +54,12 @@ export declare function droppingColor(type: 'encoding' | 'property', opt: {
     fill?: boolean;
     stroke?: boolean;
 }): string;
-export declare function emptyFieldDef(fieldDef: TypedFieldDef<string>, channel: Channel): string;
+export declare function emptyFieldDef(fieldDef: unknown, channel: ExtendedChannel): string;
 export declare function latLongDeprecated(channel: Channel, type: Type, newChannel: GeoPositionChannel): string;
 export declare const LINE_WITH_VARYING_SIZE = "Line marks cannot encode size with a non-groupby field. You may want to use trail marks instead.";
-export declare function incompatibleChannel(channel: Channel, markOrFacet: Mark | 'facet' | CompositeMark, when?: string): string;
-export declare function invalidEncodingChannel(channel: string): string;
-export declare function facetChannelShouldBeDiscrete(channel: string): string;
+export declare function incompatibleChannel(channel: ExtendedChannel, markOrFacet: Mark | 'facet' | CompositeMark, when?: string): string;
+export declare function invalidEncodingChannel(channel: ExtendedChannel): string;
+export declare function facetChannelShouldBeDiscrete(channel: FacetChannel): string;
 export declare function facetChannelDropped(channels: FacetChannel[]): string;
 export declare function discreteChannelCannotEncode(channel: Channel, type: Type): string;
 export declare function lineWithRange(hasX2: boolean, hasY2: boolean): string;
@@ -92,9 +93,8 @@ export declare function droppedDay(d: DateTime | DateTimeExpr): string;
 export declare function errorBarCenterAndExtentAreNotNeeded(center: ErrorBarCenter, extent: ErrorBarExtent): string;
 export declare function errorBarCenterIsUsedWithWrongExtent(center: ErrorBarCenter, extent: ErrorBarExtent, mark: 'errorbar' | 'errorband'): string;
 export declare function errorBarContinuousAxisHasCustomizedAggregate(aggregate: Aggregate | string, compositeMark: CompositeMark): string;
-export declare function errorBarCenterIsNotNeeded(extent: ErrorBarExtent, mark: 'errorbar' | 'errorband'): string;
 export declare function errorBand1DNotSupport(property: 'interpolate' | 'tension'): string;
 export declare function channelRequiredForBinned(channel: Channel): string;
-export declare function channelShouldNotBeUsedForBinned(channel: Channel): string;
-export declare function domainRequiredForThresholdScale(channel: Channel): string;
+export declare function channelShouldNotBeUsedForBinned(channel: ExtendedChannel): string;
+export declare function domainRequiredForThresholdScale(channel: ScaleChannel): string;
 //# sourceMappingURL=message.d.ts.map

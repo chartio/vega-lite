@@ -1,11 +1,12 @@
 import { __rest } from "tslib";
 import { FACET_CHANNELS, getPositionScaleChannel, isChannel, isScaleChannel } from '../channel';
 import { getFieldDef, vgField } from '../channeldef';
+import { DataSourceType } from '../data';
 import { forEach, reduce } from '../encoding';
 import * as log from '../log';
 import { hasDiscreteDomain } from '../scale';
 import { isFacetSpec } from '../spec';
-import { extractCompositionLayout } from '../spec/base';
+import { extractCompositionLayout, isStep } from '../spec/base';
 import { extractTitleConfig, isText } from '../title';
 import { normalizeTransform } from '../transform';
 import { contains, duplicate, keys, varName, isEmpty } from '../util';
@@ -283,13 +284,16 @@ export class Model {
     getName(text) {
         return varName((this.name ? this.name + '_' : '') + text);
     }
+    getDataName(type) {
+        return this.getName(DataSourceType[type].toLowerCase());
+    }
     /**
      * Request a data source name for the given data source type and mark that data source as required.
      * This method should be called in parse, so that all used data source can be correctly instantiated in assembleData().
      * You can lookup the correct dataset name in assemble with `lookupDataSource`.
      */
     requestDataName(name) {
-        const fullName = this.getName(name);
+        const fullName = this.getDataName(name);
         // Increase ref count. This is critical because otherwise we won't create a data source.
         // We also increase the ref counts on OutputNode.getSource() calls.
         const refCounts = this.component.data.outputNodeRefCounts;
@@ -420,6 +424,12 @@ export class Model {
     hasAxisOrientSignalRef() {
         var _a, _b;
         return (((_a = this.component.axes.x) === null || _a === void 0 ? void 0 : _a.some(a => a.hasOrientSignalRef())) || ((_b = this.component.axes.y) === null || _b === void 0 ? void 0 : _b.some(a => a.hasOrientSignalRef())));
+    }
+    /**
+     * Returns true if the model has a static value (i.e. not a step) set for the given size dimension.
+     */
+    hasStaticOuterDimension(dimension) {
+        return this.size[dimension] && !isStep(this.size[dimension]);
     }
 }
 /** Abstract class for UnitModel and FacetModel. Both of which can contain fieldDefs as a part of its own specification. */

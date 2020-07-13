@@ -1,5 +1,4 @@
 import { LabelOverlap, LegendOrient, LegendType, Orientation, SignalRef, SymbolShape } from 'vega';
-import { Channel, NonPositionChannel } from '../../channel';
 import { DatumDef, MarkPropFieldOrDatumDef, TypedFieldDef } from '../../channeldef';
 import { Config } from '../../config';
 import { Encoding } from '../../encoding';
@@ -9,10 +8,11 @@ import { ScaleType } from '../../scale';
 import { TimeUnit } from '../../timeunit';
 import { Model } from '../model';
 import { UnitModel } from '../unit';
+import { NonPositionScaleChannel } from './../../channel';
 import { LegendComponentProps } from './component';
 export interface LegendRuleParams {
     legend: Legend;
-    channel: NonPositionChannel;
+    channel: NonPositionScaleChannel;
     model: UnitModel;
     markDef: MarkDef;
     encoding: Encoding<string>;
@@ -30,16 +30,16 @@ export declare const legendRules: {
 export declare function values(legend: Legend, fieldOrDatumDef: TypedFieldDef<string> | DatumDef): SignalRef | (string | number | boolean | import("../../datetime").DateTime | {
     signal: string;
 })[];
-export declare function defaultSymbolType(mark: Mark, channel: Channel, shapeChannelDef: Encoding<string>['shape'], markShape: SymbolShape | SignalRef): SymbolShape | SignalRef;
+export declare function defaultSymbolType(mark: Mark, channel: NonPositionScaleChannel, shapeChannelDef: Encoding<string>['shape'], markShape: SymbolShape | SignalRef): SymbolShape | SignalRef;
 export declare function clipHeight(legendType: LegendType): number;
 export declare function getLegendType(params: {
     legend: Legend;
-    channel: Channel;
+    channel: NonPositionScaleChannel;
     timeUnit?: TimeUnit;
     scaleType: ScaleType;
 }): LegendType;
 export declare function defaultType({ channel, timeUnit, scaleType }: {
-    channel: Channel;
+    channel: NonPositionScaleChannel;
     timeUnit?: TimeUnit;
     scaleType: ScaleType;
 }): LegendType;

@@ -109,7 +109,7 @@ export interface MarkConfig extends VLOnlyMarkConfig, Omit<VgMarkConfig, 'toolti
      *
      * __Default value:__ `null`
      */
-    tooltip?: number | string | boolean | TooltipContent | null;
+    tooltip?: number | string | boolean | TooltipContent | SignalRef | null;
     /**
      * Default size for marks.
      * - For `point`/`circle`/`square`, this represents the pixel area of the marks. Note that this value sets the area of the symbol; the side lengths will increase with the square root of this value.

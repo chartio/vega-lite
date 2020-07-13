@@ -1,6 +1,6 @@
 import { isArray } from 'vega-util';
 import { isFieldDef, isValueDef, vgField } from '../../channeldef';
-import { MAIN } from '../../data';
+import { DataSourceType } from '../../data';
 import { isAggregate, pathGroupingFields } from '../../encoding';
 import { AREA, BAR, isPathMark, LINE, TRAIL } from '../../mark';
 import { isSortByEncoding, isSortField } from '../../sort';
@@ -59,8 +59,8 @@ function getPathGroups(model, details) {
             type: 'group',
             from: {
                 facet: {
-                    name: FACETED_PATH_PREFIX + model.requestDataName(MAIN),
-                    data: model.requestDataName(MAIN),
+                    name: FACETED_PATH_PREFIX + model.requestDataName(DataSourceType.Main),
+                    data: model.requestDataName(DataSourceType.Main),
                     groupby: details
                 }
             },
@@ -178,8 +178,8 @@ function getGroupsForStackedBarWithCornerRadius(model) {
             type: 'group',
             from: {
                 facet: {
-                    data: model.requestDataName(MAIN),
-                    name: STACK_GROUP_PREFIX + model.requestDataName(MAIN),
+                    data: model.requestDataName(DataSourceType.Main),
+                    name: STACK_GROUP_PREFIX + model.requestDataName(DataSourceType.Main),
                     groupby,
                     aggregate: {
                         fields: [
@@ -273,7 +273,7 @@ function getMarkGroup(model, opt = { fromPrefix: '' }) {
         ? markCompiler[mark].postEncodingTransform(model)
         : null;
     return [
-        Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({ name: model.getName('marks'), type: markCompiler[mark].vgMark }, (clip ? { clip: true } : {})), (style ? { style } : {})), (key ? { key: key.field } : {})), (sort ? { sort } : {})), (interactive ? interactive : {})), (aria === false ? { aria } : {})), { from: { data: opt.fromPrefix + model.requestDataName(MAIN) }, encode: {
+        Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({ name: model.getName('marks'), type: markCompiler[mark].vgMark }, (clip ? { clip: true } : {})), (style ? { style } : {})), (key ? { key: key.field } : {})), (sort ? { sort } : {})), (interactive ? interactive : {})), (aria === false ? { aria } : {})), { from: { data: opt.fromPrefix + model.requestDataName(DataSourceType.Main) }, encode: {
                 update: markCompiler[mark].encodeEntry(model)
             } }), (postEncodingTransform
             ? {

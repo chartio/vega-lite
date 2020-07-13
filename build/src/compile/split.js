@@ -6,6 +6,7 @@ import { deepEqual, duplicate, getFirstDefined, keys } from '../util';
  * This is important for scale/axis/legend merging as
  * we want to prioritize properties that users explicitly specified.
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export class Split {
     constructor(explicit = {}, implicit = {}) {
         this.explicit = explicit;

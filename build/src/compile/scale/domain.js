@@ -4,7 +4,7 @@ import { isAggregateOp, isArgmaxDef, isArgminDef, MULTIDOMAIN_SORT_OP_INDEX as U
 import { isBinning, isBinParams, isSelectionExtent } from '../../bin';
 import { getSecondaryRangeChannel, isScaleChannel } from '../../channel';
 import { binRequiresRange, getFieldOrDatumDef, hasBand, isDatumDef, isFieldDef, valueExpr, vgField } from '../../channeldef';
-import { MAIN, RAW } from '../../data';
+import { DataSourceType } from '../../data';
 import * as log from '../../log';
 import { hasDiscreteDomain, isDomainUnionWith, isSelectionDomain } from '../../scale';
 import { DEFAULT_SORT_OP, isSortArray, isSortByEncoding, isSortField } from '../../sort';
@@ -164,7 +164,7 @@ function parseSingleChannelDomain(scaleType, domain, model, channel) {
         if (stack.offset === 'normalize') {
             return makeImplicit([[0, 1]]);
         }
-        const data = model.requestDataName(MAIN);
+        const data = model.requestDataName(DataSourceType.Main);
         return makeImplicit([
             {
                 data,
@@ -183,7 +183,7 @@ function parseSingleChannelDomain(scaleType, domain, model, channel) {
     }
     const fieldDef = fieldOrDatumDef; // now we can be sure it's a fieldDef
     if (domain === 'unaggregated') {
-        const data = model.requestDataName(MAIN);
+        const data = model.requestDataName(DataSourceType.Main);
         const { field } = fieldOrDatumDef;
         return makeImplicit([
             {
@@ -208,7 +208,9 @@ function parseSingleChannelDomain(scaleType, domain, model, channel) {
                 {
                     // If sort by aggregation of a specified sort field, we need to use RAW table,
                     // so we can aggregate values for the scale independently from the main aggregation.
-                    data: util.isBoolean(sort) ? model.requestDataName(MAIN) : model.requestDataName(RAW),
+                    data: util.isBoolean(sort)
+                        ? model.requestDataName(DataSourceType.Main)
+                        : model.requestDataName(DataSourceType.Raw),
                     // Use range if we added it and the scale does not support computing a range as a signal.
                     field: model.vgField(channel, binRequiresRange(fieldDef, channel) ? { binSuffix: 'range' } : {}),
                     // we have to use a sort object if sort = true to make the sort correct by bin start
@@ -236,7 +238,7 @@ function parseSingleChannelDomain(scaleType, domain, model, channel) {
             else {
                 return makeImplicit([
                     {
-                        data: model.requestDataName(MAIN),
+                        data: model.requestDataName(DataSourceType.Main),
                         field: model.vgField(channel, {})
                     }
                 ]);
@@ -246,7 +248,7 @@ function parseSingleChannelDomain(scaleType, domain, model, channel) {
     else if (fieldDef.timeUnit &&
         util.contains(['time', 'utc'], scaleType) &&
         hasBand(channel, fieldDef, isUnitModel(model) ? model.encoding[getSecondaryRangeChannel(channel)] : undefined, model.stack, model.markDef, model.config)) {
-        const data = model.requestDataName(MAIN);
+        const data = model.requestDataName(DataSourceType.Main);
         return makeImplicit([
             {
                 data,
@@ -263,7 +265,9 @@ function parseSingleChannelDomain(scaleType, domain, model, channel) {
             {
                 // If sort by aggregation of a specified sort field, we need to use RAW table,
                 // so we can aggregate values for the scale independently from the main aggregation.
-                data: util.isBoolean(sort) ? model.requestDataName(MAIN) : model.requestDataName(RAW),
+                data: util.isBoolean(sort)
+                    ? model.requestDataName(DataSourceType.Main)
+                    : model.requestDataName(DataSourceType.Raw),
                 field: model.vgField(channel),
                 sort: sort
             }
@@ -272,7 +276,7 @@ function parseSingleChannelDomain(scaleType, domain, model, channel) {
     else {
         return makeImplicit([
             {
-                data: model.requestDataName(MAIN),
+                data: model.requestDataName(DataSourceType.Main),
                 field: model.vgField(channel)
             }
         ]);

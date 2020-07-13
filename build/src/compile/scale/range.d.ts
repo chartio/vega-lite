@@ -1,5 +1,5 @@
 import { SignalRef } from 'vega';
-import { Channel, ScaleChannel } from '../../channel';
+import { ScaleChannel } from '../../channel';
 import { Config } from '../../config';
 import { Domain, Scale } from '../../scale';
 import { VgRange } from '../../vega.schema';
@@ -11,7 +11,7 @@ export declare function parseUnitScaleRange(model: UnitModel): void;
  * Return mixins that includes one of the Vega range types (explicit range, range.step, range.scheme).
  */
 export declare function parseRangeForChannel(channel: ScaleChannel, model: UnitModel): Explicit<VgRange>;
-export declare function defaultContinuousToDiscreteCount(scaleType: 'quantile' | 'quantize' | 'threshold', config: Config, domain: Domain, channel: Channel): number;
+export declare function defaultContinuousToDiscreteCount(scaleType: 'quantile' | 'quantize' | 'threshold', config: Config, domain: Domain, channel: ScaleChannel): number;
 /**
  * Returns the linear interpolation of the range according to the cardinality
  *

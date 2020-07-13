@@ -5,6 +5,7 @@ import { duplicate, hash, varName } from '../../util';
 import { DataFlowNode, OutputNode } from './dataflow';
 import { findSource } from './parse';
 import { SourceNode } from './source';
+import { DataSourceType } from '../../data';
 export class LookupNode extends DataFlowNode {
     constructor(parent, transform, secondary) {
         super(parent);
@@ -25,7 +26,7 @@ export class LookupNode extends DataFlowNode {
                 sources.push(fromSource);
             }
             const fromOutputName = model.getName(`lookup_${counter}`);
-            fromOutputNode = new OutputNode(fromSource, fromOutputName, 'lookup', model.component.data.outputNodeRefCounts);
+            fromOutputNode = new OutputNode(fromSource, fromOutputName, DataSourceType.Lookup, model.component.data.outputNodeRefCounts);
             model.component.data.outputNodes[fromOutputName] = fromOutputNode;
         }
         else if (isLookupSelection(from)) {
