@@ -7,7 +7,8 @@ import {isFacetModel, Model} from '../model';
 import {ScaleComponent} from '../scale/component';
 import {getSizeTypeFromLayoutSizeType, LayoutSizeType} from './component';
 import {isFacetMapping} from '../../spec/facet';
-import {FacetModel} from "../facet";
+import {FacetModel} from '../facet';
+import {getFacetModel} from '../selection';
 
 export function assembleLayoutSignals(model: Model): NewSignal[] {
   return [
@@ -27,12 +28,13 @@ export function sizeSignals(model: Model, sizeType: LayoutSizeType): (NewSignal 
 
   // Read size signal name from name map, just in case it is the top-level size signal that got renamed.
   const name = model.getSizeSignalRef(sizeType).signal;
+  const facetModel = getFacetModel(model);
 
-  if (isFacetModel(model.parent) && model.parent.hasStaticOuterDimension(getSizeTypeFromLayoutSizeType(sizeType))) {
+  if (isFacetModel(facetModel) && facetModel.hasStaticOuterDimension(getSizeTypeFromLayoutSizeType(sizeType))) {
     return [
       {
         name,
-        update: autosizedFacetExpr(model.parent, sizeType)
+        update: autosizedFacetExpr(facetModel, sizeType)
       }
     ];
   } else if (size === 'step') {
@@ -45,7 +47,7 @@ export function sizeSignals(model: Model, sizeType: LayoutSizeType): (NewSignal 
       if (hasDiscreteDomain(type) && isVgRangeStep(range)) {
         const scaleName = model.scaleName(channel);
 
-        if (isFacetModel(model.parent)) {
+        if (isFacetModel(facetModel)) {
           // If parent is facet and this is an independent scale, return only signal signal
           // as the width/height will be calculated using the cardinality from
           // facet's aggregate rather than reading from scale domain

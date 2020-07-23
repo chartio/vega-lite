@@ -76,7 +76,7 @@ export function forEachSelection(
   }
 }
 
-function getFacetModel(model: Model): FacetModel {
+export function getFacetModel(model: Model): FacetModel {
   let parent = model.parent;
   while (parent) {
     if (isFacetModel(parent)) {
