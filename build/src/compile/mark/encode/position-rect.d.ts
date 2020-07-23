@@ -15,7 +15,7 @@ export declare function rectBinPosition({ fieldDef, fieldDef2, channel, band, sc
     scaleName: string;
     markDef: MarkDef<Mark>;
     spacing?: number;
-    axisTranslate: number;
+    axisTranslate: number | SignalRef;
     reverse: boolean | SignalRef;
     config: Config;
 }): {

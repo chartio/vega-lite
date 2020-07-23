@@ -4,7 +4,7 @@
     (global = global || self, factory(global.vegaLite = {}));
 }(this, (function (exports) { 'use strict';
 
-    var version = "4.13.1";
+    var version = "4.14.0";
 
     function accessor(fn, fields, name) {
       fn.fields = fields || [];
@@ -7980,19 +7980,18 @@
             return 0;
         }
         const spacingOffset = channel === 'x' || channel === 'y2' ? -spacing / 2 : spacing / 2;
-        if (isSignalRef(reverse)) {
+        if (isSignalRef(reverse) || isSignalRef(offset) || isSignalRef(translate)) {
+            const reverseExpr = signalOrStringValue(reverse);
             const offsetExpr = signalOrStringValue(offset);
+            const translateExpr = signalOrStringValue(translate);
+            const t = translateExpr ? `${translateExpr} + ` : '';
+            const r = reverseExpr ? `(${reverseExpr} ? -1 : 1) * ` : '';
+            const o = offsetExpr ? `(${offsetExpr} + ${spacingOffset})` : spacingOffset;
             return {
-                signal: `${reverse.signal} ? ${translate - spacingOffset}${offsetExpr ? '-' + offsetExpr : ''} : ${translate + spacingOffset}${offsetExpr ? '+' + offsetExpr : ''}`
+                signal: t + r + o
             };
         }
         else {
-            if (isSignalRef(offset)) {
-                const translateAndSpacingOffset = translate + (reverse ? -spacingOffset : spacingOffset);
-                return {
-                    signal: `${translateAndSpacingOffset || ''}${reverse ? ' - ' : translateAndSpacingOffset ? ' + ' : ''}${offset.signal}`
-                };
-            }
             offset = offset || 0;
             return translate + (reverse ? -offset - spacingOffset : +offset + spacingOffset);
         }
@@ -12037,36 +12036,6 @@
             const defaultValue = getViewConfigContinuousSize(model.config.view, isWidth ? 'width' : 'height');
             const safeExpr = `isFinite(${expr}) ? ${expr} : ${defaultValue}`;
             return [{ name, init: safeExpr, on: [{ update: safeExpr, events: 'window:resize' }] }];
-        }
-        else if (isFacetModel(model.parent) && sizeType === 'width' && model.parent.size.width) {
-            return [
-                {
-                    name,
-                    // if the facet operator defines a column channel, the compiled vega spec includes the 'column_domain' data
-                    // if however the facet operator is itself is a facet field definition, the compiled vega spec instead includes the 'facet_domain_column' data
-                    // otherwise there is no column faceting so the width should be passed through
-                    update: model.parent.facet.column
-                        ? "width / length(data('column_domain'))"
-                        : model.parent.facet.facet
-                            ? "width / length(data('facet_domain_column'))"
-                            : 'width'
-                }
-            ];
-        }
-        else if (isFacetModel(model.parent) && sizeType === 'height' && model.parent.size.height) {
-            return [
-                {
-                    name,
-                    // if the facet operator defines a row channel, the compiled vega spec includes the 'row_domain' data
-                    // if however the facet operator is itself is a facet field definition, the compiled vega spec instead includes the 'facet_domain_row' data
-                    // otherwise there is no row faceting so the height should be passed through
-                    update: model.parent.facet.row
-                        ? "height / length(data('row_domain'))"
-                        : model.parent.facet.facet
-                            ? "height / length(data('facet_domain_row'))"
-                            : 'height'
-                }
-            ];
         }
         else {
             return [

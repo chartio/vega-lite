@@ -157,7 +157,7 @@
         "affectsGlobalScope": false
       },
       "../../package.json": {
-        "version": "bc9a3901109080f2e2feefba3512ef57022a3e03e54a71577f16bed7e6cffac7",
+        "version": "8f600d6ed4fd3cdcaca1aed65e036745dc38d24131a16e3028de3364ac966bea",
         "affectsGlobalScope": true
       },
       "../../node_modules/vega-typings/types/spec/autosize.d.ts": {
@@ -621,8 +621,8 @@
         "affectsGlobalScope": false
       },
       "../../src/compile/mark/encode/position-rect.ts": {
-        "version": "eeeca35ba64e8873024a3bce7a284567e6c1acb6180819febf823aa5dbc414e1",
-        "signature": "65227cbfa453334b434c05fe534e4660e3d887ac4b4f283af02610af326b95f1",
+        "version": "593c0d03d4ee53fafe12a5013ea051bd57c21a3e3ed33050c639f6e6ab9e13fc",
+        "signature": "3b44a927e3e12008d05a93beb34e62fe0972b039047f497bd737a804f3480f01",
         "affectsGlobalScope": false
       },
       "../../src/compile/mark/encode/base.ts": {
@@ -821,7 +821,7 @@
         "affectsGlobalScope": false
       },
       "../../src/compile/layoutsize/assemble.ts": {
-        "version": "f6ca50beac83526550aa19d7e282303932ecb20e1254fb0fc29c2ac9ce4b2948",
+        "version": "1940683daab439cb8ed3d5135457e9911ac40367e803689d16dae958c4e58975",
         "signature": "613eb2cf8e98c925887f796dd84bc1f0817ca8713ecdea66a0684b9f4f328ba3",
         "affectsGlobalScope": false
       },
@@ -1801,8 +1801,8 @@
         "affectsGlobalScope": false
       },
       "../../node_modules/@types/jest/index.d.ts": {
-        "version": "1383ad2f5ca42b7c80662011c50da8e501b029c7d61a489a8039388beb194de5",
-        "signature": "1383ad2f5ca42b7c80662011c50da8e501b029c7d61a489a8039388beb194de5",
+        "version": "8d6f06b101f5ac64c9b28cba2b54076007f3f067cf42ff2253d3b50b7f48fdd1",
+        "signature": "8d6f06b101f5ac64c9b28cba2b54076007f3f067cf42ff2253d3b50b7f48fdd1",
         "affectsGlobalScope": true
       },
       "../../node_modules/@types/jest/ts3.2/index.d.ts": {
@@ -10689,5 +10689,5 @@
       "../../src/vega.schema.ts"
     ]
   },
-  "version": "3.9.6"
+  "version": "3.9.7"
 }
