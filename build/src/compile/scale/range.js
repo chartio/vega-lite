@@ -13,7 +13,8 @@ import { signalOrStringValue } from '../common';
 import { getBinSignalName } from '../data/bin';
 import { SignalRefWrapper } from '../signal';
 import { makeExplicit, makeImplicit } from '../split';
-import { isFacetModel } from "../model";
+import { isFacetModel } from '../model';
+import { getFacetModel } from '../selection';
 export const RANGE_PROPERTIES = ['range', 'scheme'];
 function getSizeChannel(channel) {
     return channel === 'x' ? 'width' : channel === 'y' ? 'height' : undefined;
@@ -135,6 +136,7 @@ function defaultRange(channel, model) {
     const mergedScaleCmpt = model.getScaleComponent(channel);
     const scaleType = mergedScaleCmpt.get('type');
     const { domain, domainMid } = model.specifiedScales[channel];
+    const facetModel = getFacetModel(model);
     switch (channel) {
         case X:
         case Y: {
@@ -142,13 +144,13 @@ function defaultRange(channel, model) {
             if (util.contains(['point', 'band'], scaleType)) {
                 if (channel === X && !size.width) {
                     const w = getViewConfigDiscreteSize(config.view, 'width');
-                    if (isStep(w) && (!isFacetModel(model.parent) || !model.parent.hasStaticOuterDimension('width'))) {
+                    if (isStep(w) && (!isFacetModel(facetModel) || !facetModel.hasStaticOuterDimension('width'))) {
                         return w;
                     }
                 }
                 else if (channel === Y && !size.height) {
                     const h = getViewConfigDiscreteSize(config.view, 'height');
-                    if (isStep(h) && (!isFacetModel(model.parent) || !model.parent.hasStaticOuterDimension('height'))) {
+                    if (isStep(h) && (!isFacetModel(facetModel) || !facetModel.hasStaticOuterDimension('height'))) {
                         return h;
                     }
                 }

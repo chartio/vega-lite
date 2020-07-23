@@ -36,13 +36,13 @@ export declare function getStyleConfig<P extends keyof MarkDef | keyof AxisConfi
  */
 export declare function sortParams(orderDef: OrderFieldDef<string> | OrderFieldDef<string>[], fieldRefOption?: FieldRefOption): SortFields;
 export declare type AxisTitleComponent = AxisComponentProps['title'];
-export declare function mergeTitleFieldDefs(f1: readonly FieldDefBase<string>[], f2: readonly FieldDefBase<string>[]): FieldDefBase<string, boolean | import("../bin").BinParams | "binned">[];
-export declare function mergeTitle(title1: Text | SignalRef, title2: Text | SignalRef): string | string[] | SignalRef;
+export declare function mergeTitleFieldDefs(f1: readonly FieldDefBase<string>[], f2: readonly FieldDefBase<string>[]): FieldDefBase<string, import("../bin").Bin>[];
+export declare function mergeTitle(title1: Text | SignalRef, title2: Text | SignalRef): string | SignalRef | string[];
 export declare function mergeTitleComponent(v1: Explicit<AxisTitleComponent>, v2: Explicit<AxisTitleComponent>): {
     explicit: boolean;
-    value: string | string[] | SignalRef;
+    value: string | SignalRef | string[];
 } | {
     explicit: boolean;
-    value: FieldDefBase<string, boolean | import("../bin").BinParams | "binned">[];
+    value: FieldDefBase<string, import("../bin").Bin>[];
 };
 //# sourceMappingURL=common.d.ts.map

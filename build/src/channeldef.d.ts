@@ -402,7 +402,7 @@ export declare function resetTitleFormatter(): void;
 export declare function title(fieldOrDatumDef: TypedFieldDef<string> | SecondaryFieldDef<string> | DatumDef, config: Config, { allowDisabling, includeDefault }: {
     allowDisabling: boolean;
     includeDefault?: boolean;
-}): string | string[] | SignalRef;
+}): string | SignalRef | string[];
 export declare function getGuide(fieldDef: TypedFieldDef<string> | SecondaryFieldDef<string> | DatumDef): Guide;
 export declare function defaultTitle(fieldDef: FieldDefBase<string>, config: Config): string;
 export declare function getFormatMixins(fieldDef: TypedFieldDef<string> | DatumDef): {
@@ -449,7 +449,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
      *
      * __See also:__ [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html) documentation.
      */
-    timeUnit?: "day" | "week" | "month" | "year" | "date" | "quarter" | "dayofyear" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
+    timeUnit?: "year" | "quarter" | "month" | "week" | "day" | "dayofyear" | "date" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
     /**
      * Aggregation function for the field
      * (e.g., `"mean"`, `"sum"`, `"median"`, `"min"`, `"max"`, `"count"`).
@@ -458,7 +458,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
      *
      * __See also:__ [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html) documentation.
      */
-    aggregate?: "count" | "min" | "max" | "average" | "distinct" | "mean" | "median" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgminDef | import("./aggregate").ArgmaxDef | "boxplot" | "errorbar" | "errorband";
+    aggregate?: "average" | "count" | "distinct" | "max" | "mean" | "median" | "min" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgmaxDef | import("./aggregate").ArgminDef | "boxplot" | "errorbar" | "errorband";
     /**
      * A flag for binning a `quantitative` field, [an object defining binning parameters](https://vega.github.io/vega-lite/docs/bin.html#params), or indicating that the data for `x` or `y` channel are binned before they are imported into Vega-Lite (`"binned"`).
      *
@@ -480,7 +480,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
      * @maximum 1
      */
     band?: number;
-    title?: string | string[] | SignalRef;
+    title?: string | SignalRef | string[];
 } | {
     /**
      * __Required.__ A string defining the name of the field from which to pull a data value
@@ -503,7 +503,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
      *
      * __See also:__ [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html) documentation.
      */
-    timeUnit?: "day" | "week" | "month" | "year" | "date" | "quarter" | "dayofyear" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
+    timeUnit?: "year" | "quarter" | "month" | "week" | "day" | "dayofyear" | "date" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
     /**
      * Aggregation function for the field
      * (e.g., `"mean"`, `"sum"`, `"median"`, `"min"`, `"max"`, `"count"`).
@@ -512,7 +512,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
      *
      * __See also:__ [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html) documentation.
      */
-    aggregate?: "count" | "min" | "max" | "average" | "distinct" | "mean" | "median" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgminDef | import("./aggregate").ArgmaxDef | "boxplot" | "errorbar" | "errorband";
+    aggregate?: "average" | "count" | "distinct" | "max" | "mean" | "median" | "min" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgmaxDef | import("./aggregate").ArgminDef | "boxplot" | "errorbar" | "errorband";
     /**
      * A flag for binning a `quantitative` field, [an object defining binning parameters](https://vega.github.io/vega-lite/docs/bin.html#params), or indicating that the data for `x` or `y` channel are binned before they are imported into Vega-Lite (`"binned"`).
      *
@@ -524,7 +524,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
      *
      * __See also:__ [`bin`](https://vega.github.io/vega-lite/docs/bin.html) documentation.
      */
-    bin?: boolean | BinParams | "binned";
+    bin?: Bin;
     /**
      * For rect-based marks (`rect`, `bar`, and `image`), mark size relative to bandwidth of [band scales](https://vega.github.io/vega-lite/docs/scale.html#band), bins or time units. If set to `1`, the mark size is set to the bandwidth, the bin interval, or the time unit interval. If set to `0.5`, the mark size is half of the bandwidth or the time unit interval.
      *
@@ -534,7 +534,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
      * @maximum 1
      */
     band?: number;
-    title?: string | string[] | SignalRef;
+    title?: string | SignalRef | string[];
     /**
      * The type of measurement (`"quantitative"`, `"temporal"`, `"ordinal"`, or `"nominal"`) for the encoded field or constant value (`datum`).
      * It can also be a `"geojson"` type for encoding ['geoshape'](https://vega.github.io/vega-lite/docs/geoshape.html).
@@ -568,7 +568,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
     type?: any;
 } | {
     sort: {
-        encoding: "stroke" | "color" | "text" | "shape" | "x" | "y" | "fill" | "opacity" | "fillOpacity" | "strokeOpacity" | "strokeWidth" | "size";
+        encoding: "x" | "y" | "color" | "fill" | "stroke" | "opacity" | "fillOpacity" | "strokeOpacity" | "strokeWidth" | "size" | "shape" | "text";
         order?: undefined;
     };
     /**
@@ -592,7 +592,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
      *
      * __See also:__ [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html) documentation.
      */
-    timeUnit?: "day" | "week" | "month" | "year" | "date" | "quarter" | "dayofyear" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
+    timeUnit?: "year" | "quarter" | "month" | "week" | "day" | "dayofyear" | "date" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
     /**
      * Aggregation function for the field
      * (e.g., `"mean"`, `"sum"`, `"median"`, `"min"`, `"max"`, `"count"`).
@@ -601,7 +601,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
      *
      * __See also:__ [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html) documentation.
      */
-    aggregate?: "count" | "min" | "max" | "average" | "distinct" | "mean" | "median" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgminDef | import("./aggregate").ArgmaxDef | "boxplot" | "errorbar" | "errorband";
+    aggregate?: "average" | "count" | "distinct" | "max" | "mean" | "median" | "min" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgmaxDef | import("./aggregate").ArgminDef | "boxplot" | "errorbar" | "errorband";
     /**
      * A flag for binning a `quantitative` field, [an object defining binning parameters](https://vega.github.io/vega-lite/docs/bin.html#params), or indicating that the data for `x` or `y` channel are binned before they are imported into Vega-Lite (`"binned"`).
      *
@@ -623,7 +623,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
      * @maximum 1
      */
     band?: number;
-    title?: string | string[] | SignalRef;
+    title?: string | SignalRef | string[];
     /**
      * The type of measurement (`"quantitative"`, `"temporal"`, `"ordinal"`, or `"nominal"`) for the encoded field or constant value (`datum`).
      * It can also be a `"geojson"` type for encoding ['geoshape'](https://vega.github.io/vega-lite/docs/geoshape.html).
@@ -657,7 +657,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
     type?: StandardType;
 } | {
     sort: {
-        encoding: "stroke" | "color" | "text" | "shape" | "x" | "y" | "fill" | "opacity" | "fillOpacity" | "strokeOpacity" | "strokeWidth" | "size";
+        encoding: "x" | "y" | "color" | "fill" | "stroke" | "opacity" | "fillOpacity" | "strokeOpacity" | "strokeWidth" | "size" | "shape" | "text";
         order: string;
     };
     /**
@@ -681,7 +681,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
      *
      * __See also:__ [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html) documentation.
      */
-    timeUnit?: "day" | "week" | "month" | "year" | "date" | "quarter" | "dayofyear" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
+    timeUnit?: "year" | "quarter" | "month" | "week" | "day" | "dayofyear" | "date" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
     /**
      * Aggregation function for the field
      * (e.g., `"mean"`, `"sum"`, `"median"`, `"min"`, `"max"`, `"count"`).
@@ -690,7 +690,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
      *
      * __See also:__ [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html) documentation.
      */
-    aggregate?: "count" | "min" | "max" | "average" | "distinct" | "mean" | "median" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgminDef | import("./aggregate").ArgmaxDef | "boxplot" | "errorbar" | "errorband";
+    aggregate?: "average" | "count" | "distinct" | "max" | "mean" | "median" | "min" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgmaxDef | import("./aggregate").ArgminDef | "boxplot" | "errorbar" | "errorband";
     /**
      * A flag for binning a `quantitative` field, [an object defining binning parameters](https://vega.github.io/vega-lite/docs/bin.html#params), or indicating that the data for `x` or `y` channel are binned before they are imported into Vega-Lite (`"binned"`).
      *
@@ -712,7 +712,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
      * @maximum 1
      */
     band?: number;
-    title?: string | string[] | SignalRef;
+    title?: string | SignalRef | string[];
     /**
      * The type of measurement (`"quantitative"`, `"temporal"`, `"ordinal"`, or `"nominal"`) for the encoded field or constant value (`datum`).
      * It can also be a `"geojson"` type for encoding ['geoshape'](https://vega.github.io/vega-lite/docs/geoshape.html).
@@ -746,39 +746,39 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
     type?: StandardType;
 } | {
     header: {
-        labelOrient: import("vega").Orient;
-        titleOrient: import("vega").Orient;
+        labelOrient: import("vega").AxisOrient;
+        titleOrient: import("vega").AxisOrient;
         titleAnchor?: import("vega").TitleAnchor;
-        titleAlign?: SignalRef | "left" | "center" | "right";
+        titleAlign?: SignalRef | "left" | "right" | "center";
         titleAngle?: number;
-        titleBaseline?: SignalRef | "alphabetic" | "top" | "middle" | "bottom" | "line-top" | "line-bottom";
-        titleColor?: import("vega").ScaleField;
-        titleFont?: import("vega").ScaleField;
+        titleBaseline?: SignalRef | "top" | "bottom" | "alphabetic" | "middle" | "line-top" | "line-bottom";
+        titleColor?: string | SignalRef;
+        titleFont?: string | SignalRef;
         titleFontSize?: number | SignalRef;
-        titleFontStyle?: import("vega").ScaleField;
+        titleFontStyle?: string | SignalRef;
         titleFontWeight?: SignalRef | "normal" | "bold" | "lighter" | "bolder" | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
         titleLimit?: number | SignalRef;
         titleLineHeight?: number | SignalRef;
         titlePadding?: number | SignalRef;
         labels?: boolean;
-        labelAlign?: SignalRef | "left" | "center" | "right";
-        labelBaseline?: SignalRef | "alphabetic" | "top" | "middle" | "bottom" | "line-top" | "line-bottom";
+        labelAlign?: SignalRef | "left" | "right" | "center";
+        labelBaseline?: SignalRef | "top" | "bottom" | "alphabetic" | "middle" | "line-top" | "line-bottom";
         labelAnchor?: import("vega").TitleAnchor;
         labelExpr?: string;
         labelAngle?: number;
-        labelColor?: import("vega").ScaleField;
-        labelFont?: import("vega").ScaleField;
+        labelColor?: string | SignalRef;
+        labelFont?: string | SignalRef;
         labelFontSize?: number | SignalRef;
-        labelFontStyle?: import("vega").ScaleField;
+        labelFontStyle?: string | SignalRef;
         labelFontWeight?: SignalRef | "normal" | "bold" | "lighter" | "bolder" | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
         labelLimit?: number | SignalRef;
         labelLineHeight?: number | SignalRef;
         labelPadding?: number | SignalRef;
         format?: string | Record<string, unknown>;
         formatType?: string;
-        title?: string | string[] | SignalRef;
+        title?: string | SignalRef | string[];
     };
-    sort?: string[] | number[] | "ascending" | "descending" | boolean[] | DateTime[] | import("./sort").EncodingSortField<string>;
+    sort?: string[] | number[] | boolean[] | DateTime[] | "ascending" | "descending" | import("./sort").EncodingSortField<string>;
     /**
      * __Required.__ A string defining the name of the field from which to pull a data value
      * or an object defining iterated values from the [`repeat`](https://vega.github.io/vega-lite/docs/repeat.html) operator.
@@ -800,7 +800,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
      *
      * __See also:__ [`timeUnit`](https://vega.github.io/vega-lite/docs/timeunit.html) documentation.
      */
-    timeUnit?: "day" | "week" | "month" | "year" | "date" | "quarter" | "dayofyear" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
+    timeUnit?: "year" | "quarter" | "month" | "week" | "day" | "dayofyear" | "date" | "hours" | "minutes" | "seconds" | "milliseconds" | "utcyear" | "utcquarter" | "utcmonth" | "utcweek" | "utcday" | "utcdayofyear" | "utcdate" | "utchours" | "utcminutes" | "utcseconds" | "utcmilliseconds" | "yearquarter" | "yearquartermonth" | "yearmonth" | "yearmonthdate" | "yearmonthdatehours" | "yearmonthdatehoursminutes" | "yearmonthdatehoursminutesseconds" | "yearweek" | "yearweekday" | "yearweekdayhours" | "yearweekdayhoursminutes" | "yearweekdayhoursminutesseconds" | "yeardayofyear" | "quartermonth" | "monthdate" | "monthdatehours" | "monthdatehoursminutes" | "monthdatehoursminutesseconds" | "weekday" | "weeksdayhours" | "weekdayhoursminutes" | "weekdayhoursminutesseconds" | "dayhours" | "dayhoursminutes" | "dayhoursminutesseconds" | "hoursminutes" | "hoursminutesseconds" | "minutesseconds" | "secondsmilliseconds" | "utcyearquarter" | "utcyearquartermonth" | "utcyearmonth" | "utcyearmonthdate" | "utcyearmonthdatehours" | "utcyearmonthdatehoursminutes" | "utcyearmonthdatehoursminutesseconds" | "utcyearweek" | "utcyearweekday" | "utcyearweekdayhours" | "utcyearweekdayhoursminutes" | "utcyearweekdayhoursminutesseconds" | "utcyeardayofyear" | "utcquartermonth" | "utcmonthdate" | "utcmonthdatehours" | "utcmonthdatehoursminutes" | "utcmonthdatehoursminutesseconds" | "utcweekday" | "utcweeksdayhours" | "utcweekdayhoursminutes" | "utcweekdayhoursminutesseconds" | "utcdayhours" | "utcdayhoursminutes" | "utcdayhoursminutesseconds" | "utchoursminutes" | "utchoursminutesseconds" | "utcminutesseconds" | "utcsecondsmilliseconds" | TimeUnitParams;
     /**
      * Aggregation function for the field
      * (e.g., `"mean"`, `"sum"`, `"median"`, `"min"`, `"max"`, `"count"`).
@@ -809,7 +809,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
      *
      * __See also:__ [`aggregate`](https://vega.github.io/vega-lite/docs/aggregate.html) documentation.
      */
-    aggregate?: "count" | "min" | "max" | "average" | "distinct" | "mean" | "median" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgminDef | import("./aggregate").ArgmaxDef | "boxplot" | "errorbar" | "errorband";
+    aggregate?: "average" | "count" | "distinct" | "max" | "mean" | "median" | "min" | "missing" | "product" | "q1" | "q3" | "ci0" | "ci1" | "stderr" | "stdev" | "stdevp" | "sum" | "valid" | "values" | "variance" | "variancep" | import("./aggregate").ArgmaxDef | import("./aggregate").ArgminDef | "boxplot" | "errorbar" | "errorband";
     /**
      * A flag for binning a `quantitative` field, [an object defining binning parameters](https://vega.github.io/vega-lite/docs/bin.html#params), or indicating that the data for `x` or `y` channel are binned before they are imported into Vega-Lite (`"binned"`).
      *
@@ -831,7 +831,7 @@ export declare function initFieldDef(fd: FieldDef<string, any>, channel: Extende
      * @maximum 1
      */
     band?: number;
-    title?: string | string[] | SignalRef;
+    title?: string | SignalRef | string[];
     /**
      * The type of measurement (`"quantitative"`, `"temporal"`, `"ordinal"`, or `"nominal"`) for the encoded field or constant value (`datum`).
      * It can also be a `"geojson"` type for encoding ['geoshape'](https://vega.github.io/vega-lite/docs/geoshape.html).

@@ -243,7 +243,7 @@ export declare function initConfig(config?: Config): {
     /**
      * A delimiter, such as a newline character, upon which to break text strings into multiple lines. This property provides a global default for text marks, which is overridden by mark or style config settings, and by the lineBreak mark encoding channel. If signal-valued, either string or regular expression (regexp) values are valid.
      */
-    lineBreak?: import("vega").ScaleField;
+    lineBreak?: string | SignalRef;
     /**
      * A boolean flag indicating if ARIA default attributes should be included for marks and guides (SVG output only). If false, the `"aria-hidden"` attribute will be set for all guides, removing them from the ARIA accessibility tree and Vega-Lite will not generate default descriptions for marks.
      *
@@ -254,14 +254,14 @@ export declare function initConfig(config?: Config): {
      * @hidden
      */
     signals?: (NewSignal | InitSignal)[];
-    background?: import("vega").ScaleField;
+    background?: string | SignalRef;
     padding?: number | SignalRef | {
         top?: number;
         bottom?: number;
         left?: number;
         right?: number;
     };
-    autosize?: "pad" | "fit" | "fit-x" | "fit-y" | "none" | import("./spec/toplevel").AutoSizeParams;
+    autosize?: "none" | "pad" | "fit" | "fit-x" | "fit-y" | import("./spec/toplevel").AutoSizeParams;
     /**
      * Default axis and legend title for count fields.
      *

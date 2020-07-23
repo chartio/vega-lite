@@ -30,8 +30,8 @@ export interface StackProperties {
      */
     impute: boolean;
 }
-export declare const STACKABLE_MARKS: Set<"square" | "circle" | "text" | "point" | "arc" | "area" | "image" | "line" | "rect" | "rule" | "trail" | "geoshape" | "bar" | "tick">;
-export declare const STACK_BY_DEFAULT_MARKS: Set<"square" | "circle" | "text" | "point" | "arc" | "area" | "image" | "line" | "rect" | "rule" | "trail" | "geoshape" | "bar" | "tick">;
+export declare const STACKABLE_MARKS: Set<"text" | "point" | "arc" | "area" | "bar" | "image" | "line" | "rect" | "rule" | "tick" | "trail" | "circle" | "square" | "geoshape">;
+export declare const STACK_BY_DEFAULT_MARKS: Set<"text" | "point" | "arc" | "area" | "bar" | "image" | "line" | "rect" | "rule" | "tick" | "trail" | "circle" | "square" | "geoshape">;
 export declare function stack(m: Mark | MarkDef, encoding: Encoding<string>, opt?: {
     disallowNonLinearStack?: boolean;
 }): StackProperties;

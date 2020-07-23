@@ -1,27 +1,9 @@
 import { UnitModel } from './../../unit';
 export declare function aria(model: UnitModel): {
-    stroke?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    text?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
     width?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     height?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    path?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    shape?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    orient?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    cornerRadius?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     x?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
@@ -45,6 +27,9 @@ export declare function aria(model: UnitModel): {
     fill?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
+    stroke?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
     opacity?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
@@ -66,6 +51,12 @@ export declare function aria(model: UnitModel): {
     angle?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
+    shape?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    text?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
     tooltip?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
@@ -75,16 +66,16 @@ export declare function aria(model: UnitModel): {
     url?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
+    orient?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
     interpolate?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     align?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
-    xc?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    yc?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+    cornerRadius?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     strokeCap?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
@@ -93,28 +84,16 @@ export declare function aria(model: UnitModel): {
     strokeDashOffset?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
-    strokeMiterLimit?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+    strokeJoin?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
-    strokeJoin?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+    strokeMiterLimit?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     strokeOffset?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
-    strokeForeground?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    cursor?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    clip?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    innerRadius?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    outerRadius?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+    tension?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     startAngle?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
@@ -123,7 +102,10 @@ export declare function aria(model: UnitModel): {
     endAngle?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
-    tension?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+    innerRadius?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    outerRadius?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     baseline?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
@@ -132,16 +114,16 @@ export declare function aria(model: UnitModel): {
     dir?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
-    ellipsis?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    limit?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
     dx?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     dy?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    ellipsis?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    limit?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     font?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
@@ -150,13 +132,13 @@ export declare function aria(model: UnitModel): {
     fontSize?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
-    fontWeight?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
     fontStyle?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
-    defined?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+    fontWeight?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    cursor?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     cornerRadiusTopLeft?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
@@ -169,6 +151,24 @@ export declare function aria(model: UnitModel): {
         test?: string;
     })[];
     cornerRadiusBottomLeft?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    clip?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    xc?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    yc?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    strokeForeground?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    path?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    defined?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     scaleX?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
@@ -186,28 +186,10 @@ export declare function aria(model: UnitModel): {
     ariaRoleDescription?: undefined;
     aria?: true | import("vega-typings/types").SignalRef;
 } | {
-    stroke?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    text?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
     width?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     height?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    path?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    shape?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    orient?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    cornerRadius?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     x?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
@@ -231,6 +213,9 @@ export declare function aria(model: UnitModel): {
     fill?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
+    stroke?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
     opacity?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
@@ -252,6 +237,12 @@ export declare function aria(model: UnitModel): {
     angle?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
+    shape?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    text?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
     tooltip?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
@@ -261,16 +252,16 @@ export declare function aria(model: UnitModel): {
     url?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
+    orient?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
     interpolate?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     align?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
-    xc?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    yc?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+    cornerRadius?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     strokeCap?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
@@ -279,28 +270,16 @@ export declare function aria(model: UnitModel): {
     strokeDashOffset?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
-    strokeMiterLimit?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+    strokeJoin?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
-    strokeJoin?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+    strokeMiterLimit?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     strokeOffset?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
-    strokeForeground?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    cursor?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    clip?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    innerRadius?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    outerRadius?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+    tension?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     startAngle?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
@@ -309,7 +288,10 @@ export declare function aria(model: UnitModel): {
     endAngle?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
-    tension?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+    innerRadius?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    outerRadius?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     baseline?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
@@ -318,16 +300,16 @@ export declare function aria(model: UnitModel): {
     dir?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
-    ellipsis?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
-    limit?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
     dx?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     dy?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    ellipsis?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    limit?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     font?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
@@ -336,13 +318,13 @@ export declare function aria(model: UnitModel): {
     fontSize?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
-    fontWeight?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
-        test?: string;
-    })[];
     fontStyle?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
-    defined?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+    fontWeight?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    cursor?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
     cornerRadiusTopLeft?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
@@ -357,6 +339,24 @@ export declare function aria(model: UnitModel): {
     cornerRadiusBottomLeft?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
+    clip?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    xc?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    yc?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    strokeForeground?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    path?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
+    defined?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
+        test?: string;
+    })[];
     scaleX?: import("../../../vega.schema").VgValueRef | (import("../../../vega.schema").VgValueRef & {
         test?: string;
     })[];
@@ -364,7 +364,7 @@ export declare function aria(model: UnitModel): {
         test?: string;
     })[];
     ariaRoleDescription: {
-        value: import("vega-typings/types").ScaleField;
+        value: string | import("vega-typings/types").SignalRef;
     };
     aria?: true | import("vega-typings/types").SignalRef;
 } | {
@@ -372,7 +372,7 @@ export declare function aria(model: UnitModel): {
         value: string;
     };
     ariaRoleDescription: {
-        value: import("vega-typings/types").ScaleField;
+        value: string | import("vega-typings/types").SignalRef;
     };
     aria?: true | import("vega-typings/types").SignalRef;
 };

@@ -11994,11 +11994,12 @@
         }
         // Read size signal name from name map, just in case it is the top-level size signal that got renamed.
         const name = model.getSizeSignalRef(sizeType).signal;
-        if (isFacetModel(model.parent) && model.parent.hasStaticOuterDimension(getSizeTypeFromLayoutSizeType(sizeType))) {
+        const facetModel = getFacetModel(model);
+        if (isFacetModel(facetModel) && facetModel.hasStaticOuterDimension(getSizeTypeFromLayoutSizeType(sizeType))) {
             return [
                 {
                     name,
-                    update: autosizedFacetExpr(model.parent, sizeType)
+                    update: autosizedFacetExpr(facetModel, sizeType)
                 }
             ];
         }
@@ -12009,7 +12010,7 @@
                 const range = scaleComponent.get('range');
                 if (hasDiscreteDomain(type) && isVgRangeStep(range)) {
                     const scaleName = model.scaleName(channel);
-                    if (isFacetModel(model.parent)) {
+                    if (isFacetModel(facetModel)) {
                         // If parent is facet and this is an independent scale, return only signal signal
                         // as the width/height will be calculated using the cardinality from
                         // facet's aggregate rather than reading from scale domain
@@ -15506,6 +15507,7 @@
         const mergedScaleCmpt = model.getScaleComponent(channel);
         const scaleType = mergedScaleCmpt.get('type');
         const { domain, domainMid } = model.specifiedScales[channel];
+        const facetModel = getFacetModel(model);
         switch (channel) {
             case X:
             case Y: {
@@ -15513,13 +15515,13 @@
                 if (contains(['point', 'band'], scaleType)) {
                     if (channel === X && !size.width) {
                         const w = getViewConfigDiscreteSize(config.view, 'width');
-                        if (isStep(w) && (!isFacetModel(model.parent) || !model.parent.hasStaticOuterDimension('width'))) {
+                        if (isStep(w) && (!isFacetModel(facetModel) || !facetModel.hasStaticOuterDimension('width'))) {
                             return w;
                         }
                     }
                     else if (channel === Y && !size.height) {
                         const h = getViewConfigDiscreteSize(config.view, 'height');
-                        if (isStep(h) && (!isFacetModel(model.parent) || !model.parent.hasStaticOuterDimension('height'))) {
+                        if (isStep(h) && (!isFacetModel(facetModel) || !facetModel.hasStaticOuterDimension('height'))) {
                             return h;
                         }
                     }

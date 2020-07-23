@@ -10,7 +10,7 @@ import { NormalizedUnitSpec } from '../spec/unit';
 import { NormalizerParams } from './base';
 export declare class CoreNormalizer extends SpecMapper<NormalizerParams, FacetedUnitSpec, LayerSpec> {
     private nonFacetUnitNormalizers;
-    map(spec: GenericSpec<FacetedUnitSpec, LayerSpec, RepeatSpec, Field>, params: NormalizerParams): NormalizedUnitSpec | NormalizedFacetSpec | import("../spec").GenericLayerSpec<NormalizedUnitSpec> | GenericConcatSpec<GenericSpec<NormalizedUnitSpec, import("../spec").GenericLayerSpec<NormalizedUnitSpec>, never, string>> | import("../spec").GenericVConcatSpec<GenericSpec<NormalizedUnitSpec, import("../spec").GenericLayerSpec<NormalizedUnitSpec>, never, string>> | import("../spec").GenericHConcatSpec<GenericSpec<NormalizedUnitSpec, import("../spec").GenericLayerSpec<NormalizedUnitSpec>, never, string>>;
+    map(spec: GenericSpec<FacetedUnitSpec, LayerSpec, RepeatSpec, Field>, params: NormalizerParams): NormalizedUnitSpec | import("../spec").GenericLayerSpec<NormalizedUnitSpec> | NormalizedFacetSpec | GenericConcatSpec<GenericSpec<NormalizedUnitSpec, import("../spec").GenericLayerSpec<NormalizedUnitSpec>, never, string>> | import("../spec").GenericVConcatSpec<GenericSpec<NormalizedUnitSpec, import("../spec").GenericLayerSpec<NormalizedUnitSpec>, never, string>> | import("../spec").GenericHConcatSpec<GenericSpec<NormalizedUnitSpec, import("../spec").GenericLayerSpec<NormalizedUnitSpec>, never, string>>;
     mapUnit(spec: UnitSpec, params: NormalizerParams): NormalizedUnitSpec | NormalizedLayerSpec;
     protected mapRepeat(spec: RepeatSpec, params: NormalizerParams): GenericConcatSpec<NormalizedSpec> | NormalizedLayerSpec;
     private mapLayerRepeat;

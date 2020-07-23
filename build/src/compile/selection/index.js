@@ -22,7 +22,7 @@ export function forEachSelection(model, cb) {
         }
     }
 }
-function getFacetModel(model) {
+export function getFacetModel(model) {
     let parent = model.parent;
     while (parent) {
         if (isFacetModel(parent)) {

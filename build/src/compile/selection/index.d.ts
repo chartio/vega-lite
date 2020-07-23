@@ -2,6 +2,7 @@ import { Binding, NewSignal, Stream } from 'vega';
 import { BrushConfig, LegendBinding, SelectionInit, SelectionInitInterval, SelectionResolution, SelectionType } from '../../selection';
 import { Dict } from '../../util';
 import { OutputNode } from '../data/dataflow';
+import { FacetModel } from '../facet';
 import { Model } from '../model';
 import { UnitModel } from '../unit';
 import { SelectionProjection, SelectionProjectionComponent } from './transforms/project';
@@ -35,6 +36,7 @@ export interface SelectionCompiler<T extends SelectionType = SelectionType> {
     marks?: (model: UnitModel, selCmpt: SelectionComponent<T>, marks: any[]) => any[];
 }
 export declare function forEachSelection(model: Model, cb: (selCmpt: SelectionComponent, selCompiler: SelectionCompiler) => void | boolean): void;
+export declare function getFacetModel(model: Model): FacetModel;
 export declare function unitName(model: Model, { escape }?: {
     escape: boolean;
 }): string;

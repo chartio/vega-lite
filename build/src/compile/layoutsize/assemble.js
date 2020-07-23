@@ -5,6 +5,7 @@ import { isVgRangeStep } from '../../vega.schema';
 import { isFacetModel } from '../model';
 import { getSizeTypeFromLayoutSizeType } from './component';
 import { isFacetMapping } from '../../spec/facet';
+import { getFacetModel } from '../selection';
 export function assembleLayoutSignals(model) {
     return [
         ...sizeSignals(model, 'width'),
@@ -21,11 +22,12 @@ export function sizeSignals(model, sizeType) {
     }
     // Read size signal name from name map, just in case it is the top-level size signal that got renamed.
     const name = model.getSizeSignalRef(sizeType).signal;
-    if (isFacetModel(model.parent) && model.parent.hasStaticOuterDimension(getSizeTypeFromLayoutSizeType(sizeType))) {
+    const facetModel = getFacetModel(model);
+    if (isFacetModel(facetModel) && facetModel.hasStaticOuterDimension(getSizeTypeFromLayoutSizeType(sizeType))) {
         return [
             {
                 name,
-                update: autosizedFacetExpr(model.parent, sizeType)
+                update: autosizedFacetExpr(facetModel, sizeType)
             }
         ];
     }
@@ -36,7 +38,7 @@ export function sizeSignals(model, sizeType) {
             const range = scaleComponent.get('range');
             if (hasDiscreteDomain(type) && isVgRangeStep(range)) {
                 const scaleName = model.scaleName(channel);
-                if (isFacetModel(model.parent)) {
+                if (isFacetModel(facetModel)) {
                     // If parent is facet and this is an independent scale, return only signal signal
                     // as the width/height will be calculated using the cardinality from
                     // facet's aggregate rather than reading from scale domain
