@@ -33,16 +33,26 @@ export function parseUnitScaleRange(model) {
 }
 function getBinStepSignal(model, channel) {
     const fieldDef = model.fieldDef(channel);
-    if (fieldDef && fieldDef.bin && isBinning(fieldDef.bin)) {
-        const binSignal = getBinSignalName(model, fieldDef.field, fieldDef.bin);
-        // TODO: extract this to be range step signal
+    if (fieldDef === null || fieldDef === void 0 ? void 0 : fieldDef.bin) {
+        const { bin, field } = fieldDef;
         const sizeType = getSizeChannel(channel);
         const sizeSignal = model.getName(sizeType);
-        return new SignalRefWrapper(() => {
-            const updatedName = model.getSignalName(binSignal);
-            const binCount = `(${updatedName}.stop - ${updatedName}.start) / ${updatedName}.step`;
-            return `${model.getSignalName(sizeSignal)} / (${binCount})`;
-        });
+        if (isObject(bin) && bin.binned && bin.step !== undefined) {
+            return new SignalRefWrapper(() => {
+                const scaleName = model.scaleName(channel);
+                const binCount = `(domain("${scaleName}")[1] - domain("${scaleName}")[0]) / ${bin.step}`;
+                return `${model.getSignalName(sizeSignal)} / (${binCount})`;
+            });
+        }
+        else if (isBinning(bin)) {
+            const binSignal = getBinSignalName(model, field, bin);
+            // TODO: extract this to be range step signal
+            return new SignalRefWrapper(() => {
+                const updatedName = model.getSignalName(binSignal);
+                const binCount = `(${updatedName}.stop - ${updatedName}.start) / ${updatedName}.step`;
+                return `${model.getSignalName(sizeSignal)} / (${binCount})`;
+            });
+        }
     }
     return undefined;
 }

@@ -1,5 +1,5 @@
-import {FacetedUnitSpec} from '../src/spec/unit';
-import {BaseSpec} from '../src/spec/base';
+import {SignalRef} from 'vega';
+import {Field} from '../src/channeldef';
 import {buildModel} from '../src/compile/buildmodel';
 import {ConcatModel} from '../src/compile/concat';
 import {FacetModel} from '../src/compile/facet';
@@ -10,18 +10,21 @@ import {UnitModel} from '../src/compile/unit';
 import {initConfig} from '../src/config';
 import {normalize} from '../src/normalize';
 import {
+  GenericLayerSpec,
+  isLayerSpec,
+  isUnitSpec,
   NormalizedConcatSpec,
   NormalizedFacetSpec,
   NormalizedLayerSpec,
   NormalizedUnitSpec,
   TopLevel,
-  TopLevelSpec,
-  isUnitSpec
+  TopLevelSpec
 } from '../src/spec';
-import {FrameMixins} from '../src/spec/base';
+import {BaseSpec, FrameMixins} from '../src/spec/base';
+import {FacetedUnitSpec} from '../src/spec/unit';
 import {contains} from '../src/util';
 
-export type TopLevelNormalizedUnitSpecForTest = TopLevel<NormalizedUnitSpec> & FrameMixins;
+export type TopLevelNormalizedUnitSpecForTest = TopLevel<NormalizedUnitSpec> & FrameMixins<SignalRef>;
 
 export function parseModel(inputSpec: TopLevelSpec): Model {
   const config = initConfig(inputSpec.config);
@@ -64,6 +67,12 @@ export function parseUnitModelWithScaleAndLayoutSize(spec: TopLevelNormalizedUni
   return model;
 }
 
+export function parseModelWithScaleAndLayoutSize(spec: TopLevelSpec) {
+  const model = parseModelWithScale(spec);
+  model.parseLayoutSize();
+  return model;
+}
+
 export function parseLayerModel(spec: TopLevel<NormalizedLayerSpec>) {
   return new LayerModel(spec, null, '', undefined, initConfig(spec.config));
 }
@@ -82,13 +91,19 @@ export function parseConcatModel(spec: TopLevel<NormalizedConcatSpec>) {
   return new ConcatModel(spec, null, '', initConfig(spec.config));
 }
 
-export function assertIsUnitSpec(spec: BaseSpec): asserts spec is FacetedUnitSpec | NormalizedUnitSpec {
+export function assertIsUnitSpec(spec: BaseSpec): asserts spec is FacetedUnitSpec<Field> | NormalizedUnitSpec {
   if (!isUnitSpec(spec)) {
     throw new Error('Spec is not a unit spec!');
   }
 }
 
-/** Returns the array without the elements in item */
+export function assertIsLayerSpec(spec: BaseSpec): asserts spec is GenericLayerSpec<any> {
+  if (!isLayerSpec(spec)) {
+    throw new Error('Spec is not a layer spec!');
+  }
+}
+
+/** Returns the array without the elements in excludedItems */
 export function without<T>(array: readonly T[], excludedItems: readonly T[]) {
   return array.filter(item => !contains(excludedItems, item));
 }

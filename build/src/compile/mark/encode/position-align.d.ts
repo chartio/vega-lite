@@ -1,4 +1,5 @@
+import { SignalRef } from 'vega';
 import { Config } from '../../../config';
-import { MarkDef } from '../../../mark';
-export declare function vgAlignedPositionChannel(channel: 'x' | 'y' | 'radius' | 'theta', markDef: MarkDef, config: Config, defaultAlign?: 'top' | 'middle'): any;
+import { Mark, MarkDef } from '../../../mark';
+export declare function vgAlignedPositionChannel(channel: 'x' | 'y' | 'radius' | 'theta', markDef: MarkDef<Mark, SignalRef>, config: Config<SignalRef>, defaultAlign?: 'top' | 'middle'): any;
 //# sourceMappingURL=position-align.d.ts.map

@@ -81,7 +81,7 @@ export function isNullOrFalse(x: any): x is false | null {
 }
 
 export function contains<T>(array: readonly T[], item: T) {
-  return array.indexOf(item) > -1;
+  return array.includes(item);
 }
 
 /**
@@ -221,18 +221,7 @@ export const keys = Object.keys as <T>(o: T) => Extract<keyof T, string>[];
 
 export const vals = Object.values;
 
-export function entries<T>(x: {[key: string]: T}): {key: string; value: T}[] {
-  const _entries: {key: string; value: T}[] = [];
-  for (const k in x) {
-    if (hasOwnProperty(x, k)) {
-      _entries.push({
-        key: k,
-        value: x[k]
-      });
-    }
-  }
-  return _entries;
-}
+export const entries = Object.entries;
 
 // Using mapped type to declare a collect of flags for a string literal type S
 // https://www.typescriptlang.org/docs/handbook/advanced-types.html#mapped-types
@@ -255,11 +244,11 @@ export function varName(s: string): string {
 
 export function logicalExpr<T>(op: LogicalComposition<T>, cb: (...args: readonly any[]) => string): string {
   if (isLogicalNot(op)) {
-    return '!(' + logicalExpr(op.not, cb) + ')';
+    return `!(${logicalExpr(op.not, cb)})`;
   } else if (isLogicalAnd(op)) {
-    return '(' + op.and.map((and: LogicalComposition<T>) => logicalExpr(and, cb)).join(') && (') + ')';
+    return `(${op.and.map((and: LogicalComposition<T>) => logicalExpr(and, cb)).join(') && (')})`;
   } else if (isLogicalOr(op)) {
-    return '(' + op.or.map((or: LogicalComposition<T>) => logicalExpr(or, cb)).join(') || (') + ')';
+    return `(${op.or.map((or: LogicalComposition<T>) => logicalExpr(or, cb)).join(') || (')})`;
   } else {
     return cb(op);
   }
@@ -386,7 +375,7 @@ export function internalField(name: string) {
 }
 
 export function isInternalField(name: string) {
-  return name.indexOf('__') === 0;
+  return name.startsWith('__');
 }
 
 /**

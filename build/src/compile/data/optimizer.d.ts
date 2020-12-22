@@ -1,42 +1,51 @@
 import { DataFlowNode } from './dataflow';
-import { OptimizerFlags } from './optimizers';
 /**
  * Whether this dataflow node is the source of the dataflow that produces data i.e. a source or a generator.
  */
 export declare function isDataSourceNode(node: DataFlowNode): boolean;
 /**
- * Abstract base class for BottomUpOptimizer and TopDownOptimizer.
+ * Abstract base class for Dataflow optimizers.
  * Contains only mutation handling logic. Subclasses need to implement iteration logic.
  */
-declare abstract class OptimizerBase {
-    private _mutated;
+export declare abstract class Optimizer {
+    #private;
     constructor();
-    setMutated(): void;
-    get mutatedFlag(): boolean;
-}
-/**
- * Starts from a node and runs the optimization function(the "run" method) upwards to the root,
- * depending on the continueFlag and mutatedFlag values returned by the optimization function.
- */
-export declare abstract class BottomUpOptimizer extends OptimizerBase {
-    private _continue;
-    constructor();
-    setContinue(): void;
-    get continueFlag(): boolean;
-    get flags(): OptimizerFlags;
-    set flags({ continueFlag, mutatedFlag }: OptimizerFlags);
-    abstract run(node: DataFlowNode): OptimizerFlags;
+    setModified(): void;
+    get modifiedFlag(): boolean;
     /**
-     * Reset the state of the optimizer after it has completed a run from the bottom of the tree to the top.
+     * Run the optimization for the tree with the provided root.
      */
-    reset(): void;
-    optimizeNextFromLeaves(node: DataFlowNode): boolean;
+    abstract optimize(root: DataFlowNode): boolean;
 }
 /**
- * The optimizer function( the "run" method), is invoked on the given node and then continues recursively.
+ * Starts from a node and runs the optimization function (the "run" method) upwards to the root,
+ * depending on the continue and modified flag values returned by the optimization function.
  */
-export declare abstract class TopDownOptimizer extends OptimizerBase {
-    abstract run(node: DataFlowNode): boolean;
+export declare abstract class BottomUpOptimizer extends Optimizer {
+    /**
+     * Run the optimizer at the node. This method should not change the parent of the passed in node (it should only affect children).
+     */
+    abstract run(node: DataFlowNode): void;
+    /**
+     * Compute a map of node depths that we can use to determine a topological sort order.
+     */
+    private getNodeDepths;
+    /**
+     * Run the optimizer on all nodes starting from the leaves.
+     */
+    optimize(node: DataFlowNode): boolean;
 }
-export {};
+/**
+ * The optimizer function (the "run" method), is invoked on the given node and then continues recursively.
+ */
+export declare abstract class TopDownOptimizer extends Optimizer {
+    /**
+     * Run the optimizer at the node.
+     */
+    abstract run(node: DataFlowNode): void;
+    /**
+     * Run the optimizer depth first on all nodes starting from the roots.
+     */
+    optimize(node: DataFlowNode): boolean;
+}
 //# sourceMappingURL=optimizer.d.ts.map

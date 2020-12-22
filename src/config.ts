@@ -1,9 +1,11 @@
 import {Color, InitSignal, NewSignal, RangeConfig, RangeScheme, SignalRef} from 'vega';
 import {isObject, mergeConfig} from 'vega-util';
-import {Axis, AxisConfigMixins, isConditionalAxisValue} from './axis';
+import {Axis, AxisConfig, AxisConfigMixins, AXIS_CONFIGS, isConditionalAxisValue} from './axis';
+import {signalOrValueRefWithCondition, signalRefOrValue} from './compile/common';
 import {CompositeMarkConfigMixins, getAllCompositeMarks} from './compositemark';
+import {ExprRef, replaceExprRef} from './expr';
 import {VL_ONLY_LEGEND_CONFIG} from './guide';
-import {HeaderConfigMixins} from './header';
+import {HeaderConfigMixins, HEADER_CONFIGS} from './header';
 import {defaultLegendConfig, LegendConfig} from './legend';
 import * as mark from './mark';
 import {
@@ -11,33 +13,21 @@ import {
   Mark,
   MarkConfig,
   MarkConfigMixins,
+  MARK_CONFIGS,
   PRIMITIVE_MARKS,
   VL_ONLY_MARK_CONFIG_PROPERTIES,
   VL_ONLY_MARK_SPECIFIC_CONFIG_PROPERTY_INDEX
 } from './mark';
+import {assembleParameterSignals} from './parameter';
 import {ProjectionConfig} from './projection';
 import {defaultScaleConfig, ScaleConfig} from './scale';
 import {defaultConfig as defaultSelectionConfig, SelectionConfig} from './selection';
 import {BaseViewBackground, CompositionConfigMixins, DEFAULT_SPACING, isStep} from './spec/base';
 import {TopLevelProperties} from './spec/toplevel';
 import {extractTitleConfig, TitleConfig} from './title';
-import {duplicate, getFirstDefined, isEmpty} from './util';
+import {duplicate, getFirstDefined, isEmpty, keys, omit} from './util';
 
-export interface ViewConfig extends BaseViewBackground {
-  /**
-   * Default width
-   *
-   * __Deprecated:__ Since Vega-Lite 4.0. Please use continuousWidth and discreteWidth instead.
-   */
-  width?: number;
-
-  /**
-   * Default height
-   *
-   * __Deprecated:__ Since Vega-Lite 4.0. Please use continuousHeight and discreteHeight instead.
-   */
-  height?: number;
-
+export interface ViewConfig<ES extends ExprRef | SignalRef> extends BaseViewBackground<ES> {
   /**
    * The default width when the plot has a continuous field for x or longitude, or has arc marks.
    *
@@ -78,23 +68,32 @@ export interface ViewConfig extends BaseViewBackground {
   clip?: boolean;
 }
 
-export function getViewConfigContinuousSize(viewConfig: ViewConfig, channel: 'width' | 'height') {
+export function getViewConfigContinuousSize<ES extends ExprRef | SignalRef>(
+  viewConfig: ViewConfig<ES>,
+  channel: 'width' | 'height'
+) {
   return viewConfig[channel] ?? viewConfig[channel === 'width' ? 'continuousWidth' : 'continuousHeight']; // get width/height for backwards compatibility
 }
 
-export function getViewConfigDiscreteStep(viewConfig: ViewConfig, channel: 'width' | 'height') {
+export function getViewConfigDiscreteStep<ES extends ExprRef | SignalRef>(
+  viewConfig: ViewConfig<ES>,
+  channel: 'width' | 'height'
+) {
   const size = getViewConfigDiscreteSize(viewConfig, channel);
   return isStep(size) ? size.step : DEFAULT_STEP;
 }
 
-export function getViewConfigDiscreteSize(viewConfig: ViewConfig, channel: 'width' | 'height') {
+export function getViewConfigDiscreteSize<ES extends ExprRef | SignalRef>(
+  viewConfig: ViewConfig<ES>,
+  channel: 'width' | 'height'
+) {
   const size = viewConfig[channel] ?? viewConfig[channel === 'width' ? 'discreteWidth' : 'discreteHeight']; // get width/height for backwards compatibility
   return getFirstDefined(size, {step: viewConfig.step});
 }
 
 export const DEFAULT_STEP = 20;
 
-export const defaultViewConfig: ViewConfig = {
+export const defaultViewConfig: ViewConfig<SignalRef> = {
   continuousWidth: 200,
   continuousHeight: 200,
   step: DEFAULT_STEP
@@ -108,7 +107,7 @@ export type ColorConfig = Record<string, Color>;
 
 export type FontSizeConfig = Record<string, number>;
 
-export interface VLOnlyConfig {
+export interface VLOnlyConfig<ES extends ExprRef | SignalRef> {
   /**
    * Default font for all text marks, titles, and labels.
    */
@@ -164,47 +163,47 @@ export interface VLOnlyConfig {
   customFormatTypes?: boolean;
 
   /** Default properties for [single view plots](https://vega.github.io/vega-lite/docs/spec.html#single). */
-  view?: ViewConfig;
+  view?: ViewConfig<ES>;
 
   /**
    * Scale configuration determines default properties for all [scales](https://vega.github.io/vega-lite/docs/scale.html). For a full list of scale configuration options, please see the [corresponding section of the scale documentation](https://vega.github.io/vega-lite/docs/scale.html#config).
    */
-  scale?: ScaleConfig;
+  scale?: ScaleConfig<ES>;
 
   /** An object hash for defining default properties for each type of selections. */
   selection?: SelectionConfig;
 }
 
-export type StyleConfigIndex = Partial<Record<string, AnyMarkConfig | Axis>> &
-  MarkConfigMixins & {
+export type StyleConfigIndex<ES extends ExprRef | SignalRef> = Partial<Record<string, AnyMarkConfig<ES> | Axis<ES>>> &
+  MarkConfigMixins<ES> & {
     /**
      * Default style for axis, legend, and header titles.
      */
-    'guide-title'?: MarkConfig;
+    'guide-title'?: MarkConfig<ES>;
 
     /**
      * Default style for axis, legend, and header labels.
      */
-    'guide-label'?: MarkConfig;
+    'guide-label'?: MarkConfig<ES>;
 
     /**
      * Default style for chart titles
      */
-    'group-title'?: MarkConfig;
+    'group-title'?: MarkConfig<ES>;
 
     /**
      * Default style for chart subtitles
      */
-    'group-subtitle'?: MarkConfig;
+    'group-subtitle'?: MarkConfig<ES>;
   };
 
-export interface Config
-  extends TopLevelProperties,
-    VLOnlyConfig,
-    MarkConfigMixins,
+export interface Config<ES extends ExprRef | SignalRef = ExprRef | SignalRef>
+  extends TopLevelProperties<ES>,
+    VLOnlyConfig<ES>,
+    MarkConfigMixins<ES>,
     CompositeMarkConfigMixins,
-    AxisConfigMixins,
-    HeaderConfigMixins,
+    AxisConfigMixins<ES>,
+    HeaderConfigMixins<ES>,
     CompositionConfigMixins {
   /**
    * An object hash that defines default range arrays or schemes for using with scales.
@@ -215,12 +214,12 @@ export interface Config
   /**
    * Legend configuration, which determines default properties for all [legends](https://vega.github.io/vega-lite/docs/legend.html). For a full list of legend configuration options, please see the [corresponding section of in the legend documentation](https://vega.github.io/vega-lite/docs/legend.html#config).
    */
-  legend?: LegendConfig;
+  legend?: LegendConfig<ES>;
 
   /**
    * Title configuration, which determines default properties for all [titles](https://vega.github.io/vega-lite/docs/title.html). For a full list of title configuration options, please see the [corresponding section of the title documentation](https://vega.github.io/vega-lite/docs/title.html#config).
    */
-  title?: TitleConfig;
+  title?: TitleConfig<ES>;
 
   /**
    * Projection configuration, which determines default properties for all [projections](https://vega.github.io/vega-lite/docs/projection.html). For a full list of projection configuration options, please see the [corresponding section of the projection documentation](https://vega.github.io/vega-lite/docs/projection.html#config).
@@ -228,12 +227,12 @@ export interface Config
   projection?: ProjectionConfig;
 
   /** An object hash that defines key-value mappings to determine default properties for marks with a given [style](https://vega.github.io/vega-lite/docs/mark.html#mark-def). The keys represent styles names; the values have to be valid [mark configuration objects](https://vega.github.io/vega-lite/docs/mark.html#config). */
-  style?: StyleConfigIndex;
+  style?: StyleConfigIndex<ES>;
 
   /**
    * A delimiter, such as a newline character, upon which to break text strings into multiple lines. This property provides a global default for text marks, which is overridden by mark or style config settings, and by the lineBreak mark encoding channel. If signal-valued, either string or regular expression (regexp) values are valid.
    */
-  lineBreak?: string | SignalRef;
+  lineBreak?: string | ES;
 
   /**
    * A boolean flag indicating if ARIA default attributes should be included for marks and guides (SVG output only). If false, the `"aria-hidden"` attribute will be set for all guides, removing them from the ARIA accessibility tree and Vega-Lite will not generate default descriptions for marks.
@@ -248,7 +247,7 @@ export interface Config
   signals?: (InitSignal | NewSignal)[];
 }
 
-export const defaultConfig: Config = {
+export const defaultConfig: Config<SignalRef> = {
   background: 'white',
 
   padding: 5,
@@ -458,10 +457,50 @@ export function fontConfig(font: string): Config {
   };
 }
 
-export function initConfig(config: Config = {}) {
-  const {color, font, fontSize, ...restConfig} = config;
+function getAxisConfigInternal(axisConfig: AxisConfig<ExprRef | SignalRef>) {
+  const props = keys(axisConfig || {});
+  const axisConfigInternal: AxisConfig<SignalRef> = {};
+  for (const prop of props) {
+    const val = axisConfig[prop];
+    axisConfigInternal[prop as any] = isConditionalAxisValue<any, ExprRef | SignalRef>(val)
+      ? signalOrValueRefWithCondition<any>(val)
+      : signalRefOrValue(val);
+  }
+  return axisConfigInternal;
+}
 
-  return mergeConfig(
+function getStyleConfigInternal(styleConfig: StyleConfigIndex<ExprRef | SignalRef>) {
+  const props = keys(styleConfig);
+
+  const styleConfigInternal: StyleConfigIndex<SignalRef> = {};
+  for (const prop of props) {
+    // We need to cast to cheat a bit here since styleConfig can be either mark config or axis config
+    styleConfigInternal[prop as any] = getAxisConfigInternal(styleConfig[prop] as any);
+  }
+  return styleConfigInternal;
+}
+
+const configPropsWithExpr = [
+  ...MARK_CONFIGS,
+  ...AXIS_CONFIGS,
+  ...HEADER_CONFIGS,
+  'background',
+  'padding',
+  'legend',
+  'lineBreak',
+  'scale',
+  'style',
+  'title',
+  'view'
+] as const;
+
+/**
+ * Merge specified config with default config and config for the `color` flag,
+ * then replace all expressions with signals
+ */
+export function initConfig(specifiedConfig: Config = {}): Config<SignalRef> {
+  const {color, font, fontSize, ...restConfig} = specifiedConfig;
+  const mergedConfig = mergeConfig(
     {},
     defaultConfig,
     font ? fontConfig(font) : {},
@@ -469,6 +508,54 @@ export function initConfig(config: Config = {}) {
     fontSize ? fontSizeSignalConfig(fontSize) : {},
     restConfig || {}
   );
+  const outputConfig: Config<SignalRef> = omit(mergedConfig, configPropsWithExpr);
+
+  for (const prop of ['background', 'lineBreak', 'padding']) {
+    if (mergedConfig[prop]) {
+      outputConfig[prop] = signalRefOrValue(mergedConfig[prop]);
+    }
+  }
+
+  for (const markConfigType of mark.MARK_CONFIGS) {
+    if (mergedConfig[markConfigType]) {
+      // FIXME: outputConfig[markConfigType] expects that types are replaced recursively but replaceExprRef only replaces one level deep
+      outputConfig[markConfigType] = replaceExprRef(mergedConfig[markConfigType]) as any;
+    }
+  }
+
+  for (const axisConfigType of AXIS_CONFIGS) {
+    if (mergedConfig[axisConfigType]) {
+      outputConfig[axisConfigType] = getAxisConfigInternal(mergedConfig[axisConfigType]);
+    }
+  }
+
+  for (const headerConfigType of HEADER_CONFIGS) {
+    if (mergedConfig[headerConfigType]) {
+      outputConfig[headerConfigType] = replaceExprRef(mergedConfig[headerConfigType]);
+    }
+  }
+
+  if (mergedConfig.legend) {
+    outputConfig.legend = replaceExprRef(mergedConfig.legend);
+  }
+
+  if (mergedConfig.scale) {
+    outputConfig.scale = replaceExprRef(mergedConfig.scale);
+  }
+
+  if (mergedConfig.style) {
+    outputConfig.style = getStyleConfigInternal(mergedConfig.style);
+  }
+
+  if (mergedConfig.title) {
+    outputConfig.title = replaceExprRef(mergedConfig.title);
+  }
+
+  if (mergedConfig.view) {
+    outputConfig.view = replaceExprRef(mergedConfig.view);
+  }
+
+  return outputConfig;
 }
 
 const MARK_STYLES = ['view', ...PRIMITIVE_MARKS] as ('view' | Mark)[];
@@ -512,7 +599,7 @@ const VL_ONLY_ALL_MARK_SPECIFIC_CONFIG_PROPERTY_INDEX = {
   ...VL_ONLY_MARK_SPECIFIC_CONFIG_PROPERTY_INDEX
 };
 
-export function stripAndRedirectConfig(config: Config) {
+export function stripAndRedirectConfig(config: Config<SignalRef>) {
   config = duplicate(config);
 
   for (const prop of VL_ONLY_CONFIG_PROPERTIES) {
@@ -543,6 +630,11 @@ export function stripAndRedirectConfig(config: Config) {
     if (config.mark.tooltip && isObject(config.mark.tooltip)) {
       delete config.mark.tooltip;
     }
+  }
+
+  if (config.params) {
+    config.signals = (config.signals || []).concat(assembleParameterSignals(config.params));
+    delete config.params;
   }
 
   for (const markType of MARK_STYLES) {
@@ -589,7 +681,7 @@ export function stripAndRedirectConfig(config: Config) {
  *
  * For subtitle configs in config.title, keep them in config.title as header titles never have subtitles.
  */
-function redirectTitleConfig(config: Config) {
+function redirectTitleConfig(config: Config<SignalRef>) {
   const {titleMarkConfig, subtitleMarkConfig, subtitle} = extractTitleConfig(config.title);
 
   // set config.style if title/subtitleMarkConfig is not an empty object
@@ -615,20 +707,20 @@ function redirectTitleConfig(config: Config) {
 }
 
 function redirectConfigToStyleConfig(
-  config: Config,
+  config: Config<SignalRef>,
   prop: Mark | 'view' | string, // string = composite mark
   toProp?: string,
   compositeMarkPart?: string
 ) {
-  const propConfig: MarkConfig = compositeMarkPart ? config[prop][compositeMarkPart] : config[prop];
+  const propConfig: MarkConfig<SignalRef> = compositeMarkPart ? config[prop][compositeMarkPart] : config[prop];
 
   if (prop === 'view') {
     toProp = 'cell'; // View's default style is "cell"
   }
 
-  const style: MarkConfig = {
+  const style: MarkConfig<SignalRef> = {
     ...propConfig,
-    ...(config.style[toProp ?? prop] as MarkConfig)
+    ...(config.style[toProp ?? prop] as MarkConfig<SignalRef>)
   };
 
   // set config.style if it is not an empty object

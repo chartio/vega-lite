@@ -142,7 +142,7 @@ function mergeAxisComponent(merged, child) {
 // eslint-disable-next-line @typescript-eslint/ban-types
 function isExplicit(value, property, axis, model, channel) {
     if (property === 'disable') {
-        return axis !== undefined; // if axis is specified or null/false, then it's enable/disable state is explicit
+        return axis !== undefined; // if axis is specified or null/false, then its enable/disable state is explicit
     }
     axis = axis || {};
     switch (property) {

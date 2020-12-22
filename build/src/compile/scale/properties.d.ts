@@ -17,9 +17,9 @@ export interface ScaleRuleParams {
     scaleType: ScaleType;
     scalePadding: number | SignalRef;
     scalePaddingInner: number | SignalRef;
-    domain: Scale['domain'];
+    domain: Domain;
     markDef: MarkDef;
-    config: Config;
+    config: Config<SignalRef>;
 }
 export declare const scaleRules: {
     [k in keyof Scale]?: (params: ScaleRuleParams) => Scale[k];
@@ -31,11 +31,11 @@ export declare function bins(model: Model, fieldDef: TypedFieldDef<string>): Sig
 };
 export declare function interpolate(channel: ScaleChannel, type: Type): Scale['interpolate'];
 export declare function nice(scaleType: ScaleType, channel: ScaleChannel, fieldOrDatumDef: TypedFieldDef<string> | ScaleDatumDef): boolean | TimeInterval;
-export declare function padding(channel: ScaleChannel, scaleType: ScaleType, scaleConfig: ScaleConfig, fieldOrDatumDef: TypedFieldDef<string> | ScaleDatumDef, markDef: MarkDef, barConfig: RectConfig): number | SignalRef;
-export declare function paddingInner(paddingValue: number | SignalRef, channel: ScaleChannel, mark: Mark, scaleConfig: ScaleConfig): number | SignalRef;
-export declare function paddingOuter(paddingValue: number | SignalRef, channel: ScaleChannel, scaleType: ScaleType, mark: Mark, paddingInnerValue: number | SignalRef, scaleConfig: ScaleConfig): number | {
+export declare function padding(channel: ScaleChannel, scaleType: ScaleType, scaleConfig: ScaleConfig<SignalRef>, fieldOrDatumDef: TypedFieldDef<string> | ScaleDatumDef, markDef: MarkDef, barConfig: RectConfig<SignalRef>): number | SignalRef;
+export declare function paddingInner(paddingValue: number | SignalRef, channel: ScaleChannel, mark: Mark, scaleConfig: ScaleConfig<SignalRef>): number | SignalRef;
+export declare function paddingOuter(paddingValue: number | SignalRef, channel: ScaleChannel, scaleType: ScaleType, mark: Mark, paddingInnerValue: number | SignalRef, scaleConfig: ScaleConfig<SignalRef>): number | {
     signal: string;
 };
-export declare function reverse(scaleType: ScaleType, sort: Sort<string>, channel: ScaleChannel, scaleConfig: ScaleConfig): boolean | SignalRef;
+export declare function reverse(scaleType: ScaleType, sort: Sort<string>, channel: ScaleChannel, scaleConfig: ScaleConfig<SignalRef>): boolean | SignalRef;
 export declare function zero(channel: ScaleChannel, fieldDef: TypedFieldDef<string> | ScaleDatumDef, specifiedDomain: Domain, markDef: MarkDef, scaleType: ScaleType): boolean;
 //# sourceMappingURL=properties.d.ts.map

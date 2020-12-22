@@ -3,15 +3,15 @@ import {
   LabelOverlap,
   Legend as VgLegend,
   LegendConfig as VgLegendConfig,
-  LegendEncode,
   LegendOrient,
   Orientation,
   SignalRef
 } from 'vega';
 import {DateTime} from './datetime';
+import {ExprRef} from './expr';
 import {Guide, GuideEncodingEntry, VlOnlyGuideConfig} from './guide';
 import {Flag, keys} from './util';
-import {ExcludeMappedValueRefButKeepSignal, VgEncodeChannel} from './vega.schema';
+import {MapExcludeValueRefAndReplaceSignalWith} from './vega.schema';
 
 export const LEGEND_SCALE_CHANNELS = [
   'size',
@@ -23,68 +23,11 @@ export const LEGEND_SCALE_CHANNELS = [
   'opacity'
 ] as const;
 
-export type SignalLegendProp =
-  | 'fillColor'
-  | 'gradientStrokeColor'
-  | 'labelColor'
-  | 'strokeColor'
-  | 'symbolFillColor'
-  | 'symbolStrokeColor'
-  | 'titleColor';
+type BaseLegendNoValueRefs<ES extends ExprRef | SignalRef> = MapExcludeValueRefAndReplaceSignalWith<BaseLegend, ES>;
 
-export const SIGNAL_LEGEND_PROP_INDEX: Record<
-  SignalLegendProp,
-  {
-    part: keyof LegendEncode;
-    vgProp: VgEncodeChannel;
-  } | null // null if we need to convert condition to signal
-> = {
-  fillColor: {
-    part: 'legend',
-    vgProp: 'fill'
-  },
-  gradientStrokeColor: {
-    part: 'gradient',
-    vgProp: 'stroke'
-  },
-  labelColor: {
-    part: 'labels',
-    vgProp: 'fill'
-  },
-  strokeColor: {
-    part: 'legend',
-    vgProp: 'stroke'
-  },
-  symbolFillColor: {
-    part: 'symbols',
-    vgProp: 'fill'
-  },
-  symbolStrokeColor: {
-    part: 'symbols',
-    vgProp: 'stroke'
-  },
-  titleColor: {
-    part: 'title',
-    vgProp: 'fill'
-  }
-};
-
-type BaseLegendNoValueRefs = ExcludeMappedValueRefButKeepSignal<BaseLegend>;
-
-export interface LegendPropsWithSignal {
-  fillColor?: BaseLegendNoValueRefs['fillColor'] | SignalRef;
-  gradientStrokeColor?: BaseLegendNoValueRefs['gradientStrokeColor'] | SignalRef;
-  labelColor?: BaseLegendNoValueRefs['labelColor'] | SignalRef;
-  strokeColor?: BaseLegendNoValueRefs['strokeColor'] | SignalRef;
-  symbolFillColor?: BaseLegendNoValueRefs['symbolFillColor'] | SignalRef;
-  symbolStrokeColor?: BaseLegendNoValueRefs['symbolStrokeColor'] | SignalRef;
-  titleColor?: BaseLegendNoValueRefs['titleColor'] | SignalRef;
-}
-
-export type LegendConfig = LegendMixins &
+export type LegendConfig<ES extends ExprRef | SignalRef> = LegendMixins<ES> &
   VlOnlyGuideConfig &
-  Omit<VgLegendConfig, SignalLegendProp> &
-  LegendPropsWithSignal & {
+  MapExcludeValueRefAndReplaceSignalWith<VgLegendConfig, ES> & {
     /**
      * Max legend length for a vertical gradient when `config.legend.gradientLength` is undefined.
      *
@@ -142,10 +85,9 @@ export type LegendConfig = LegendMixins &
 /**
  * Properties of a legend or boolean flag for determining whether to show it.
  */
-export interface Legend
-  extends Omit<BaseLegendNoValueRefs, SignalLegendProp | 'orient'>,
-    LegendPropsWithSignal,
-    LegendMixins,
+export interface Legend<ES extends ExprRef | SignalRef>
+  extends Omit<BaseLegendNoValueRefs<ES>, 'orient'>,
+    LegendMixins<ES>,
     Guide {
   /**
    * Mark definitions for custom legend encoding.
@@ -166,12 +108,12 @@ export interface Legend
    *
    * __Default value__: `undefined`
    */
-  tickMinStep?: number | SignalRef;
+  tickMinStep?: number | ES;
 
   /**
    * Explicitly set the visible legend values.
    */
-  values?: number[] | string[] | boolean[] | DateTime[] | SignalRef; // Vega already supports Signal -- we have to re-declare here since VL supports special Date Time object that's not valid in Vega.
+  values?: number[] | string[] | boolean[] | DateTime[] | ES; // Vega already supports Signal -- we have to re-declare here since VL supports special Date Time object that's not valid in Vega.
 
   /**
    * The type of the legend. Use `"symbol"` to create a discrete legend and `"gradient"` for a continuous color gradient.
@@ -192,13 +134,13 @@ export interface Legend
 }
 
 // Change comments to be Vega-Lite specific
-interface LegendMixins {
+interface LegendMixins<ES extends ExprRef | SignalRef> {
   /**
    * The strategy to use for resolving overlap of labels in gradient legends. If `false`, no overlap reduction is attempted. If set to `true` or `"parity"`, a strategy of removing every other label is used. If set to `"greedy"`, a linear scan of the labels is performed, removing any label that overlaps with the last visible label (this often works better for log-scaled axes).
    *
    * __Default value:__ `"greedy"` for `log scales otherwise `true`.
    */
-  labelOverlap?: LabelOverlap | SignalRef; // override comment since our default differs from Vega
+  labelOverlap?: LabelOverlap | ES; // override comment since our default differs from Vega
 
   /**
    * The direction of the legend, one of `"vertical"` or `"horizontal"`.
@@ -217,6 +159,8 @@ interface LegendMixins {
    */
   orient?: LegendOrient; // Omit SignalRef
 }
+
+export type LegendInternal = Legend<SignalRef>;
 
 export interface LegendEncoding {
   /**
@@ -246,7 +190,7 @@ export interface LegendEncoding {
   gradient?: GuideEncodingEntry;
 }
 
-export const defaultLegendConfig: LegendConfig = {
+export const defaultLegendConfig: LegendConfig<SignalRef> = {
   gradientHorizontalMaxLength: 200,
   gradientHorizontalMinLength: 100,
   gradientVerticalMaxLength: 200,
@@ -254,7 +198,7 @@ export const defaultLegendConfig: LegendConfig = {
   unselectedOpacity: 0.35
 };
 
-export const COMMON_LEGEND_PROPERTY_INDEX: Flag<keyof (VgLegend | Legend)> = {
+export const COMMON_LEGEND_PROPERTY_INDEX: Flag<keyof (VgLegend | Legend<any>)> = {
   aria: 1,
   clipHeight: 1,
   columnPadding: 1,

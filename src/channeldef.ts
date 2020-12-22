@@ -10,6 +10,7 @@ import {
   COLUMN,
   DESCRIPTION,
   DETAIL,
+  ExtendedChannel,
   FACET,
   FILL,
   FILLOPACITY,
@@ -41,8 +42,7 @@ import {
   X,
   X2,
   Y,
-  Y2,
-  ExtendedChannel
+  Y2
 } from './channel';
 import {getMarkConfig} from './compile/common';
 import {isCustomFormatType} from './compile/format';
@@ -50,12 +50,13 @@ import {CompositeAggregate} from './compositemark';
 import {Config} from './config';
 import {DateTime, dateTimeToExpr, isDateTime} from './datetime';
 import {Encoding} from './encoding';
-import {FormatMixins, Guide, GuideEncodingConditionalValueDef, TitleMixins} from './guide';
+import {ExprRef, isExprRef} from './expr';
+import {Guide, GuideEncodingConditionalValueDef, TitleMixins} from './guide';
 import {ImputeParams} from './impute';
 import {Legend} from './legend';
 import * as log from './log';
 import {LogicalComposition} from './logical';
-import {isRectBasedMark, MarkDef} from './mark';
+import {isRectBasedMark, Mark, MarkDef} from './mark';
 import {Predicate} from './predicate';
 import {Scale, SCALE_CATEGORY_INDEX} from './scale';
 import {isSortByChannel, Sort, SortOrder} from './sort';
@@ -72,20 +73,26 @@ import {
 import {AggregatedFieldDef, WindowFieldDef} from './transform';
 import {getFullName, QUANTITATIVE, StandardType, Type} from './type';
 import {
-  contains,
+  Dict,
   flatAccessWithDatum,
   getFirstDefined,
   internalField,
   omit,
   removePathFromField,
   replacePathInField,
+  stringify,
   titleCase
 } from './util';
 import {isSignalRef} from './vega.schema';
 
 export type PrimitiveValue = number | string | boolean | null;
 
-export type Value = PrimitiveValue | number[] | Gradient | Text | SignalRef;
+export type Value<ES extends ExprRef | SignalRef = ExprRef | SignalRef> =
+  | PrimitiveValue
+  | number[]
+  | Gradient
+  | Text
+  | ES;
 
 /**
  * Definition object for a constant value (primitive value or gradient definition) of an encoding channel.
@@ -97,9 +104,8 @@ export interface ValueDef<V extends Value = Value> {
   value: V;
 }
 
-export type PositionValueDef = ValueDef<number | 'width' | 'height' | SignalRef>;
-
-export type NumericValueDef = ValueDef<number | SignalRef>;
+export type PositionValueDef = ValueDef<number | 'width' | 'height' | ExprRef | SignalRef>;
+export type NumericValueDef = ValueDef<number | ExprRef | SignalRef>;
 
 /**
  * A ValueDef with Condition<ValueDef | FieldDef> where either the condition or the value are optional.
@@ -113,12 +119,15 @@ export type NumericValueDef = ValueDef<number | SignalRef>;
  * @minProperties 1
  */
 export type ValueDefWithCondition<F extends FieldDef<any> | DatumDef<any>, V extends Value = Value> = Partial<
-  ValueDef<V | SignalRef>
+  ValueDef<V | ExprRef | SignalRef>
 > & {
   /**
    * A field definition or one or more value definition(s) with a selection predicate.
    */
-  condition?: Conditional<F> | Conditional<ValueDef<V | SignalRef>> | Conditional<ValueDef<V | SignalRef>>[];
+  condition?:
+    | Conditional<F>
+    | Conditional<ValueDef<V | ExprRef | SignalRef>>
+    | Conditional<ValueDef<V | ExprRef | SignalRef>>[];
 };
 
 export type StringValueDefWithCondition<F extends Field, T extends Type = StandardType> = ValueDefWithCondition<
@@ -127,18 +136,18 @@ export type StringValueDefWithCondition<F extends Field, T extends Type = Standa
 >;
 export type TypeForShape = 'nominal' | 'ordinal' | 'geojson';
 
-export type Conditional<CD extends FieldDef<any> | DatumDef | ValueDef<any> | SignalRef> =
+export type Conditional<CD extends FieldDef<any> | DatumDef | ValueDef<any> | ExprRef | SignalRef> =
   | ConditionalPredicate<CD>
   | ConditionalSelection<CD>;
 
-export type ConditionalPredicate<CD extends FieldDef<any> | DatumDef | ValueDef<any> | SignalRef> = {
+export type ConditionalPredicate<CD extends FieldDef<any> | DatumDef | ValueDef<any> | ExprRef | SignalRef> = {
   /**
    * Predicate for triggering the condition
    */
   test: LogicalComposition<Predicate>;
 } & CD;
 
-export type ConditionalSelection<CD extends FieldDef<any> | DatumDef | ValueDef<any> | SignalRef> = {
+export type ConditionalSelection<CD extends FieldDef<any> | DatumDef | ValueDef<any> | ExprRef | SignalRef> = {
   /**
    * A [selection name](https://vega.github.io/vega-lite/docs/selection.html), or a series of [composed selections](https://vega.github.io/vega-lite/docs/selection.html#compose).
    */
@@ -169,7 +178,7 @@ export interface ConditionValueDefMixins<V extends Value = Value> {
  */
 
 export type FieldOrDatumDefWithCondition<F extends FieldDef<any, any> | DatumDef<any>, V extends Value = Value> = F &
-  ConditionValueDefMixins<V | SignalRef>;
+  ConditionValueDefMixins<V | ExprRef | SignalRef>;
 
 export type MarkPropDef<F extends Field, V extends Value, T extends Type = StandardType> =
   | FieldOrDatumDefWithCondition<MarkPropFieldDef<F, T>, V>
@@ -280,7 +289,7 @@ export interface TypeMixins<T extends Type> {
    * The type of measurement (`"quantitative"`, `"temporal"`, `"ordinal"`, or `"nominal"`) for the encoded field or constant value (`datum`).
    * It can also be a `"geojson"` type for encoding ['geoshape'](https://vega.github.io/vega-lite/docs/geoshape.html).
    *
-   * Since Vega-Lite 4.14.0, Vega-Lite automatically infers data types in many cases as discussed below. However, type is required for a field if:
+   * Vega-Lite automatically infers data types in many cases as discussed below. However, type is required for a field if:
    * (1) the field is not nominal and the field encoding has no specified `aggregate` (except `argmin` and `argmax`), `bin`, scale type, custom `sort` order, nor `timeUnit`
    * or (2) if you wish to use an ordinal scale for a field with `bin` or `timeUnit`.
    *
@@ -289,7 +298,7 @@ export interface TypeMixins<T extends Type> {
    * 1) For a data `field`, `"nominal"` is the default data type unless the field encoding has `aggregate`, `channel`, `bin`, scale type, `sort`, or `timeUnit` that satisfies the following criteria:
    * - `"quantitative"` is the default type if (1) the encoded field contains `bin` or `aggregate` except `"argmin"` and `"argmax"`, (2) the encoding channel is `latitude` or `longitude` channel or (3) if the specified scale type is [a quantitative scale](https://vega.github.io/vega-lite/docs/scale.html#type).
    * - `"temporal"` is the default type if (1) the encoded field contains `timeUnit` or (2) the specified scale type is a time or utc scale
-   * - `ordinal""` is the default type if (1) the encoded field contains a [custom `sort` order](https://vega.github.io/vega-lite/docs/sort.html#specifying-custom-sort-order) or (2) the specified scale type is an ordinal/point/band scale.
+   * - `ordinal""` is the default type if (1) the encoded field contains a [custom `sort` order](https://vega.github.io/vega-lite/docs/sort.html#specifying-custom-sort-order), (2) the specified scale type is an ordinal/point/band scale, or (3) the encoding channel is `order`.
    *
    * 2) For a constant value in data domain (`datum`):
    * - `"quantitative"` if the datum is a number
@@ -369,8 +378,9 @@ export interface ScaleMixins {
 
 export interface DatumDef<
   F extends Field = string,
-  V extends PrimitiveValue | DateTime | SignalRef = PrimitiveValue | DateTime | SignalRef
-> extends Partial<TypeMixins<Type>>, BandMixins {
+  V extends PrimitiveValue | DateTime | ExprRef | SignalRef = PrimitiveValue | DateTime | ExprRef | SignalRef
+> extends Partial<TypeMixins<Type>>,
+    BandMixins {
   /**
    * A constant value in data domain.
    */
@@ -378,6 +388,31 @@ export interface DatumDef<
   // only apply Repeatref if field (F) can be RepeatRef
   // FIXME(https://github.com/microsoft/TypeScript/issues/37586):
   // `F extends RepeatRef` probably should be `RepeatRef extends F` but there is likely a bug in TS.
+}
+
+export interface FormatMixins {
+  /**
+   * When used with the default `"number"` and `"time"` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks.
+   *
+   * - If the format type is `"number"` (e.g., for quantitative fields), this is D3's [number format pattern](https://github.com/d3/d3-format#locale_format).
+   * - If the format type is `"time"` (e.g., for temporal fields), this is D3's [time format pattern](https://github.com/d3/d3-time-format#locale_format).
+   *
+   * See the [format documentation](https://vega.github.io/vega-lite/docs/format.html) for more examples.
+   *
+   * When used with a [custom `formatType`](https://vega.github.io/vega-lite/docs/config.html#custom-format-type), this value will be passed as `format` alongside `datum.value` to the registered function.
+   *
+   * __Default value:__  Derived from [numberFormat](https://vega.github.io/vega-lite/docs/config.html#format) config for number format and from [timeFormat](https://vega.github.io/vega-lite/docs/config.html#format) config for time format.
+   */
+  format?: string | Dict<unknown>;
+
+  /**
+   * The format type for labels. One of `"number"`, `"time"`, or a [registered custom format type](https://vega.github.io/vega-lite/docs/config.html#custom-format-type).
+   *
+   * __Default value:__
+   * - `"time"` for temporal fields and ordinal and nominal fields with `timeUnit`.
+   * - `"number"` for quantitative fields as well as ordinal and nominal fields without `timeUnit`.
+   */
+  formatType?: 'number' | 'time' | string;
 }
 
 export type StringDatumDef<F extends Field = string> = DatumDef<F> & FormatMixins;
@@ -402,7 +437,7 @@ export type LatLongFieldDef<F extends Field> = FieldDefBase<F, null> &
   TitleMixins &
   Partial<TypeMixins<'quantitative'>>; // Lat long shouldn't have bin, but we keep bin property for simplicity of the codebase.
 
-export type LatLongDef<F extends Field> = LatLongFieldDef<F> | DatumDef<F> | NumericValueDef;
+export type LatLongDef<F extends Field> = LatLongFieldDef<F> | DatumDef<F>;
 
 export type PositionFieldDefBase<F extends Field> = ScaleFieldDef<
   F,
@@ -462,7 +497,7 @@ export interface PositionMixins {
    *
    * __See also:__ [`axis`](https://vega.github.io/vega-lite/docs/axis.html) documentation.
    */
-  axis?: Axis | null;
+  axis?: Axis<ExprRef | SignalRef> | null;
 
   /**
    * An object defining the properties of the Impute Operation to be applied.
@@ -490,8 +525,8 @@ export function getBand({
   fieldDef: FieldDef<string> | DatumDef;
   fieldDef2?: SecondaryChannelDef<string>;
   stack: StackProperties;
-  markDef: MarkDef;
-  config: Config;
+  markDef: MarkDef<Mark, SignalRef>;
+  config: Config<SignalRef>;
 }): number {
   if (isFieldOrDatumDef(fieldDef) && fieldDef.band !== undefined) {
     return fieldDef.band;
@@ -520,8 +555,8 @@ export function hasBand(
   fieldDef: FieldDef<string>,
   fieldDef2: SecondaryChannelDef<string>,
   stack: StackProperties,
-  markDef: MarkDef,
-  config: Config
+  markDef: MarkDef<Mark, SignalRef>,
+  config: Config<SignalRef>
 ): boolean {
   if (isBinning(fieldDef.bin) || (fieldDef.timeUnit && isTypedFieldDef(fieldDef) && fieldDef.type === 'temporal')) {
     return !!getBand({channel, fieldDef, fieldDef2, stack, markDef, config});
@@ -550,7 +585,7 @@ export interface LegendMixins {
    *
    * __See also:__ [`legend`](https://vega.github.io/vega-lite/docs/legend.html) documentation.
    */
-  legend?: Legend | null;
+  legend?: Legend<ExprRef | SignalRef> | null;
 }
 
 // Detail
@@ -571,7 +606,7 @@ export interface StringFieldDef<F extends Field> extends FieldDefWithoutScale<F,
 export type FieldDef<F extends Field, T extends Type = any> = SecondaryFieldDef<F> | TypedFieldDef<F, T>;
 export type ChannelDef<F extends Field = string> = Encoding<F>[keyof Encoding<F>];
 
-export function isConditionalDef<CD extends ChannelDef<any> | GuideEncodingConditionalValueDef | SignalRef>(
+export function isConditionalDef<CD extends ChannelDef<any> | GuideEncodingConditionalValueDef | ExprRef | SignalRef>(
   channelDef: CD
 ): channelDef is CD & {condition: Conditional<any>} {
   return !!channelDef && 'condition' in channelDef;
@@ -737,7 +772,7 @@ export function vgField(
           }
         } else if (timeUnit) {
           fn = timeUnitToString(timeUnit);
-          suffix = ((!contains(['range', 'mid'], opt.binSuffix) && opt.binSuffix) || '') + (opt.suffix ?? '');
+          suffix = ((!['range', 'mid'].includes(opt.binSuffix) && opt.binSuffix) || '') + (opt.suffix ?? '');
         }
       }
     }
@@ -825,7 +860,7 @@ export function functionalTitleFormatter(fieldDef: FieldDefBase<string>) {
 
   const fn = aggregate || timeUnitParams?.unit || (timeUnitParams?.maxbins && 'timeunit') || (isBinning(bin) && 'bin');
   if (fn) {
-    return fn.toUpperCase() + '(' + field + ')';
+    return `${fn.toUpperCase()}(${field})`;
   } else {
     return field;
   }
@@ -911,6 +946,9 @@ export function defaultType<T extends TypedFieldDef<Field>>(fieldDef: T, channel
     case 'shape':
     case 'strokeDash':
       return 'nominal';
+
+    case 'order':
+      return 'ordinal';
   }
 
   if (isSortableFieldDef(fieldDef) && isArray(fieldDef.sort)) {
@@ -1219,7 +1257,7 @@ export function channelCompatibility(
       return COMPATIBLE;
 
     case STROKEDASH:
-      if (!contains(['ordinal', 'nominal'], fieldDef.type)) {
+      if (!['ordinal', 'nominal'].includes(fieldDef.type)) {
         return {
           compatible: false,
           warning: 'StrokeDash channel should be used with only discrete data.'
@@ -1228,7 +1266,7 @@ export function channelCompatibility(
       return COMPATIBLE;
 
     case SHAPE:
-      if (!contains(['ordinal', 'nominal', 'geojson'], fieldDef.type)) {
+      if (!['ordinal', 'nominal', 'geojson'].includes(fieldDef.type)) {
         return {
           compatible: false,
           warning: 'Shape channel should be used with only either discrete or geojson data.'
@@ -1268,7 +1306,7 @@ export function isTimeFieldDef(def: FieldDef<any> | DatumDef): boolean {
  * Convert the value to Vega expression if applicable (for datetime object, or string if the field def is temporal or has timeUnit)
  */
 export function valueExpr(
-  v: number | string | boolean | DateTime | SignalRef | number[],
+  v: number | string | boolean | DateTime | ExprRef | SignalRef | number[],
   {
     timeUnit,
     type,
@@ -1285,14 +1323,16 @@ export function valueExpr(
   let isTime = unit || type === 'temporal';
 
   let expr;
-  if (isSignalRef(v)) {
+  if (isExprRef(v)) {
+    expr = v.expr;
+  } else if (isSignalRef(v)) {
     expr = v.signal;
   } else if (isDateTime(v)) {
     isTime = true;
     expr = dateTimeToExpr(v);
   } else if (isString(v) || isNumber(v)) {
     if (isTime) {
-      expr = `datetime(${JSON.stringify(v)})`;
+      expr = `datetime(${stringify(v)})`;
 
       if (isLocalSingleTimeUnit(unit)) {
         // for single timeUnit, we will use dateTimeToExpr to convert number/string to match the timeUnit
@@ -1306,7 +1346,7 @@ export function valueExpr(
     return wrapTime && isTime ? `time(${expr})` : expr;
   }
   // number or boolean or normal string
-  return undefinedIfExprNotRequired ? undefined : JSON.stringify(v);
+  return undefinedIfExprNotRequired ? undefined : stringify(v);
 }
 
 /**
@@ -1343,5 +1383,5 @@ export function binRequiresRange(fieldDef: FieldDef<string>, channel: Channel): 
 
   // We need the range only when the user explicitly forces a binned field to be use discrete scale. In this case, bin range is used in axis and legend labels.
   // We could check whether the axis or legend exists (not disabled) but that seems overkill.
-  return isScaleChannel(channel) && contains(['ordinal', 'nominal'], (fieldDef as ScaleFieldDef<string>).type);
+  return isScaleChannel(channel) && ['ordinal', 'nominal'].includes((fieldDef as ScaleFieldDef<string>).type);
 }

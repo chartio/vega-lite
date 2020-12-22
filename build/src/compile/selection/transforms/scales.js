@@ -47,7 +47,7 @@ const scaleBindings = {
         else {
             for (const proj of bound) {
                 const mapping = `${stringValue(proj.field)}: ${proj.signals.data}`;
-                if (update.indexOf(mapping) < 0) {
+                if (!update.includes(mapping)) {
                     update = `${update.substring(0, update.length - 1)}, ${mapping}}`;
                 }
             }

@@ -1,4 +1,14 @@
-import { __rest } from "tslib";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { selector as parseSelector } from 'vega-event-selector';
 import { isString, stringValue } from 'vega-util';
 import { forEachSelection, STORE } from '.';
@@ -61,10 +71,10 @@ export function parseSelectionPredicate(model, selections, dfnode, datum = 'datu
         if (selCmpt.empty !== 'none') {
             stores.push(store);
         }
-        return (`vlSelectionTest(${store}, ${datum}` + (selCmpt.resolve === 'global' ? ')' : `, ${stringValue(selCmpt.resolve)})`));
+        return `vlSelectionTest(${store}, ${datum}${selCmpt.resolve === 'global' ? ')' : `, ${stringValue(selCmpt.resolve)})`}`;
     }
     const predicateStr = logicalExpr(selections, expr);
-    return ((stores.length ? '!(' + stores.map(s => `length(data(${s}))`).join(' || ') + ') || ' : '') + `(${predicateStr})`);
+    return `${stores.length ? `!(${stores.map(s => `length(data(${s}))`).join(' || ')}) || ` : ''}(${predicateStr})`;
 }
 export function parseSelectionBinExtent(selCmpt, extent) {
     const encoding = extent['encoding'];

@@ -1,4 +1,14 @@
-import { __rest } from "tslib";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { isArray, isBoolean, isNumber, isString } from 'vega-util';
 import { isAggregateOp, isArgmaxDef, isArgminDef, isCountingAggregateOp } from './aggregate';
 import { autoMaxBins, binToString, isBinned, isBinning } from './bin';
@@ -6,6 +16,7 @@ import { ANGLE, COLOR, COLUMN, DESCRIPTION, DETAIL, FACET, FILL, FILLOPACITY, HR
 import { getMarkConfig } from './compile/common';
 import { isCustomFormatType } from './compile/format';
 import { dateTimeToExpr, isDateTime } from './datetime';
+import { isExprRef } from './expr';
 import * as log from './log';
 import { isRectBasedMark } from './mark';
 import { SCALE_CATEGORY_INDEX } from './scale';
@@ -13,7 +24,7 @@ import { isSortByChannel } from './sort';
 import { isFacetFieldDef } from './spec/facet';
 import { getTimeUnitParts, isLocalSingleTimeUnit, normalizeTimeUnit, timeUnitToString } from './timeunit';
 import { getFullName, QUANTITATIVE } from './type';
-import { contains, flatAccessWithDatum, getFirstDefined, internalField, omit, removePathFromField, replacePathInField, titleCase } from './util';
+import { flatAccessWithDatum, getFirstDefined, internalField, omit, removePathFromField, replacePathInField, stringify, titleCase } from './util';
 import { isSignalRef } from './vega.schema';
 export function isConditionalSelection(c) {
     return c['selection'];
@@ -163,7 +174,7 @@ export function vgField(fieldDef, opt = {}) {
                 }
                 else if (timeUnit) {
                     fn = timeUnitToString(timeUnit);
-                    suffix = ((!contains(['range', 'mid'], opt.binSuffix) && opt.binSuffix) || '') + ((_c = opt.suffix) !== null && _c !== void 0 ? _c : '');
+                    suffix = ((!['range', 'mid'].includes(opt.binSuffix) && opt.binSuffix) || '') + ((_c = opt.suffix) !== null && _c !== void 0 ? _c : '');
                 }
             }
         }
@@ -247,7 +258,7 @@ export function functionalTitleFormatter(fieldDef) {
     const timeUnitParams = normalizeTimeUnit(timeUnit);
     const fn = aggregate || (timeUnitParams === null || timeUnitParams === void 0 ? void 0 : timeUnitParams.unit) || ((timeUnitParams === null || timeUnitParams === void 0 ? void 0 : timeUnitParams.maxbins) && 'timeunit') || (isBinning(bin) && 'bin');
     if (fn) {
-        return fn.toUpperCase() + '(' + field + ')';
+        return `${fn.toUpperCase()}(${field})`;
     }
     else {
         return field;
@@ -324,6 +335,8 @@ export function defaultType(fieldDef, channel) {
         case 'shape':
         case 'strokeDash':
             return 'nominal';
+        case 'order':
+            return 'ordinal';
     }
     if (isSortableFieldDef(fieldDef) && isArray(fieldDef.sort)) {
         return 'ordinal';
@@ -573,7 +586,7 @@ export function channelCompatibility(fieldDef, channel) {
             }
             return COMPATIBLE;
         case STROKEDASH:
-            if (!contains(['ordinal', 'nominal'], fieldDef.type)) {
+            if (!['ordinal', 'nominal'].includes(fieldDef.type)) {
                 return {
                     compatible: false,
                     warning: 'StrokeDash channel should be used with only discrete data.'
@@ -581,7 +594,7 @@ export function channelCompatibility(fieldDef, channel) {
             }
             return COMPATIBLE;
         case SHAPE:
-            if (!contains(['ordinal', 'nominal', 'geojson'], fieldDef.type)) {
+            if (!['ordinal', 'nominal', 'geojson'].includes(fieldDef.type)) {
                 return {
                     compatible: false,
                     warning: 'Shape channel should be used with only either discrete or geojson data.'
@@ -621,7 +634,10 @@ export function valueExpr(v, { timeUnit, type, wrapTime, undefinedIfExprNotRequi
     const unit = timeUnit && ((_a = normalizeTimeUnit(timeUnit)) === null || _a === void 0 ? void 0 : _a.unit);
     let isTime = unit || type === 'temporal';
     let expr;
-    if (isSignalRef(v)) {
+    if (isExprRef(v)) {
+        expr = v.expr;
+    }
+    else if (isSignalRef(v)) {
         expr = v.signal;
     }
     else if (isDateTime(v)) {
@@ -630,7 +646,7 @@ export function valueExpr(v, { timeUnit, type, wrapTime, undefinedIfExprNotRequi
     }
     else if (isString(v) || isNumber(v)) {
         if (isTime) {
-            expr = `datetime(${JSON.stringify(v)})`;
+            expr = `datetime(${stringify(v)})`;
             if (isLocalSingleTimeUnit(unit)) {
                 // for single timeUnit, we will use dateTimeToExpr to convert number/string to match the timeUnit
                 if ((isNumber(v) && v < 10000) || (isString(v) && isNaN(Date.parse(v)))) {
@@ -643,7 +659,7 @@ export function valueExpr(v, { timeUnit, type, wrapTime, undefinedIfExprNotRequi
         return wrapTime && isTime ? `time(${expr})` : expr;
     }
     // number or boolean or normal string
-    return undefinedIfExprNotRequired ? undefined : JSON.stringify(v);
+    return undefinedIfExprNotRequired ? undefined : stringify(v);
 }
 /**
  * Standardize value array -- convert each value to Vega expression if applicable
@@ -674,6 +690,6 @@ export function binRequiresRange(fieldDef, channel) {
     }
     // We need the range only when the user explicitly forces a binned field to be use discrete scale. In this case, bin range is used in axis and legend labels.
     // We could check whether the axis or legend exists (not disabled) but that seems overkill.
-    return isScaleChannel(channel) && contains(['ordinal', 'nominal'], fieldDef.type);
+    return isScaleChannel(channel) && ['ordinal', 'nominal'].includes(fieldDef.type);
 }
 //# sourceMappingURL=channeldef.js.map

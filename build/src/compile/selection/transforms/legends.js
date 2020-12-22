@@ -27,7 +27,7 @@ const legendBindings = {
             const legendFilter = 'event.item && indexof(event.item.mark.role, "legend") < 0';
             for (const evt of selCmpt.events) {
                 evt.filter = array((_a = evt.filter) !== null && _a !== void 0 ? _a : []);
-                if (evt.filter.indexOf(legendFilter) < 0) {
+                if (!evt.filter.includes(legendFilter)) {
                     evt.filter.push(legendFilter);
                 }
             }

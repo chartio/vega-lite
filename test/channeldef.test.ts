@@ -1,3 +1,4 @@
+import {SignalRef} from 'vega';
 import {COUNTING_OPS} from '../src/aggregate';
 import {CHANNELS} from '../src/channel';
 import {
@@ -55,12 +56,12 @@ describe('fieldDef', () => {
     it('should return temporal if there is timeUnit', () => {
       expect(defaultType({timeUnit: 'month', field: 'a'}, 'x')).toBe('temporal');
     });
-    it('should return ordinal if there is a custom sort order ', () => {
+    it('should return ordinal if there is a custom sort order', () => {
       expect(defaultType({field: 'a', sort: [1, 2, 3]}, 'x')).toBe('ordinal');
       expect(defaultType({timeUnit: 'month', field: 'a', sort: [1, 2, 3]}, 'x')).toBe('ordinal');
     });
 
-    it('should return nominal if the field is sorted by another field ', () => {
+    it('should return nominal if the field is sorted by another field', () => {
       expect(defaultType({field: 'a', sort: '-x'}, 'x')).toBe('nominal');
       expect(defaultType({field: 'a', sort: {encoding: 'x'}}, 'x')).toBe('nominal');
       expect(defaultType({field: 'a', sort: {field: 'x'}}, 'x')).toBe('nominal');
@@ -101,6 +102,10 @@ describe('fieldDef', () => {
       expect(defaultType({aggregate: {argmax: 'b'}, field: 'a'}, 'x')).toBe('nominal');
     });
 
+    it('should return ordinal for order channels', () => {
+      expect(defaultType({field: 'foo'}, 'order')).toBe('ordinal');
+    });
+
     it('should return nominal by default', () => {
       expect(defaultType({field: 'a'}, 'x')).toBe('nominal');
     });
@@ -126,7 +131,7 @@ describe('fieldDef', () => {
     });
 
     it('converts header orient to labelOrient and titleOrient', () => {
-      const fieldDef: FacetFieldDef<string> = {field: 1 as any, type: 'nominal', header: {orient: 'bottom'}};
+      const fieldDef: FacetFieldDef<string, SignalRef> = {field: 1 as any, type: 'nominal', header: {orient: 'bottom'}};
       expect(initChannelDef(fieldDef, 'row', defaultConfig)).toEqual({
         field: '1',
         type: 'nominal',

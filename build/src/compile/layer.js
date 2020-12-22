@@ -16,10 +16,10 @@ export class LayerModel extends Model {
         const layoutSize = Object.assign(Object.assign(Object.assign({}, parentGivenSize), (spec.width ? { width: spec.width } : {})), (spec.height ? { height: spec.height } : {}));
         this.children = spec.layer.map((layer, i) => {
             if (isLayerSpec(layer)) {
-                return new LayerModel(layer, this, this.getName('layer_' + i), layoutSize, config);
+                return new LayerModel(layer, this, this.getName(`layer_${i}`), layoutSize, config);
             }
             else if (isUnitSpec(layer)) {
-                return new UnitModel(layer, this, this.getName('layer_' + i), layoutSize, config);
+                return new UnitModel(layer, this, this.getName(`layer_${i}`), layoutSize, config);
             }
             throw new Error(log.message.invalidSpec(layer));
         });

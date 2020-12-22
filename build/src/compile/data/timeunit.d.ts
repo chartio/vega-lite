@@ -18,6 +18,10 @@ export declare class TimeUnitNode extends DataFlowNode {
      * and removing `other`.
      */
     merge(other: TimeUnitNode): void;
+    /**
+     * Remove time units coming from the other node.
+     */
+    removeFormulas(fields: Set<string>): void;
     producedFields(): Set<string>;
     dependentFields(): Set<string>;
     hash(): string;

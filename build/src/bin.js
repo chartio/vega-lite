@@ -1,7 +1,7 @@
 import { isBoolean, isObject } from 'vega-util';
 import { COLOR, COLUMN, FILL, FILLOPACITY, OPACITY, ROW, SHAPE, SIZE, STROKE, STROKEDASH, STROKEOPACITY, STROKEWIDTH } from './channel';
 import { normalizeBin } from './channeldef';
-import { keys, varName } from './util';
+import { entries, keys, varName } from './util';
 /**
  * Create a key for the bin configuration. Not for prebinned bin.
  */
@@ -11,7 +11,7 @@ export function binToString(bin) {
     }
     return ('bin' +
         keys(bin)
-            .map(p => (isSelectionExtent(bin[p]) ? varName(`_${p}_${Object.entries(bin[p])}`) : varName(`_${p}_${bin[p]}`)))
+            .map(p => (isSelectionExtent(bin[p]) ? varName(`_${p}_${entries(bin[p])}`) : varName(`_${p}_${bin[p]}`)))
             .join(''));
 }
 /**

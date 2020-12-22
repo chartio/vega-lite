@@ -1,13 +1,24 @@
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { isArray } from 'vega-util';
 import { isBinning } from '../bin';
 import { COLUMN, FACET_CHANNELS, POSITION_SCALE_CHANNELS, ROW } from '../channel';
-import { initChannelDef, vgField } from '../channeldef';
-import { reduce } from '../encoding';
+import { initFieldDef, vgField } from '../channeldef';
+import { replaceExprRef } from '../expr';
 import * as log from '../log';
 import { hasDiscreteDomain } from '../scale';
 import { DEFAULT_SORT_OP, isSortField } from '../sort';
 import { isFacetMapping } from '../spec/facet';
-import { contains } from '../util';
+import { keys } from '../util';
 import { isVgRangeStep } from '../vega.schema';
 import { buildModel } from './buildmodel';
 import { assembleFacetData } from './data/assemble';
@@ -30,27 +41,39 @@ export class FacetModel extends ModelWithField {
         this.child = buildModel(spec.spec, this, this.getName('child'), undefined, config);
         this.children = [this.child];
         this.size = Object.assign(Object.assign({}, (spec.width ? { width: spec.width } : {})), (spec.height ? { height: spec.height } : {}));
-        this.facet = this.initFacet(spec.facet, config);
+        this.facet = this.initFacet(spec.facet);
     }
-    initFacet(facet, config) {
+    initFacet(facet) {
         // clone to prevent side effect to the original spec
         if (!isFacetMapping(facet)) {
-            return { facet: initChannelDef(facet, 'facet', config) };
+            return { facet: this.initFacetFieldDef(facet, 'facet') };
         }
-        return reduce(facet, (normalizedFacet, fieldDef, channel) => {
-            if (!contains([ROW, COLUMN], channel)) {
+        const channels = keys(facet);
+        const normalizedFacet = {};
+        for (const channel of channels) {
+            if (![ROW, COLUMN].includes(channel)) {
                 // Drop unsupported channel
                 log.warn(log.message.incompatibleChannel(channel, 'facet'));
-                return normalizedFacet;
+                break;
             }
+            const fieldDef = facet[channel];
             if (fieldDef.field === undefined) {
                 log.warn(log.message.emptyFieldDef(fieldDef, channel));
-                return normalizedFacet;
+                break;
             }
-            // Convert type to full, lowercase type, or augment the fieldDef with a default type if missing.
-            normalizedFacet[channel] = initChannelDef(fieldDef, channel, config);
-            return normalizedFacet;
-        }, {});
+            normalizedFacet[channel] = this.initFacetFieldDef(fieldDef, channel);
+        }
+        return normalizedFacet;
+    }
+    initFacetFieldDef(fieldDef, channel) {
+        const { header } = fieldDef, rest = __rest(fieldDef, ["header"]);
+        // Cast because we call initFieldDef, which assumes general FieldDef.
+        // However, FacetFieldDef is a bit more constrained than the general FieldDef
+        const facetFieldDef = initFieldDef(rest, channel);
+        if (header) {
+            facetFieldDef.header = replaceExprRef(header);
+        }
+        return facetFieldDef;
     }
     channelHasField(channel) {
         return !!this.facet[channel];
@@ -98,8 +121,8 @@ export class FacetModel extends ModelWithField {
                 const headerComponent = layoutHeaderComponent[headerType];
                 const { facetFieldDef } = layoutHeaderComponent;
                 if (facetFieldDef) {
-                    const titleOrient = getHeaderProperty('titleOrient', facetFieldDef, this.config, channel);
-                    if (contains(['right', 'bottom'], titleOrient)) {
+                    const titleOrient = getHeaderProperty('titleOrient', facetFieldDef.header, this.config, channel);
+                    if (['right', 'bottom'].includes(titleOrient)) {
                         const headerChannel = getHeaderChannel(channel, titleOrient);
                         layoutMixins.titleAnchor = (_a = layoutMixins.titleAnchor) !== null && _a !== void 0 ? _a : {};
                         layoutMixins.titleAnchor[headerChannel] = 'end';
@@ -283,6 +306,7 @@ export class FacetModel extends ModelWithField {
         return [];
     }
     assembleLabelTitle() {
+        var _a;
         const { facet, config } = this;
         if (facet.facet) {
             // Facet always uses title to display labels
@@ -294,8 +318,8 @@ export class FacetModel extends ModelWithField {
         };
         for (const channel of HEADER_CHANNELS) {
             if (facet[channel]) {
-                const labelOrient = getHeaderProperty('labelOrient', facet[channel], config, channel);
-                if (contains(ORTHOGONAL_ORIENT[channel], labelOrient)) {
+                const labelOrient = getHeaderProperty('labelOrient', (_a = facet[channel]) === null || _a === void 0 ? void 0 : _a.header, config, channel);
+                if (ORTHOGONAL_ORIENT[channel].includes(labelOrient)) {
                     // Row/Column with orthogonal labelOrient must use title to display labels
                     return assembleLabelTitle(facet[channel], channel, config);
                 }

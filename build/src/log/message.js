@@ -1,7 +1,7 @@
 import { getSizeChannel } from '../channel';
 import { stringify } from '../util';
 export function invalidSpec(spec) {
-    return `Invalid specification ${JSON.stringify(spec)}. Make sure the specification includes at least one of the following properties: "mark", "layer", "facet", "hconcat", "vconcat", "concat", or "repeat".`;
+    return `Invalid specification ${stringify(spec)}. Make sure the specification includes at least one of the following properties: "mark", "layer", "facet", "hconcat", "vconcat", "concat", or "repeat".`;
 }
 // FIT
 export const FIT_NON_SINGLE = 'Autosize "fit" only works for single views and layered views.';
@@ -100,9 +100,6 @@ export function droppingColor(type, opt) {
 export function emptyFieldDef(fieldDef, channel) {
     return `Dropping ${stringify(fieldDef)} from channel "${channel}" since it does not contain any data field, datum, value, or signal.`;
 }
-export function latLongDeprecated(channel, type, newChannel) {
-    return `${channel}-encoding with type ${type} is deprecated. Replacing with ${newChannel}-encoding.`;
-}
 export const LINE_WITH_VARYING_SIZE = 'Line marks cannot encode size with a non-groupby field. You may want to use trail marks instead.';
 export function incompatibleChannel(channel, markOrFacet, when) {
     return `${channel} dropped as it is incompatible with "${markOrFacet}"${when ? ` when ${when}` : ''}.`;
@@ -120,6 +117,9 @@ export function discreteChannelCannotEncode(channel, type) {
     return `Using discrete channel "${channel}" to encode "${type}" field can be misleading as it does not encode ${type === 'ordinal' ? 'order' : 'magnitude'}.`;
 }
 // MARK
+export function rangeMarkAlignmentCannotBeExpression(align) {
+    return `The ${align} for range marks cannot be an expression`;
+}
 export function lineWithRange(hasX2, hasY2) {
     const channels = hasX2 && hasY2 ? 'x2 and y2' : hasX2 ? 'x2' : 'y2';
     return `Line mark is for continuous lines and thus cannot be used with ${channels}. We will use the rule mark (line segments) instead.`;
@@ -129,7 +129,6 @@ export function orientOverridden(original, actual) {
 }
 // SCALE
 export const CANNOT_UNION_CUSTOM_DOMAIN_WITH_FIELD_DOMAIN = 'Custom domain scale cannot be unioned with default field-based domain.';
-export const RANGE_STEP_DEPRECATED = `Scale's "rangeStep" is deprecated and will be removed in Vega-Lite 5.0. Please use "width"/"height": {"step": ...} instead. See https://vega.github.io/vega-lite/docs/size.html.`;
 export function cannotUseScalePropertyWithNonColor(prop) {
     return `Cannot use the scale property "${prop}" with non-color channel.`;
 }

@@ -1,22 +1,15 @@
 /**
  * Collection of all Vega-Lite Error Messages
  */
-import {AggregateOp} from 'vega';
+import {AggregateOp, SignalRef} from 'vega';
 import {Aggregate} from '../aggregate';
-import {
-  Channel,
-  FacetChannel,
-  GeoPositionChannel,
-  getSizeChannel,
-  PositionScaleChannel,
-  ScaleChannel,
-  ExtendedChannel
-} from '../channel';
+import {Channel, ExtendedChannel, FacetChannel, getSizeChannel, PositionScaleChannel, ScaleChannel} from '../channel';
 import {HiddenCompositeAggregate, TypedFieldDef, Value} from '../channeldef';
 import {SplitParentProperty} from '../compile/split';
 import {CompositeMark} from '../compositemark';
 import {ErrorBarCenter, ErrorBarExtent} from '../compositemark/errorbar';
 import {DateTime, DateTimeExpr} from '../datetime';
+import {ExprRef} from '../expr';
 import {Mark} from '../mark';
 import {Projection} from '../projection';
 import {ScaleType} from '../scale';
@@ -26,7 +19,7 @@ import {stringify} from '../util';
 import {VgSortField} from '../vega.schema';
 
 export function invalidSpec(spec: GenericSpec<any, any, any, any>) {
-  return `Invalid specification ${JSON.stringify(
+  return `Invalid specification ${stringify(
     spec
   )}. Make sure the specification includes at least one of the following properties: "mark", "layer", "facet", "hconcat", "vconcat", "concat", or "repeat".`;
 }
@@ -132,7 +125,10 @@ export function customFormatTypeNotAllowed(channel: ExtendedChannel) {
   return `Config.customFormatTypes is not true, thus custom format type and format for channel ${channel} are dropped.`;
 }
 
-export function projectionOverridden(opt: {parentProjection: Projection; projection: Projection}) {
+export function projectionOverridden<ES extends ExprRef | SignalRef>(opt: {
+  parentProjection: Projection<ES>;
+  projection: Projection<ES>;
+}) {
   const {parentProjection, projection} = opt;
   return `Layer's shared projection ${stringify(parentProjection)} is overridden by a child projection ${stringify(
     projection
@@ -176,9 +172,6 @@ export function emptyFieldDef(fieldDef: unknown, channel: ExtendedChannel) {
     fieldDef
   )} from channel "${channel}" since it does not contain any data field, datum, value, or signal.`;
 }
-export function latLongDeprecated(channel: Channel, type: Type, newChannel: GeoPositionChannel) {
-  return `${channel}-encoding with type ${type} is deprecated. Replacing with ${newChannel}-encoding.`;
-}
 
 export const LINE_WITH_VARYING_SIZE =
   'Line marks cannot encode size with a non-groupby field. You may want to use trail marks instead.';
@@ -210,6 +203,11 @@ export function discreteChannelCannotEncode(channel: Channel, type: Type) {
 }
 
 // MARK
+
+export function rangeMarkAlignmentCannotBeExpression(align: 'align' | 'baseline') {
+  return `The ${align} for range marks cannot be an expression`;
+}
+
 export function lineWithRange(hasX2: boolean, hasY2: boolean) {
   const channels = hasX2 && hasY2 ? 'x2 and y2' : hasX2 ? 'x2' : 'y2';
   return `Line mark is for continuous lines and thus cannot be used with ${channels}. We will use the rule mark (line segments) instead.`;
@@ -222,8 +220,6 @@ export function orientOverridden(original: string, actual: string) {
 // SCALE
 export const CANNOT_UNION_CUSTOM_DOMAIN_WITH_FIELD_DOMAIN =
   'Custom domain scale cannot be unioned with default field-based domain.';
-
-export const RANGE_STEP_DEPRECATED = `Scale's "rangeStep" is deprecated and will be removed in Vega-Lite 5.0. Please use "width"/"height": {"step": ...} instead. See https://vega.github.io/vega-lite/docs/size.html.`;
 
 export function cannotUseScalePropertyWithNonColor(prop: string) {
   return `Cannot use the scale property "${prop}" with non-color channel.`;

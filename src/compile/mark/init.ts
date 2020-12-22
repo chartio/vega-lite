@@ -1,8 +1,9 @@
-import {Orientation} from 'vega';
+import {Orientation, SignalRef} from 'vega';
 import {isBinned, isBinning} from '../../bin';
 import {isContinuousFieldOrDatumDef, isFieldDef, isNumericDataDef, TypedFieldDef} from '../../channeldef';
 import {Config} from '../../config';
 import {Encoding, isAggregate} from '../../encoding';
+import {replaceExprRef} from '../../expr';
 import * as log from '../../log';
 import {
   AREA,
@@ -24,7 +25,10 @@ import {QUANTITATIVE, TEMPORAL} from '../../type';
 import {contains, getFirstDefined} from '../../util';
 import {getMarkConfig, getMarkPropOrConfig} from '../common';
 
-export function initMarkdef(markDef: MarkDef, encoding: Encoding<string>, config: Config) {
+export function initMarkdef(originalMarkDef: MarkDef, encoding: Encoding<string>, config: Config<SignalRef>) {
+  // FIXME: markDef expects that exprRefs are replaced recursively but replaceExprRef only replaces the top level
+  const markDef: MarkDef<Mark, SignalRef> = replaceExprRef(originalMarkDef) as any;
+
   // set orient, which can be overridden by rules as sometimes the specified orient is invalid.
   const specifiedOrient = getMarkPropOrConfig('orient', markDef, config);
   markDef.orient = orient(markDef.type, encoding, specifiedOrient);
@@ -65,7 +69,7 @@ export function initMarkdef(markDef: MarkDef, encoding: Encoding<string>, config
   return markDef;
 }
 
-function cursor(markDef: MarkDef, encoding: Encoding<string>, config: Config) {
+function cursor(markDef: MarkDef<Mark, SignalRef>, encoding: Encoding<string>, config: Config<SignalRef>) {
   if (encoding.href || markDef.href || getMarkPropOrConfig('href', markDef, config)) {
     return 'pointer';
   }
@@ -82,7 +86,7 @@ function opacity(mark: Mark, encoding: Encoding<string>) {
   return undefined;
 }
 
-export function defaultFilled(markDef: MarkDef, config: Config, {graticule}: {graticule: boolean}) {
+export function defaultFilled(markDef: MarkDef, config: Config<SignalRef>, {graticule}: {graticule: boolean}) {
   if (graticule) {
     return false;
   }

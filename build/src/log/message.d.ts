@@ -1,14 +1,15 @@
 /**
  * Collection of all Vega-Lite Error Messages
  */
-import { AggregateOp } from 'vega';
+import { AggregateOp, SignalRef } from 'vega';
 import { Aggregate } from '../aggregate';
-import { Channel, FacetChannel, GeoPositionChannel, PositionScaleChannel, ScaleChannel, ExtendedChannel } from '../channel';
+import { Channel, ExtendedChannel, FacetChannel, PositionScaleChannel, ScaleChannel } from '../channel';
 import { HiddenCompositeAggregate, TypedFieldDef, Value } from '../channeldef';
 import { SplitParentProperty } from '../compile/split';
 import { CompositeMark } from '../compositemark';
 import { ErrorBarCenter, ErrorBarExtent } from '../compositemark/errorbar';
 import { DateTime, DateTimeExpr } from '../datetime';
+import { ExprRef } from '../expr';
 import { Mark } from '../mark';
 import { Projection } from '../projection';
 import { ScaleType } from '../scale';
@@ -40,9 +41,9 @@ export declare const ADD_SAME_CHILD_TWICE = "Attempt to add the same child twice
 export declare function invalidTransformIgnored(transform: any): string;
 export declare const NO_FIELDS_NEEDS_AS = "If \"from.fields\" is not specified, \"as\" has to be a string that specifies the key to be used for the data from the secondary source.";
 export declare function customFormatTypeNotAllowed(channel: ExtendedChannel): string;
-export declare function projectionOverridden(opt: {
-    parentProjection: Projection;
-    projection: Projection;
+export declare function projectionOverridden<ES extends ExprRef | SignalRef>(opt: {
+    parentProjection: Projection<ES>;
+    projection: Projection<ES>;
 }): string;
 export declare const REPLACE_ANGLE_WITH_THETA = "Arc marks uses theta channel rather than angle, replacing angle with theta.";
 export declare function primitiveChannelDef(channel: ExtendedChannel, type: 'string' | 'number' | 'boolean', value: Exclude<Value, null>): string;
@@ -55,17 +56,16 @@ export declare function droppingColor(type: 'encoding' | 'property', opt: {
     stroke?: boolean;
 }): string;
 export declare function emptyFieldDef(fieldDef: unknown, channel: ExtendedChannel): string;
-export declare function latLongDeprecated(channel: Channel, type: Type, newChannel: GeoPositionChannel): string;
 export declare const LINE_WITH_VARYING_SIZE = "Line marks cannot encode size with a non-groupby field. You may want to use trail marks instead.";
 export declare function incompatibleChannel(channel: ExtendedChannel, markOrFacet: Mark | 'facet' | CompositeMark, when?: string): string;
 export declare function invalidEncodingChannel(channel: ExtendedChannel): string;
 export declare function facetChannelShouldBeDiscrete(channel: FacetChannel): string;
 export declare function facetChannelDropped(channels: FacetChannel[]): string;
 export declare function discreteChannelCannotEncode(channel: Channel, type: Type): string;
+export declare function rangeMarkAlignmentCannotBeExpression(align: 'align' | 'baseline'): string;
 export declare function lineWithRange(hasX2: boolean, hasY2: boolean): string;
 export declare function orientOverridden(original: string, actual: string): string;
 export declare const CANNOT_UNION_CUSTOM_DOMAIN_WITH_FIELD_DOMAIN = "Custom domain scale cannot be unioned with default field-based domain.";
-export declare const RANGE_STEP_DEPRECATED = "Scale's \"rangeStep\" is deprecated and will be removed in Vega-Lite 5.0. Please use \"width\"/\"height\": {\"step\": ...} instead. See https://vega.github.io/vega-lite/docs/size.html.";
 export declare function cannotUseScalePropertyWithNonColor(prop: string): string;
 export declare function unaggregateDomainHasNoEffectForRawField(fieldDef: TypedFieldDef<string>): string;
 export declare function unaggregateDomainWithNonSharedDomainOp(aggregate: Aggregate | string): string;

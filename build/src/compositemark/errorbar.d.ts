@@ -1,9 +1,10 @@
-import { Orientation, Text } from 'vega';
+import { Orientation, SignalRef, Text } from 'vega';
 import { PositionChannel } from '../channel';
 import { Field, PositionFieldDef, SecondaryFieldDef, ValueDef } from '../channeldef';
 import { Config } from '../config';
 import { Data } from '../data';
 import { Encoding } from '../encoding';
+import { ExprRef } from '../expr';
 import { NormalizerParams } from '../normalize';
 import { GenericUnitSpec, NormalizedLayerSpec } from '../spec';
 import { Step } from '../spec/base';
@@ -41,6 +42,10 @@ export interface ErrorExtraEncoding<F extends Field> {
 export declare type ErrorEncoding<F extends Field> = Pick<Encoding<F>, PositionChannel | 'color' | 'detail' | 'opacity'> & ErrorExtraEncoding<F>;
 export declare type ErrorBarPartsMixins = PartsMixins<ErrorBarPart>;
 export interface ErrorBarConfig extends ErrorBarPartsMixins {
+    /** Size of the ticks of an error bar */
+    size?: number;
+    /** Thickness of the ticks and the bar of an error bar */
+    thickness?: number;
     /**
      * The center of the errorbar. Available options include:
      * - `"mean"`: the mean of the data points.
@@ -85,7 +90,7 @@ export declare function errorBarParams<M extends ErrorBar | ErrorBand, MD extend
     markDef: MD;
     outerSpec: {
         data?: Data;
-        title?: Text | TitleParams;
+        title?: Text | TitleParams<ExprRef | SignalRef>;
         name?: string;
         description?: string;
         transform?: Transform[];

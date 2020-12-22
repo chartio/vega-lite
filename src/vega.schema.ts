@@ -1,4 +1,4 @@
-import {
+import type {
   AggregateOp,
   BandScale,
   BaseScale,
@@ -11,6 +11,7 @@ import {
   LayoutAlign,
   LinearScale,
   LogScale,
+  Mark,
   MarkConfig,
   NumericValueRef,
   OrdinalScale,
@@ -38,31 +39,32 @@ import {
   TimeScale,
   Title as VgTitle,
   Transforms as VgTransform,
-  UnionSortField as VgUnionSortField,
-  Mark
+  UnionSortField as VgUnionSortField
 } from 'vega';
 import {isArray} from 'vega-util';
 import {Value} from './channeldef';
+import {ExprRef} from './expr';
 import {SortOrder} from './sort';
-import {Flag, keys, Dict} from './util';
+import {Dict, Flag, keys} from './util';
 
-export {VgSortField, VgUnionSortField, VgCompare, VgTitle, LayoutAlign, ProjectionType, VgExprRef};
+export type {VgSortField, VgUnionSortField, VgCompare, VgTitle, LayoutAlign, ProjectionType, VgExprRef};
 
-// TODO: make recursive
-type ExcludeMapped<T, E> = {
+// TODO: make recursive (e.g. with https://stackoverflow.com/a/64900252/214950 but needs https://github.com/vega/ts-json-schema-generator/issues/568)
+export type MappedExclude<T, E> = {
   [P in keyof T]: Exclude<T[P], E>;
 };
 
-type ExcludeMappedButKeepSignals<T, E> = {
-  [P in keyof T]: SignalRef extends T[P] ? Exclude<T[P], E> | SignalRef : Exclude<T[P], E>;
+export type MapExcludeAndKeepSignalAs<T, E, S extends ExprRef | SignalRef> = {
+  [P in keyof T]: SignalRef extends T[P] ? Exclude<T[P], E> | S : Exclude<T[P], E>;
 };
 
 // Remove ValueRefs from mapped types
-export type ExcludeMappedValueRef<T> = ExcludeMapped<T, ScaledValueRef<any> | NumericValueRef | ColorValueRef>;
+export type MappedExcludeValueRef<T> = MappedExclude<T, ScaledValueRef<any> | NumericValueRef | ColorValueRef>;
 
-export type ExcludeMappedValueRefButKeepSignal<T> = ExcludeMappedButKeepSignals<
+export type MapExcludeValueRefAndReplaceSignalWith<T, S extends ExprRef | SignalRef> = MapExcludeAndKeepSignalAs<
   T,
-  ScaledValueRef<any> | NumericValueRef | ColorValueRef
+  ScaledValueRef<any> | NumericValueRef | ColorValueRef,
+  S
 >;
 
 export interface VgData {
@@ -90,7 +92,7 @@ export function isSignalRef(o: any): o is SignalRef {
 
 // TODO: add type of value (Make it VgValueRef<V extends ValueOrGradient> {value?:V ...})
 export interface VgValueRef {
-  value?: Value | number[];
+  value?: Value<null>;
   field?:
     | string
     | {
@@ -339,7 +341,9 @@ const VG_MARK_CONFIG_INDEX: Flag<keyof MarkConfig> = {
   cornerRadiusBottomRight: 1,
   aspect: 1,
   width: 1,
-  height: 1
+  height: 1,
+  url: 1,
+  smooth: 1
 
   // commented below are vg channel that do not have mark config.
   // x: 1,

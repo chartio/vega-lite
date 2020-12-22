@@ -1,4 +1,14 @@
-import { __rest } from "tslib";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { isNumber, isObject } from 'vega-util';
 import { getMarkPropOrConfig } from '../compile/common';
 import { extractTransformsFromEncoding, normalizeEncoding } from '../encoding';
@@ -31,7 +41,7 @@ export function normalizeBoxPlot(spec, { config }) {
     const sizeValue = getMarkPropOrConfig('size', markDef, // TODO: https://github.com/vega/vega-lite/issues/6245
     config);
     const boxPlotType = getBoxPlotType(extent);
-    const { transform, continuousAxisChannelDef, continuousAxis, groupby, aggregate, encodingWithoutContinuousAxis, ticksOrient, boxOrient, customTooltipWithoutAggregatedField } = boxParams(spec, extent, config);
+    const { bins, timeUnits, transform, continuousAxisChannelDef, continuousAxis, groupby, aggregate, encodingWithoutContinuousAxis, ticksOrient, boxOrient, customTooltipWithoutAggregatedField } = boxParams(spec, extent, config);
     const { color, size } = encodingWithoutContinuousAxis, encodingWithoutSizeColorAndContinuousAxis = __rest(encodingWithoutContinuousAxis, ["color", "size"]);
     const makeBoxPlotPart = (sharedEncoding) => {
         return makeCompositeAggregatePartFactory(markDef, continuousAxis, continuousAxisChannelDef, sharedEncoding, config.boxplot);
@@ -101,105 +111,96 @@ export function normalizeBoxPlot(spec, { config }) {
             extraEncoding: fiveSummaryTooltipEncoding
         })
     ];
-    // ## Filtered Layers
-    let filteredLayersMixins;
-    if (boxPlotType !== 'min-max') {
-        const lowerBoxExpr = `datum["lower_box_${continuousAxisChannelDef.field}"]`;
-        const upperBoxExpr = `datum["upper_box_${continuousAxisChannelDef.field}"]`;
-        const iqrExpr = `(${upperBoxExpr} - ${lowerBoxExpr})`;
-        const lowerWhiskerExpr = `${lowerBoxExpr} - ${extent} * ${iqrExpr}`;
-        const upperWhiskerExpr = `${upperBoxExpr} + ${extent} * ${iqrExpr}`;
-        const fieldExpr = `datum["${continuousAxisChannelDef.field}"]`;
-        const joinaggregateTransform = {
-            joinaggregate: boxParamsQuartiles(continuousAxisChannelDef.field),
-            groupby
-        };
-        let filteredWhiskerSpec = undefined;
-        if (boxPlotType === 'tukey') {
-            filteredWhiskerSpec = {
-                transform: [
+    if (boxPlotType === 'min-max') {
+        return Object.assign(Object.assign({}, outerSpec), { transform: ((_b = outerSpec.transform) !== null && _b !== void 0 ? _b : []).concat(transform), layer: boxLayers });
+    }
+    // Tukey Box Plot
+    const lowerBoxExpr = `datum["lower_box_${continuousAxisChannelDef.field}"]`;
+    const upperBoxExpr = `datum["upper_box_${continuousAxisChannelDef.field}"]`;
+    const iqrExpr = `(${upperBoxExpr} - ${lowerBoxExpr})`;
+    const lowerWhiskerExpr = `${lowerBoxExpr} - ${extent} * ${iqrExpr}`;
+    const upperWhiskerExpr = `${upperBoxExpr} + ${extent} * ${iqrExpr}`;
+    const fieldExpr = `datum["${continuousAxisChannelDef.field}"]`;
+    const joinaggregateTransform = {
+        joinaggregate: boxParamsQuartiles(continuousAxisChannelDef.field),
+        groupby
+    };
+    const filteredWhiskerSpec = {
+        transform: [
+            {
+                filter: `(${lowerWhiskerExpr} <= ${fieldExpr}) && (${fieldExpr} <= ${upperWhiskerExpr})`
+            },
+            {
+                aggregate: [
                     {
-                        filter: `(${lowerWhiskerExpr} <= ${fieldExpr}) && (${fieldExpr} <= ${upperWhiskerExpr})`
+                        op: 'min',
+                        field: continuousAxisChannelDef.field,
+                        as: `lower_whisker_${continuousAxisChannelDef.field}`
                     },
                     {
-                        aggregate: [
-                            {
-                                op: 'min',
-                                field: continuousAxisChannelDef.field,
-                                as: 'lower_whisker_' + continuousAxisChannelDef.field
-                            },
-                            {
-                                op: 'max',
-                                field: continuousAxisChannelDef.field,
-                                as: 'upper_whisker_' + continuousAxisChannelDef.field
-                            },
-                            // preserve lower_box / upper_box
-                            {
-                                op: 'min',
-                                field: 'lower_box_' + continuousAxisChannelDef.field,
-                                as: 'lower_box_' + continuousAxisChannelDef.field
-                            },
-                            {
-                                op: 'max',
-                                field: 'upper_box_' + continuousAxisChannelDef.field,
-                                as: 'upper_box_' + continuousAxisChannelDef.field
-                            },
-                            ...aggregate
-                        ],
-                        groupby
-                    }
+                        op: 'max',
+                        field: continuousAxisChannelDef.field,
+                        as: `upper_whisker_${continuousAxisChannelDef.field}`
+                    },
+                    // preserve lower_box / upper_box
+                    {
+                        op: 'min',
+                        field: `lower_box_${continuousAxisChannelDef.field}`,
+                        as: `lower_box_${continuousAxisChannelDef.field}`
+                    },
+                    {
+                        op: 'max',
+                        field: `upper_box_${continuousAxisChannelDef.field}`,
+                        as: `upper_box_${continuousAxisChannelDef.field}`
+                    },
+                    ...aggregate
                 ],
-                layer: whiskerLayers
-            };
-        }
-        const { tooltip } = encodingWithoutSizeColorAndContinuousAxis, encodingWithoutSizeColorContinuousAxisAndTooltip = __rest(encodingWithoutSizeColorAndContinuousAxis, ["tooltip"]);
-        const { scale, axis } = continuousAxisChannelDef;
-        const title = getTitle(continuousAxisChannelDef);
-        const axisWithoutTitle = omit(axis, ['title']);
-        const outlierLayersMixins = partLayerMixins(markDef, 'outliers', config.boxplot, {
-            transform: [{ filter: `(${fieldExpr} < ${lowerWhiskerExpr}) || (${fieldExpr} > ${upperWhiskerExpr})` }],
-            mark: 'point',
-            encoding: Object.assign(Object.assign({ [continuousAxis]: Object.assign(Object.assign(Object.assign({ field: continuousAxisChannelDef.field, type: continuousAxisChannelDef.type }, (title !== undefined ? { title } : {})), (scale !== undefined ? { scale } : {})), (isEmpty(axisWithoutTitle) ? {} : { axis: axisWithoutTitle })) }, encodingWithoutSizeColorContinuousAxisAndTooltip), (customTooltipWithoutAggregatedField ? { tooltip: customTooltipWithoutAggregatedField } : {}))
-        })[0];
-        if (outlierLayersMixins && filteredWhiskerSpec) {
-            filteredLayersMixins = {
-                transform: [joinaggregateTransform],
-                layer: [outlierLayersMixins, filteredWhiskerSpec]
-            };
-        }
-        else if (outlierLayersMixins) {
-            filteredLayersMixins = outlierLayersMixins;
-            filteredLayersMixins.transform.unshift(joinaggregateTransform);
-        }
-        else if (filteredWhiskerSpec) {
-            filteredLayersMixins = filteredWhiskerSpec;
-            filteredLayersMixins.transform.unshift(joinaggregateTransform);
-        }
+                groupby
+            }
+        ],
+        layer: whiskerLayers
+    };
+    const { tooltip } = encodingWithoutSizeColorAndContinuousAxis, encodingWithoutSizeColorContinuousAxisAndTooltip = __rest(encodingWithoutSizeColorAndContinuousAxis, ["tooltip"]);
+    const { scale, axis } = continuousAxisChannelDef;
+    const title = getTitle(continuousAxisChannelDef);
+    const axisWithoutTitle = omit(axis, ['title']);
+    const outlierLayersMixins = partLayerMixins(markDef, 'outliers', config.boxplot, {
+        transform: [{ filter: `(${fieldExpr} < ${lowerWhiskerExpr}) || (${fieldExpr} > ${upperWhiskerExpr})` }],
+        mark: 'point',
+        encoding: Object.assign(Object.assign(Object.assign({ [continuousAxis]: Object.assign(Object.assign(Object.assign({ field: continuousAxisChannelDef.field, type: continuousAxisChannelDef.type }, (title !== undefined ? { title } : {})), (scale !== undefined ? { scale } : {})), (isEmpty(axisWithoutTitle) ? {} : { axis: axisWithoutTitle })) }, encodingWithoutSizeColorContinuousAxisAndTooltip), (color ? { color } : {})), (customTooltipWithoutAggregatedField ? { tooltip: customTooltipWithoutAggregatedField } : {}))
+    })[0];
+    let filteredLayersMixins;
+    const filteredLayersMixinsTransforms = [...bins, ...timeUnits, joinaggregateTransform];
+    if (outlierLayersMixins) {
+        filteredLayersMixins = {
+            transform: filteredLayersMixinsTransforms,
+            layer: [outlierLayersMixins, filteredWhiskerSpec]
+        };
     }
-    if (filteredLayersMixins) {
-        // tukey box plot with outliers included
-        return Object.assign(Object.assign({}, outerSpec), { layer: [
-                filteredLayersMixins,
-                {
-                    // boxplot
-                    transform,
-                    layer: boxLayers
-                }
-            ] });
+    else {
+        filteredLayersMixins = filteredWhiskerSpec;
+        filteredLayersMixins.transform.unshift(...filteredLayersMixinsTransforms);
     }
-    return Object.assign(Object.assign({}, outerSpec), { transform: ((_b = outerSpec.transform) !== null && _b !== void 0 ? _b : []).concat(transform), layer: boxLayers });
+    return Object.assign(Object.assign({}, outerSpec), { layer: [
+            filteredLayersMixins,
+            {
+                // boxplot
+                transform,
+                layer: boxLayers
+            }
+        ] });
 }
 function boxParamsQuartiles(continousAxisField) {
     return [
         {
             op: 'q1',
             field: continousAxisField,
-            as: 'lower_box_' + continousAxisField
+            as: `lower_box_${continousAxisField}`
         },
         {
             op: 'q3',
             field: continousAxisField,
-            as: 'upper_box_' + continousAxisField
+            as: `upper_box_${continousAxisField}`
         }
     ];
 }
@@ -213,7 +214,7 @@ function boxParams(spec, extent, config) {
         {
             op: 'median',
             field: continuousFieldName,
-            as: 'mid_box_' + continuousFieldName
+            as: `mid_box_${continuousFieldName}`
         },
         {
             op: 'min',
@@ -232,15 +233,15 @@ function boxParams(spec, extent, config) {
             // This is for the  original k-IQR, which we do not expose
             {
                 calculate: `datum["upper_box_${continuousFieldName}"] - datum["lower_box_${continuousFieldName}"]`,
-                as: 'iqr_' + continuousFieldName
+                as: `iqr_${continuousFieldName}`
             },
             {
                 calculate: `min(datum["upper_box_${continuousFieldName}"] + datum["iqr_${continuousFieldName}"] * ${extent}, datum["max_${continuousFieldName}"])`,
-                as: 'upper_whisker_' + continuousFieldName
+                as: `upper_whisker_${continuousFieldName}`
             },
             {
                 calculate: `max(datum["lower_box_${continuousFieldName}"] - datum["iqr_${continuousFieldName}"] * ${extent}, datum["min_${continuousFieldName}"])`,
-                as: 'lower_whisker_' + continuousFieldName
+                as: `lower_whisker_${continuousFieldName}`
             }
         ];
     const _a = spec.encoding, _b = continuousAxis, oldContinuousAxisChannelDef = _a[_b], oldEncodingWithoutContinuousAxis = __rest(_a, [typeof _b === "symbol" ? _b : _b + ""]);
@@ -258,6 +259,8 @@ function boxParams(spec, extent, config) {
         ...postAggregateCalculates
     ];
     return {
+        bins,
+        timeUnits,
         transform,
         groupby,
         aggregate,

@@ -34,7 +34,7 @@ function parseFacetHeader(model, channel) {
             // TODO: better handle multiline titles
             title = isArray(title) ? title.join(', ') : title;
             // merge title with child to produce "Title / Subtitle / Sub-subtitle"
-            title += ' / ' + child.component.layoutHeaders[channel].title;
+            title += ` / ${child.component.layoutHeaders[channel].title}`;
             child.component.layoutHeaders[channel].title = null;
         }
         const labelOrient = getHeaderProperty('labelOrient', fieldDef, config, channel);

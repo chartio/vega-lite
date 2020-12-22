@@ -129,6 +129,22 @@ describe('Mark: Point', () => {
     expect(props.x).toEqual({scale: 'x', field: 'a', band: 0.6});
   });
 
+  it('supports encoding with expression', () => {
+    // This is a simplified example for stacked point.
+    // In reality this will be used as stacked's overlayed marker
+    const model = parseUnitModelWithScaleAndLayoutSize({
+      mark: 'point',
+      encoding: {
+        x: {value: {expr: 'a'}}
+      },
+      data: {url: 'data/barley.json'}
+    });
+
+    const props = point.encodeEntry(model);
+
+    expect(props.x).toEqual({signal: 'a'});
+  });
+
   describe('with y', () => {
     const model = parseUnitModelWithScaleAndLayoutSize({
       mark: 'point',
@@ -402,5 +418,33 @@ describe('Mark: Circle', () => {
 
     expect(filledCircleProps.stroke['value']).toBe('blue');
     expect(filledCircleProps.fill['value']).toBe('transparent');
+  });
+
+  it('converts expression in mark properties to signal', () => {
+    const filledCircleModel = parseUnitModelWithScaleAndLayoutSize({
+      mark: {type: 'circle', stroke: {expr: "'red'"}},
+      config: {
+        mark: {
+          filled: false
+        }
+      }
+    });
+
+    const filledCircleProps = circle.encodeEntry(filledCircleModel);
+
+    expect(filledCircleProps.stroke).toEqual({signal: "'red'"});
+  });
+
+  it('converts expression in encoding into signal', () => {
+    const filledCircleModel = parseUnitModelWithScaleAndLayoutSize({
+      mark: {type: 'circle'},
+      encoding: {
+        x: {datum: {expr: 'myX'}, type: 'quantitative'}
+      }
+    });
+
+    const filledCircleProps = circle.encodeEntry(filledCircleModel);
+
+    expect(filledCircleProps.x).toEqual({scale: 'x', signal: 'myX'});
   });
 });

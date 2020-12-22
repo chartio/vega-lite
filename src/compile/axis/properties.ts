@@ -1,6 +1,6 @@
 import {Align, AxisOrient, Orient, SignalRef} from 'vega';
 import {isArray, isObject} from 'vega-util';
-import {Axis} from '../../axis';
+import {AxisInternal} from '../../axis';
 import {isBinned, isBinning} from '../../bin';
 import {PositionScaleChannel, X} from '../../channel';
 import {
@@ -30,7 +30,7 @@ import {AxisConfigs, getAxisConfig} from './config';
 
 export interface AxisRuleParams {
   fieldOrDatumDef: PositionFieldDef<string> | PositionDatumDef<string>;
-  axis: Axis;
+  axis: AxisInternal;
   channel: PositionScaleChannel;
   model: UnitModel;
 
@@ -138,9 +138,9 @@ export function gridScale(model: UnitModel, channel: PositionScaleChannel) {
 
 export function getLabelAngle(
   fieldOrDatumDef: PositionFieldDef<string> | PositionDatumDef<string>,
-  axis: Axis,
+  axis: AxisInternal,
   channel: PositionScaleChannel,
-  styleConfig: StyleConfigIndex,
+  styleConfig: StyleConfigIndex<SignalRef>,
   axisConfigs?: AxisConfigs
 ) {
   const labelAngle = axis?.labelAngle;
@@ -242,7 +242,7 @@ export function defaultLabelAlign(
     const orientIsMain = isSignalRef(orient) ? `(${orient.signal} === "${mainOrient}")` : orient === mainOrient;
     return {
       signal:
-        `(${startAngle ? '(' + a + ' + 90)' : a} % 180 === 0) ? ${isX ? null : '"center"'} :` +
+        `(${startAngle ? `(${a} + 90)` : a} % 180 === 0) ? ${isX ? null : '"center"'} :` +
         `(${startAngle} < ${a} && ${a} < ${180 + startAngle}) === ${orientIsMain} ? "left" : "right"`
     };
   }
@@ -277,7 +277,7 @@ export function defaultLabelFlush(type: Type, channel: PositionScaleChannel) {
 export function defaultLabelOverlap(type: Type, scaleType: ScaleType, hasTimeUnit: boolean, sort?: Sort<string>) {
   // do not prevent overlap for nominal data because there is no way to infer what the missing labels are
   if ((hasTimeUnit && !isObject(sort)) || (type !== 'nominal' && type !== 'ordinal')) {
-    if (scaleType === 'log') {
+    if (scaleType === 'log' || scaleType === 'symlog') {
       return 'greedy';
     }
     return true;
@@ -298,7 +298,7 @@ export function defaultTickCount({
   fieldOrDatumDef: TypedFieldDef<string> | DatumDef;
   scaleType: ScaleType;
   size?: SignalRef;
-  values?: Axis['values'];
+  values?: AxisInternal['values'];
 }) {
   if (!vals && !hasDiscreteDomain(scaleType) && scaleType !== 'log') {
     if (isFieldDef(fieldOrDatumDef)) {
@@ -346,7 +346,7 @@ export function getFieldDefTitle(model: UnitModel, channel: 'x' | 'y') {
   return undefined;
 }
 
-export function values(axis: Axis, fieldOrDatumDef: TypedFieldDef<string> | DatumDef) {
+export function values(axis: AxisInternal, fieldOrDatumDef: TypedFieldDef<string> | DatumDef) {
   const vals = axis.values;
 
   if (isArray(vals)) {

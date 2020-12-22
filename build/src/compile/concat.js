@@ -14,7 +14,7 @@ export class ConcatModel extends Model {
             log.warn(log.message.CONCAT_CANNOT_SHARE_AXIS);
         }
         this.children = this.getChildren(spec).map((child, i) => {
-            return buildModel(child, this, this.getName('concat_' + i), undefined, config);
+            return buildModel(child, this, this.getName(`concat_${i}`), undefined, config);
         });
     }
     parseData() {

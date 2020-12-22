@@ -1,7 +1,7 @@
-import { version } from '../package.json';
-import { normalize } from './normalize';
+export declare const version: string;
 export { compile } from './compile/compile';
-export { Config } from './config';
-export { TopLevelSpec } from './spec';
-export { normalize, version };
+export type { Config } from './config';
+export { normalize } from './normalize';
+export type { TopLevelSpec } from './spec';
+export * from './util';
 //# sourceMappingURL=index.d.ts.map

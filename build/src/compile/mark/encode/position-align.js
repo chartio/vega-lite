@@ -1,4 +1,6 @@
 import { getVgPositionChannel } from '../../../channel';
+import * as log from '../../../log';
+import { isSignalRef } from '../../../vega.schema';
 import { getMarkPropOrConfig } from '../../common';
 const ALIGNED_X_CHANNEL = {
     left: 'x',
@@ -16,11 +18,19 @@ export function vgAlignedPositionChannel(channel, markDef, config, defaultAlign 
     }
     const alignChannel = channel === 'x' ? 'align' : 'baseline';
     const align = getMarkPropOrConfig(alignChannel, markDef, config);
-    if (channel === 'x') {
-        return ALIGNED_X_CHANNEL[align || (defaultAlign === 'top' ? 'left' : 'center')];
+    let alignExcludingSignal;
+    if (isSignalRef(align)) {
+        log.warn(log.message.rangeMarkAlignmentCannotBeExpression(alignChannel));
+        alignExcludingSignal = undefined;
     }
     else {
-        return BASELINED_Y_CHANNEL[align || defaultAlign];
+        alignExcludingSignal = align;
+    }
+    if (channel === 'x') {
+        return ALIGNED_X_CHANNEL[alignExcludingSignal || (defaultAlign === 'top' ? 'left' : 'center')];
+    }
+    else {
+        return BASELINED_Y_CHANNEL[alignExcludingSignal || defaultAlign];
     }
 }
 //# sourceMappingURL=position-align.js.map

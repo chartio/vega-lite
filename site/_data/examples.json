@@ -199,6 +199,11 @@
       {
         "name": "scatter_image",
         "title": "Image-based Scatter Plot"
+      },
+      {
+        "name": "circle_custom_tick_labels",
+        "description": "After using the numerical values to calculate the average rating, they are replaced by string labels.",
+        "title": "Strip plot with custom axis tick labels"
       }
     ],
     "Line Charts": [
@@ -647,7 +652,7 @@
     "Repeat & Concatenation": [
       {
         "name": "repeat_layer",
-        "title": "Repeat and Layer to Show Different Weather Measures"
+        "title": "Repeat and Layer to Show Different Movie Measures"
       },
       {
         "name": "vconcat_weather",
@@ -730,6 +735,12 @@
         "name": "geo_layer_line_london",
         "title": "London Tube Lines",
         "description": "This example was created by @jwoLondon.",
+        "png": true
+      },
+      {
+        "name": "geo_params_projections",
+        "title": "Projection explorer",
+        "description": "Compare different projections.",
         "png": true
       }
     ]
@@ -853,6 +864,12 @@
         "name": "airport_connections",
         "png": true,
         "title": "Connections among Major U.S. Airports."
+      },
+      {
+        "name": "interactive_global_development",
+        "title": "An interactive scatter plot of global health statistics by country and year.",
+        "description": "Similar to the Vega version at https://vega.github.io/vega/examples/global-development/.",
+        "png": true
       }
     ]
   }

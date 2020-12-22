@@ -1,9 +1,19 @@
-import { __rest } from "tslib";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { selector as parseSelector } from 'vega-event-selector';
 import { identity, isArray, stringValue } from 'vega-util';
 import { forEachSelection, MODIFY, STORE, unitName, VL_SELECTION_RESOLVE, TUPLE } from '.';
 import { dateTimeToExpr, isDateTime, dateTimeToTimestamp } from '../../datetime';
-import { keys, varName } from '../../util';
+import { keys, stringify, varName } from '../../util';
 import { isUnitModel } from '../model';
 import { forEachTransform } from './transforms/transforms';
 import { parseSelectionBinExtent } from './parse';
@@ -20,7 +30,7 @@ export function assembleInit(init, isExpr = true, wrap = identity) {
             return wrap(dateTimeToTimestamp(init));
         }
     }
-    return isExpr ? wrap(JSON.stringify(init)) : init;
+    return isExpr ? wrap(stringify(init)) : init;
 }
 export function assembleUnitSelectionSignals(model, signals) {
     forEachSelection(model, (selCmpt, selCompiler) => {

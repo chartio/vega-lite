@@ -28,13 +28,14 @@ import {
 } from '../../../channeldef';
 import {Config} from '../../../config';
 import {dateTimeToExpr, isDateTime} from '../../../datetime';
+import {isExprRef} from '../../../expr';
 import * as log from '../../../log';
 import {isPathMark, Mark, MarkDef} from '../../../mark';
 import {fieldValidPredicate} from '../../../predicate';
 import {hasDiscreteDomain, isContinuousToContinuous} from '../../../scale';
 import {StackProperties} from '../../../stack';
 import {TEMPORAL} from '../../../type';
-import {contains} from '../../../util';
+import {contains, stringify} from '../../../util';
 import {isSignalRef, VgValueRef} from '../../../vega.schema';
 import {getMarkPropOrConfig, signalOrValueRef} from '../../common';
 import {ScaleComponent} from '../../scale/component';
@@ -79,7 +80,7 @@ export function wrapPositionInvalidTest({
   channel: PositionChannel | PolarPositionChannel;
   markDef: MarkDef<Mark>;
   ref: VgValueRef;
-  config: Config;
+  config: Config<SignalRef>;
 }): VgValueRef | VgValueRef[] {
   if (isPathMark(markDef.type)) {
     // path mark already use defined to skip points, no need to do it here.
@@ -117,7 +118,7 @@ export function datumDefToExpr(datumDef: DatumDef<string>) {
   if (isDateTime(datum)) {
     return dateTimeToExpr(datum);
   }
-  return `${JSON.stringify(datum)}`;
+  return `${stringify(datum)}`;
 }
 
 export function valueRefForFieldOrDatumDef(
@@ -138,6 +139,8 @@ export function valueRefForFieldOrDatumDef(
       ref.signal = dateTimeToExpr(datum);
     } else if (isSignalRef(datum)) {
       ref.signal = datum.signal;
+    } else if (isExprRef(datum)) {
+      ref.signal = datum.expr;
     } else {
       ref.value = datum;
     }
@@ -204,8 +207,8 @@ export interface MidPointParams {
   channelDef: ChannelDef;
   channel2Def?: SecondaryChannelDef<string>;
 
-  markDef: MarkDef<Mark>;
-  config: Config;
+  markDef: MarkDef<Mark, SignalRef>;
+  config: Config<SignalRef>;
 
   scaleName: string;
   scale: ScaleComponent;

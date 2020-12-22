@@ -11,14 +11,14 @@ export function getHeaderChannel(channel, orient) {
     }
     return channel === 'row' ? 'row' : 'column';
 }
-export function getHeaderProperty(prop, facetFieldDef, config, channel) {
+export function getHeaderProperty(prop, header, config, channel) {
     const headerSpecificConfig = channel === 'row' ? config.headerRow : channel === 'column' ? config.headerColumn : config.headerFacet;
-    return getFirstDefined(((facetFieldDef === null || facetFieldDef === void 0 ? void 0 : facetFieldDef.header) || {})[prop], headerSpecificConfig[prop], config.header[prop]);
+    return getFirstDefined((header || {})[prop], headerSpecificConfig[prop], config.header[prop]);
 }
-export function getHeaderProperties(properties, facetFieldDef, config, channel) {
+export function getHeaderProperties(properties, header, config, channel) {
     const props = {};
     for (const prop of properties) {
-        const value = getHeaderProperty(prop, facetFieldDef, config, channel);
+        const value = getHeaderProperty(prop, header || {}, config, channel);
         if (value !== undefined) {
             props[prop] = value;
         }

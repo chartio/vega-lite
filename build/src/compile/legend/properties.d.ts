@@ -2,7 +2,7 @@ import { LabelOverlap, LegendOrient, LegendType, Orientation, SignalRef, SymbolS
 import { DatumDef, MarkPropFieldOrDatumDef, TypedFieldDef } from '../../channeldef';
 import { Config } from '../../config';
 import { Encoding } from '../../encoding';
-import { Legend, LegendConfig } from '../../legend';
+import { Legend, LegendConfig, LegendInternal } from '../../legend';
 import { Mark, MarkDef } from '../../mark';
 import { ScaleType } from '../../scale';
 import { TimeUnit } from '../../timeunit';
@@ -11,14 +11,14 @@ import { UnitModel } from '../unit';
 import { NonPositionScaleChannel } from './../../channel';
 import { LegendComponentProps } from './component';
 export interface LegendRuleParams {
-    legend: Legend;
+    legend: LegendInternal;
     channel: NonPositionScaleChannel;
     model: UnitModel;
-    markDef: MarkDef;
+    markDef: MarkDef<Mark, SignalRef>;
     encoding: Encoding<string>;
     fieldOrDatumDef: MarkPropFieldOrDatumDef<string>;
-    legendConfig: LegendConfig;
-    config: Config;
+    legendConfig: LegendConfig<SignalRef>;
+    config: Config<SignalRef>;
     scaleType: ScaleType;
     orient: LegendOrient;
     legendType: LegendType;
@@ -27,13 +27,13 @@ export interface LegendRuleParams {
 export declare const legendRules: {
     [k in keyof LegendComponentProps]?: (params: LegendRuleParams) => LegendComponentProps[k];
 };
-export declare function values(legend: Legend, fieldOrDatumDef: TypedFieldDef<string> | DatumDef): SignalRef | (string | number | boolean | import("../../datetime").DateTime | {
+export declare function values(legend: LegendInternal, fieldOrDatumDef: TypedFieldDef<string> | DatumDef): SignalRef | (string | number | boolean | import("../../datetime").DateTime | {
     signal: string;
 })[];
 export declare function defaultSymbolType(mark: Mark, channel: NonPositionScaleChannel, shapeChannelDef: Encoding<string>['shape'], markShape: SymbolShape | SignalRef): SymbolShape | SignalRef;
 export declare function clipHeight(legendType: LegendType): number;
 export declare function getLegendType(params: {
-    legend: Legend;
+    legend: LegendInternal;
     channel: NonPositionScaleChannel;
     timeUnit?: TimeUnit;
     scaleType: ScaleType;
@@ -45,9 +45,9 @@ export declare function defaultType({ channel, timeUnit, scaleType }: {
 }): LegendType;
 export declare function getDirection({ legendConfig, legendType, orient, legend }: {
     orient: LegendOrient;
-    legendConfig: LegendConfig;
+    legendConfig: LegendConfig<SignalRef>;
     legendType: LegendType;
-    legend: Legend;
+    legend: Legend<SignalRef>;
 }): Orientation;
 export declare function defaultDirection(orient: LegendOrient, legendType: LegendType): 'horizontal' | undefined;
 export declare function defaultGradientLength({ legendConfig, model, direction, orient, scaleType }: {
@@ -55,7 +55,7 @@ export declare function defaultGradientLength({ legendConfig, model, direction, 
     direction: Orientation;
     orient: LegendOrient;
     model: Model;
-    legendConfig: LegendConfig;
+    legendConfig: LegendConfig<SignalRef>;
 }): number | {
     signal: string;
 };

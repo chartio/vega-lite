@@ -2,12 +2,16 @@ import { Orientation, SignalRef, Text } from 'vega';
 import { CompositeMark, CompositeMarkDef } from '.';
 import { Field, PositionFieldDef, SecondaryFieldDef, StringFieldDef, StringFieldDefWithCondition, StringValueDefWithCondition } from '../channeldef';
 import { Encoding } from '../encoding';
+import { ExprRef } from '../expr';
 import { ColorMixins, GenericMarkDef, Mark, MarkConfig, MarkDef } from '../mark';
 import { GenericUnitSpec, NormalizedUnitSpec } from '../spec';
-export declare type PartsMixins<P extends string> = Partial<Record<P, boolean | MarkConfig>>;
-export declare type GenericCompositeMarkDef<T> = GenericMarkDef<T> & ColorMixins & {
+export declare type PartsMixins<P extends string> = Partial<Record<P, boolean | MarkConfig<ExprRef | SignalRef>>>;
+export declare type GenericCompositeMarkDef<T> = GenericMarkDef<T> & ColorMixins<ExprRef | SignalRef> & {
     /**
      * The opacity (value between [0,1]) of the mark.
+     *
+     * @minimum 0
+     * @maximum 1
      */
     opacity?: number;
     /**
@@ -30,7 +34,7 @@ export declare function filterTooltipWithAggregatedField<F extends Field>(oldEnc
     filteredEncoding: Encoding<F>;
 };
 export declare function getCompositeMarkTooltip(tooltipSummary: CompositeMarkTooltipSummary[], continuousAxisChannelDef: PositionFieldDef<string>, encodingWithoutContinuousAxis: Encoding<string>, withFieldName?: boolean): Encoding<string>;
-export declare function getTitle(continuousAxisChannelDef: PositionFieldDef<string>): string | SignalRef | string[];
+export declare function getTitle(continuousAxisChannelDef: PositionFieldDef<string>): string | string[] | SignalRef;
 export declare function makeCompositeAggregatePartFactory<P extends PartsMixins<any>>(compositeMarkDef: GenericCompositeMarkDef<any> & P, continuousAxis: 'x' | 'y', continuousAxisChannelDef: PositionFieldDef<string>, sharedEncoding: Encoding<string>, compositeMarkConfig: P): ({ partName, mark, positionPrefix, endPositionPrefix, extraEncoding }: {
     partName: keyof P;
     mark: Mark | MarkDef;

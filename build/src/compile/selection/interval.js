@@ -1,4 +1,14 @@
-import { __rest } from "tslib";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { array, stringValue } from 'vega-util';
 import { STORE, TUPLE, unitName } from '.';
 import { X, Y } from '../../channel';
@@ -23,7 +33,7 @@ const interval = {
             events(selCmpt, (on, evt) => {
                 var _a;
                 const filters = array((_a = evt.between[0].filter) !== null && _a !== void 0 ? _a : (evt.between[0].filter = []));
-                if (filters.indexOf(filterExpr) < 0) {
+                if (!filters.includes(filterExpr)) {
                     filters.push(filterExpr);
                 }
                 return on;
@@ -60,7 +70,7 @@ const interval = {
                 on: [
                     {
                         events: scaleTriggers.map(t => ({ scale: t.scaleName })),
-                        update: scaleTriggers.map(t => t.expr).join(' && ') + ` ? ${name + SCALE_TRIGGER} : {}`
+                        update: `${scaleTriggers.map(t => t.expr).join(' && ')} ? ${name + SCALE_TRIGGER} : {}`
                     }
                 ]
             });
@@ -73,13 +83,13 @@ const interval = {
         return signals.concat(Object.assign(Object.assign({ name: name + TUPLE }, (init ? { init: `{${update}: ${assembleInit(init)}}` } : {})), { on: [
                 {
                     events: [{ signal: dataSignals.join(' || ') }],
-                    update: dataSignals.join(' && ') + ` ? {${update}: [${dataSignals}]} : null`
+                    update: `${dataSignals.join(' && ')} ? {${update}: [${dataSignals}]} : null`
                 }
             ] }));
     },
     modifyExpr: (model, selCmpt) => {
         const tpl = selCmpt.name + TUPLE;
-        return tpl + ', ' + (selCmpt.resolve === 'global' ? 'true' : `{unit: ${unitName(model)}}`);
+        return `${tpl}, ${selCmpt.resolve === 'global' ? 'true' : `{unit: ${unitName(model)}}`}`;
     },
     marks: (model, selCmpt, marks) => {
         const name = selCmpt.name;
@@ -127,7 +137,7 @@ const interval = {
         }, {});
         return [
             {
-                name: name + BRUSH + '_bg',
+                name: `${name + BRUSH}_bg`,
                 type: 'rect',
                 clip: true,
                 encode: {

@@ -7,9 +7,10 @@ import { isDateTime } from '../../datetime';
 import * as log from '../../log';
 import { forEachLeaf } from '../../logical';
 import { isPathMark } from '../../mark';
-import { isFieldEqualPredicate, isFieldOneOfPredicate, isFieldPredicate, isFieldRangePredicate } from '../../predicate';
+import { isFieldEqualPredicate, isFieldGTEPredicate, isFieldGTPredicate, isFieldLTEPredicate, isFieldLTPredicate, isFieldOneOfPredicate, isFieldPredicate, isFieldRangePredicate } from '../../predicate';
 import { isSortField } from '../../sort';
 import { accessPathDepth, accessPathWithDatum, duplicate, hash, keys, removePathFromField } from '../../util';
+import { signalRefOrValue } from '../common';
 import { isFacetModel, isUnitModel } from '../model';
 import { Split } from '../split';
 import { DataFlowNode } from './dataflow';
@@ -44,11 +45,11 @@ function parseExpression(field, parse) {
     else if (parse === 'flatten') {
         return f;
     }
-    else if (parse.indexOf('date:') === 0) {
+    else if (parse.startsWith('date:')) {
         const specifier = unquote(parse.slice(5, parse.length));
         return `timeParse(${f},'${specifier}')`;
     }
-    else if (parse.indexOf('utc:') === 0) {
+    else if (parse.startsWith('utc:')) {
         const specifier = unquote(parse.slice(4, parse.length));
         return `utcParse(${f},'${specifier}')`;
     }
@@ -68,7 +69,19 @@ export function getImplicitFromFilterTransform(transform) {
             // For RangeFilter and OneOfFilter, all array members should have
             // the same type, so we only use the first one.
             if (isFieldEqualPredicate(filter)) {
-                val = filter.equal;
+                val = signalRefOrValue(filter.equal);
+            }
+            else if (isFieldLTEPredicate(filter)) {
+                val = signalRefOrValue(filter.lte);
+            }
+            else if (isFieldLTPredicate(filter)) {
+                val = signalRefOrValue(filter.lt);
+            }
+            else if (isFieldGTPredicate(filter)) {
+                val = signalRefOrValue(filter.gt);
+            }
+            else if (isFieldGTEPredicate(filter)) {
+                val = signalRefOrValue(filter.gte);
             }
             else if (isFieldRangePredicate(filter)) {
                 val = filter.range[0];

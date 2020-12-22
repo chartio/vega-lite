@@ -44,7 +44,7 @@ const multi = {
     signals: singleOrMultiSignals,
     modifyExpr: (model, selCmpt) => {
         const tpl = selCmpt.name + TUPLE;
-        return tpl + ', ' + (selCmpt.resolve === 'global' ? 'null' : `{unit: ${unitName(model)}}`);
+        return `${tpl}, ${selCmpt.resolve === 'global' ? 'null' : `{unit: ${unitName(model)}}`}`;
     }
 };
 export default multi;

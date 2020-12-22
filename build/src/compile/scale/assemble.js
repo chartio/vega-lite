@@ -1,4 +1,14 @@
-import { __rest } from "tslib";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { isObject } from 'vega-util';
 import { isXorY } from '../../channel';
 import { keys } from '../../util';
@@ -45,7 +55,7 @@ export function assembleScaleRange(scaleRange, scaleName, channel, model) {
         if (isVgRangeStep(scaleRange)) {
             // For width/height step, use a signal created in layout assemble instead of a constant step.
             return {
-                step: { signal: scaleName + '_step' }
+                step: { signal: `${scaleName}_step` }
             };
         }
     }

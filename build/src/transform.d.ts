@@ -9,7 +9,7 @@ import { SortField } from './sort';
 import { TimeUnit, TimeUnitParams } from './timeunit';
 export interface FilterTransform {
     /**
-     * The `filter` property must be a predication definition, which can takes one of the following forms:
+     * The `filter` property must be a predication definition, which can take one of the following forms:
      *
      * 1) an [expression](https://vega.github.io/vega-lite/docs/types.html#expression) string,
      * where `datum` can be used to refer to the current data object.
@@ -296,7 +296,7 @@ export interface LookupTransform {
      *
      * __Default value:__ `null`
      */
-    default?: string;
+    default?: any;
     /**
      * Data source or selection for secondary data reference.
      */

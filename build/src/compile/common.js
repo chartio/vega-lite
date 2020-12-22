@@ -1,10 +1,46 @@
-import { array, stringValue } from 'vega-util';
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
+import { array, isArray, stringValue } from 'vega-util';
 import { vgField } from '../channeldef';
+import { isExprRef } from '../expr';
 import { isText } from '../title';
 import { deepEqual, getFirstDefined } from '../util';
 import { isSignalRef } from '../vega.schema';
 export const BIN_RANGE_DELIMITER = ' \u2013 ';
+export function signalOrValueRefWithCondition(val) {
+    const condition = isArray(val.condition)
+        ? val.condition.map(conditionalSignalRefOrValue)
+        : conditionalSignalRefOrValue(val.condition);
+    return Object.assign(Object.assign({}, signalRefOrValue(val)), { condition });
+}
+export function signalRefOrValue(value) {
+    if (isExprRef(value)) {
+        const { expr } = value, rest = __rest(value, ["expr"]);
+        return Object.assign({ signal: expr }, rest);
+    }
+    return value;
+}
+export function conditionalSignalRefOrValue(value) {
+    if (isExprRef(value)) {
+        const { expr } = value, rest = __rest(value, ["expr"]);
+        return Object.assign({ signal: expr }, rest);
+    }
+    return value;
+}
 export function signalOrValueRef(value) {
+    if (isExprRef(value)) {
+        const { expr } = value, rest = __rest(value, ["expr"]);
+        return Object.assign({ signal: expr }, rest);
+    }
     if (isSignalRef(value)) {
         return value;
     }

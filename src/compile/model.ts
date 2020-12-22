@@ -4,23 +4,25 @@ import {
   Legend as VgLegend,
   NewSignal,
   Projection as VgProjection,
+  Signal,
   SignalRef,
   Title as VgTitle
 } from 'vega';
 import {
   Channel,
+  ExtendedChannel,
   FACET_CHANNELS,
   getPositionScaleChannel,
   isChannel,
   isScaleChannel,
   ScaleChannel,
-  SingleDefChannel,
-  ExtendedChannel
+  SingleDefChannel
 } from '../channel';
 import {ChannelDef, FieldDef, FieldRefOption, getFieldDef, vgField} from '../channeldef';
 import {Config} from '../config';
 import {Data, DataSourceType} from '../data';
 import {forEach, reduce} from '../encoding';
+import {ExprRef, replaceExprRef} from '../expr';
 import * as log from '../log';
 import {Resolve} from '../resolve';
 import {hasDiscreteDomain} from '../scale';
@@ -37,7 +39,7 @@ import {
 import {NormalizedSpec} from '../spec/index';
 import {extractTitleConfig, isText, TitleParams} from '../title';
 import {normalizeTransform, Transform} from '../transform';
-import {contains, Dict, duplicate, keys, varName, isEmpty} from '../util';
+import {contains, Dict, duplicate, isEmpty, keys, varName} from '../util';
 import {isVgRangeStep, VgData, VgEncodeEntry, VgLayout, VgMarkGroup} from '../vega.schema';
 import {assembleAxes} from './axis/assemble';
 import {AxisComponentIndex} from './axis/component';
@@ -164,7 +166,7 @@ export abstract class Model {
 
   public size: LayoutSizeMixins;
 
-  public readonly title: TitleParams;
+  public readonly title: TitleParams<SignalRef>;
   public readonly description: string;
 
   public readonly data: Data | null;
@@ -182,6 +184,8 @@ export abstract class Model {
 
   public readonly component: Component;
 
+  public readonly view?: ViewBackground<SignalRef>;
+
   public abstract readonly children: Model[] = [];
 
   constructor(
@@ -189,16 +193,17 @@ export abstract class Model {
     public readonly type: SpecType,
     public readonly parent: Model,
     parentGivenName: string,
-    public readonly config: Config,
+    public readonly config: Config<SignalRef>,
     resolve: Resolve,
-    public readonly view?: ViewBackground
+    view?: ViewBackground<ExprRef | SignalRef>
   ) {
     this.parent = parent;
     this.config = config;
+    this.view = replaceExprRef(view);
 
     // If name is not provided, always use parent's givenName to avoid name conflicts.
     this.name = spec.name ?? parentGivenName;
-    this.title = isText(spec.title) ? {text: spec.title} : (spec.title as TitleParams);
+    this.title = isText(spec.title) ? {text: spec.title} : spec.title ? replaceExprRef(spec.title) : undefined;
 
     // Shared name maps
     this.scaleNameMap = parent ? parent.scaleNameMap : new NameMap();
@@ -306,7 +311,7 @@ export abstract class Model {
     return undefined;
   }
 
-  private assembleEncodeFromView(view: ViewBackground): VgEncodeEntry {
+  private assembleEncodeFromView(view: ViewBackground<SignalRef>): VgEncodeEntry {
     // Exclude "style"
     const {style: _, ...baseView} = view;
 
@@ -402,7 +407,7 @@ export abstract class Model {
   }
 
   public assembleTitle(): VgTitle {
-    const {encoding, ...titleNoEncoding} = this.title ?? ({} as TitleParams);
+    const {encoding, ...titleNoEncoding} = this.title ?? ({} as TitleParams<SignalRef>);
 
     const title: VgTitle = {
       ...extractTitleConfig(this.config.title).nonMark,
@@ -432,7 +437,7 @@ export abstract class Model {
   /**
    * Assemble the mark group for this model. We accept optional `signals` so that we can include concat top-level signals with the top-level model's local signals.
    */
-  public assembleGroup(signals: NewSignal[] = []) {
+  public assembleGroup(signals: Signal[] = []) {
     const group: VgMarkGroup = {};
 
     signals = signals.concat(this.assembleSignals());
@@ -469,7 +474,7 @@ export abstract class Model {
   }
 
   public getName(text: string) {
-    return varName((this.name ? this.name + '_' : '') + text);
+    return varName((this.name ? `${this.name}_` : '') + text);
   }
 
   public getDataName(type: DataSourceType) {

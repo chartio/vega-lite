@@ -2,9 +2,10 @@ import { hasOwnProperty } from 'vega-util';
 import { LATITUDE, LATITUDE2, LONGITUDE, LONGITUDE2, SHAPE } from '../../channel';
 import { getFieldOrDatumDef } from '../../channeldef';
 import { DataSourceType } from '../../data';
+import { replaceExprRef } from '../../expr';
 import { PROJECTION_PROPERTIES } from '../../projection';
 import { GEOJSON } from '../../type';
-import { duplicate, every, stringify } from '../../util';
+import { deepEqual, duplicate, every } from '../../util';
 import { isUnitModel } from '../model';
 import { ProjectionComponent } from './component';
 export function parseProjection(model) {
@@ -13,11 +14,15 @@ export function parseProjection(model) {
 function parseUnitProjection(model) {
     var _a;
     if (model.hasProjection) {
-        const proj = model.specifiedProjection;
+        const proj = replaceExprRef(model.specifiedProjection);
         const fit = !(proj && (proj.scale != null || proj.translate != null));
         const size = fit ? [model.getSizeSignalRef('width'), model.getSizeSignalRef('height')] : undefined;
         const data = fit ? gatherFitData(model) : undefined;
-        return new ProjectionComponent(model.projectionName(true), Object.assign(Object.assign({}, ((_a = model.config.projection) !== null && _a !== void 0 ? _a : {})), (proj !== null && proj !== void 0 ? proj : {})), size, data);
+        const projComp = new ProjectionComponent(model.projectionName(true), Object.assign(Object.assign({}, ((_a = replaceExprRef(model.config.projection)) !== null && _a !== void 0 ? _a : {})), (proj !== null && proj !== void 0 ? proj : {})), size, data);
+        if (!projComp.get('type')) {
+            projComp.set('type', 'equalEarth', false);
+        }
+        return projComp;
     }
     return undefined;
 }
@@ -55,20 +60,20 @@ function mergeIfNoConflict(first, second) {
         if (hasOwnProperty(first.explicit, prop) &&
             hasOwnProperty(second.explicit, prop) &&
             // some properties might be signals or objects and require hashing for comparison
-            stringify(first.get(prop)) === stringify(second.get(prop))) {
+            deepEqual(first.get(prop), second.get(prop))) {
             return true;
         }
         return false;
     });
-    const size = stringify(first.size) === stringify(second.size);
+    const size = deepEqual(first.size, second.size);
     if (size) {
         if (allPropertiesShared) {
             return first;
         }
-        else if (stringify(first.explicit) === stringify({})) {
+        else if (deepEqual(first.explicit, {})) {
             return second;
         }
-        else if (stringify(second.explicit) === stringify({})) {
+        else if (deepEqual(second.explicit, {})) {
             return first;
         }
     }

@@ -9,7 +9,7 @@ export declare function getAxisConfigs(channel: PositionScaleChannel, scaleType:
     axisConfigStyle: any;
 };
 export declare function getAxisConfigStyle(axisConfigTypes: string[], config: Config): any;
-export declare function getAxisConfig(property: keyof AxisConfig, styleConfigIndex: StyleConfigIndex, style: string | string[], axisConfigs?: Partial<AxisConfigs>): {
+export declare function getAxisConfig(property: keyof AxisConfig<SignalRef>, styleConfigIndex: StyleConfigIndex<SignalRef>, style: string | string[], axisConfigs?: Partial<AxisConfigs>): {
     configFrom?: string;
     configValue?: any;
 };

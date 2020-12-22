@@ -63,7 +63,7 @@ export function getAxisConfigs(
       : [];
 
   const axisChannel = channel === 'x' ? 'axisX' : 'axisY';
-  const axisOrient = isSignalRef(orient) ? 'axisOrient' : 'axis' + titleCase(orient); // axisTop, axisBottom, ...
+  const axisOrient = isSignalRef(orient) ? 'axisOrient' : `axis${titleCase(orient)}`; // axisTop, axisBottom, ...
 
   const vlOnlyConfigTypes = [
     // technically Vega does have axisBand, but if we make another separation here,
@@ -96,8 +96,8 @@ export function getAxisConfigStyle(axisConfigTypes: string[], config: Config) {
   return Object.assign.apply(null, toMerge);
 }
 export function getAxisConfig(
-  property: keyof AxisConfig,
-  styleConfigIndex: StyleConfigIndex,
+  property: keyof AxisConfig<SignalRef>,
+  styleConfigIndex: StyleConfigIndex<SignalRef>,
   style: string | string[],
   axisConfigs: Partial<AxisConfigs> = {}
 ): {configFrom?: string; configValue?: any} {

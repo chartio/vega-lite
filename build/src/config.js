@@ -1,16 +1,30 @@
-import { __rest } from "tslib";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { isObject, mergeConfig } from 'vega-util';
-import { isConditionalAxisValue } from './axis';
+import { AXIS_CONFIGS, isConditionalAxisValue } from './axis';
+import { signalOrValueRefWithCondition, signalRefOrValue } from './compile/common';
 import { getAllCompositeMarks } from './compositemark';
+import { replaceExprRef } from './expr';
 import { VL_ONLY_LEGEND_CONFIG } from './guide';
+import { HEADER_CONFIGS } from './header';
 import { defaultLegendConfig } from './legend';
 import * as mark from './mark';
-import { PRIMITIVE_MARKS, VL_ONLY_MARK_CONFIG_PROPERTIES, VL_ONLY_MARK_SPECIFIC_CONFIG_PROPERTY_INDEX } from './mark';
+import { MARK_CONFIGS, PRIMITIVE_MARKS, VL_ONLY_MARK_CONFIG_PROPERTIES, VL_ONLY_MARK_SPECIFIC_CONFIG_PROPERTY_INDEX } from './mark';
+import { assembleParameterSignals } from './parameter';
 import { defaultScaleConfig } from './scale';
 import { defaultConfig as defaultSelectionConfig } from './selection';
 import { DEFAULT_SPACING, isStep } from './spec/base';
 import { extractTitleConfig } from './title';
-import { duplicate, getFirstDefined, isEmpty } from './util';
+import { duplicate, getFirstDefined, isEmpty, keys, omit } from './util';
 export function getViewConfigContinuousSize(viewConfig, channel) {
     var _a;
     return (_a = viewConfig[channel]) !== null && _a !== void 0 ? _a : viewConfig[channel === 'width' ? 'continuousWidth' : 'continuousHeight']; // get width/height for backwards compatibility
@@ -223,9 +237,84 @@ export function fontConfig(font) {
         }
     };
 }
-export function initConfig(config = {}) {
-    const { color, font, fontSize } = config, restConfig = __rest(config, ["color", "font", "fontSize"]);
-    return mergeConfig({}, defaultConfig, font ? fontConfig(font) : {}, color ? colorSignalConfig(color) : {}, fontSize ? fontSizeSignalConfig(fontSize) : {}, restConfig || {});
+function getAxisConfigInternal(axisConfig) {
+    const props = keys(axisConfig || {});
+    const axisConfigInternal = {};
+    for (const prop of props) {
+        const val = axisConfig[prop];
+        axisConfigInternal[prop] = isConditionalAxisValue(val)
+            ? signalOrValueRefWithCondition(val)
+            : signalRefOrValue(val);
+    }
+    return axisConfigInternal;
+}
+function getStyleConfigInternal(styleConfig) {
+    const props = keys(styleConfig);
+    const styleConfigInternal = {};
+    for (const prop of props) {
+        // We need to cast to cheat a bit here since styleConfig can be either mark config or axis config
+        styleConfigInternal[prop] = getAxisConfigInternal(styleConfig[prop]);
+    }
+    return styleConfigInternal;
+}
+const configPropsWithExpr = [
+    ...MARK_CONFIGS,
+    ...AXIS_CONFIGS,
+    ...HEADER_CONFIGS,
+    'background',
+    'padding',
+    'legend',
+    'lineBreak',
+    'scale',
+    'style',
+    'title',
+    'view'
+];
+/**
+ * Merge specified config with default config and config for the `color` flag,
+ * then replace all expressions with signals
+ */
+export function initConfig(specifiedConfig = {}) {
+    const { color, font, fontSize } = specifiedConfig, restConfig = __rest(specifiedConfig, ["color", "font", "fontSize"]);
+    const mergedConfig = mergeConfig({}, defaultConfig, font ? fontConfig(font) : {}, color ? colorSignalConfig(color) : {}, fontSize ? fontSizeSignalConfig(fontSize) : {}, restConfig || {});
+    const outputConfig = omit(mergedConfig, configPropsWithExpr);
+    for (const prop of ['background', 'lineBreak', 'padding']) {
+        if (mergedConfig[prop]) {
+            outputConfig[prop] = signalRefOrValue(mergedConfig[prop]);
+        }
+    }
+    for (const markConfigType of mark.MARK_CONFIGS) {
+        if (mergedConfig[markConfigType]) {
+            // FIXME: outputConfig[markConfigType] expects that types are replaced recursively but replaceExprRef only replaces one level deep
+            outputConfig[markConfigType] = replaceExprRef(mergedConfig[markConfigType]);
+        }
+    }
+    for (const axisConfigType of AXIS_CONFIGS) {
+        if (mergedConfig[axisConfigType]) {
+            outputConfig[axisConfigType] = getAxisConfigInternal(mergedConfig[axisConfigType]);
+        }
+    }
+    for (const headerConfigType of HEADER_CONFIGS) {
+        if (mergedConfig[headerConfigType]) {
+            outputConfig[headerConfigType] = replaceExprRef(mergedConfig[headerConfigType]);
+        }
+    }
+    if (mergedConfig.legend) {
+        outputConfig.legend = replaceExprRef(mergedConfig.legend);
+    }
+    if (mergedConfig.scale) {
+        outputConfig.scale = replaceExprRef(mergedConfig.scale);
+    }
+    if (mergedConfig.style) {
+        outputConfig.style = getStyleConfigInternal(mergedConfig.style);
+    }
+    if (mergedConfig.title) {
+        outputConfig.title = replaceExprRef(mergedConfig.title);
+    }
+    if (mergedConfig.view) {
+        outputConfig.view = replaceExprRef(mergedConfig.view);
+    }
+    return outputConfig;
 }
 const MARK_STYLES = ['view', ...PRIMITIVE_MARKS];
 const VL_ONLY_CONFIG_PROPERTIES = [
@@ -284,6 +373,10 @@ export function stripAndRedirectConfig(config) {
         if (config.mark.tooltip && isObject(config.mark.tooltip)) {
             delete config.mark.tooltip;
         }
+    }
+    if (config.params) {
+        config.signals = (config.signals || []).concat(assembleParameterSignals(config.params));
+        delete config.params;
     }
     for (const markType of MARK_STYLES) {
         // Remove Vega-Lite-only mark config

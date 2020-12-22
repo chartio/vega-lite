@@ -1,4 +1,14 @@
-import { __rest } from "tslib";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { isObject, isString } from 'vega-util';
 import { isAggregateOp, isArgmaxDef, isArgminDef, MULTIDOMAIN_SORT_OP_INDEX as UNIONDOMAIN_SORT_OP_INDEX, SHARED_DOMAIN_OP_INDEX } from '../../aggregate';
 import { isBinning, isBinParams, isSelectionExtent } from '../../bin';
@@ -456,7 +466,7 @@ export function mergeDomains(domains) {
     }
     // only keep sort properties that work with unioned domains
     const unionDomainSorts = util.unique(sorts.map(s => {
-        if (util.isBoolean(s) || !('op' in s) || s.op in UNIONDOMAIN_SORT_OP_INDEX) {
+        if (util.isBoolean(s) || !('op' in s) || (isString(s.op) && s.op in UNIONDOMAIN_SORT_OP_INDEX)) {
             return s;
         }
         log.warn(log.message.domainSortDropped(s));

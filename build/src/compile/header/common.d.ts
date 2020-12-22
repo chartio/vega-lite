@@ -1,13 +1,12 @@
-import { Orient } from 'vega';
+import { Orient, SignalRef } from 'vega';
 import { FacetChannel } from '../../channel';
 import { Config } from '../../config';
 import { Header } from '../../header';
-import { FacetFieldDef } from '../../spec/facet';
 import { HeaderChannel } from './component';
 /**
  * Get header channel, which can be different from facet channel when orient is specified or when the facet channel is facet.
  */
 export declare function getHeaderChannel(channel: FacetChannel, orient: Orient): HeaderChannel;
-export declare function getHeaderProperty<P extends keyof Header>(prop: P, facetFieldDef: FacetFieldDef<string>, config: Config, channel: FacetChannel): Header[P];
-export declare function getHeaderProperties(properties: (keyof Header)[], facetFieldDef: FacetFieldDef<string>, config: Config, channel: FacetChannel): Header;
+export declare function getHeaderProperty<P extends keyof Header<SignalRef>>(prop: P, header: Header<SignalRef>, config: Config<SignalRef>, channel: FacetChannel): Header<SignalRef>[P];
+export declare function getHeaderProperties(properties: (keyof Header<SignalRef>)[], header: Header<SignalRef>, config: Config<SignalRef>, channel: FacetChannel): Header<SignalRef>;
 //# sourceMappingURL=common.d.ts.map

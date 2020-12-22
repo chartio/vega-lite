@@ -57,7 +57,17 @@ export class GeoJSONNode extends DataFlowNode {
         return `GeoJSON ${this.geojson} ${this.signal} ${hash(this.fields)}`;
     }
     assemble() {
-        return Object.assign(Object.assign(Object.assign({ type: 'geojson' }, (this.fields ? { fields: this.fields } : {})), (this.geojson ? { geojson: this.geojson } : {})), { signal: this.signal });
+        return [
+            ...(this.geojson
+                ? [
+                    {
+                        type: 'filter',
+                        expr: `isValid(datum["${this.geojson}"])`
+                    }
+                ]
+                : []),
+            Object.assign(Object.assign(Object.assign({ type: 'geojson' }, (this.fields ? { fields: this.fields } : {})), (this.geojson ? { geojson: this.geojson } : {})), { signal: this.signal })
+        ];
     }
 }
 //# sourceMappingURL=geojson.js.map

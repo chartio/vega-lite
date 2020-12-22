@@ -1,8 +1,17 @@
-import { __rest } from "tslib";
-import stringify from 'fast-json-stable-stringify';
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { isObject, isString } from 'vega-util';
 import { dateTimeExprToExpr } from './datetime';
-import { accessPathWithDatum, keys, varName } from './util';
+import { accessPathWithDatum, keys, stringify, varName } from './util';
 /** Time Unit that only corresponds to only one part of Date objects. */
 export const LOCAL_SINGLE_TIMEUNIT_INDEX = {
     year: 1,
@@ -108,13 +117,7 @@ export const VEGALITE_TIMEFORMAT = {
     'year-month-date': '%b %d, %Y '
 };
 export function getTimeUnitParts(timeUnit) {
-    const parts = [];
-    for (const part of TIMEUNIT_PARTS) {
-        if (containsTimeUnit(timeUnit, part)) {
-            parts.push(part);
-        }
-    }
-    return parts;
+    return TIMEUNIT_PARTS.filter(part => containsTimeUnit(timeUnit, part));
 }
 /** Returns true if fullTimeUnit contains the timeUnit, false otherwise. */
 export function containsTimeUnit(fullTimeUnit, timeUnit) {

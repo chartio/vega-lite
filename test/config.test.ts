@@ -1,3 +1,4 @@
+import {SignalRef} from 'vega';
 import {
   Config,
   defaultConfig,
@@ -12,6 +13,36 @@ import {duplicate} from '../src/util';
 
 describe('config', () => {
   describe('initConfig', () => {
+    it('converts `expr`s in config to `signal`s', () => {
+      expect(
+        initConfig({
+          background: {expr: "'yellow'"},
+          padding: {expr: '5'},
+          mark: {color: {expr: "'red'"}},
+          point: {color: {expr: "'green'"}},
+          scale: {
+            bandPaddingInner: {expr: '0.1'}
+          },
+          style: {
+            foo: {color: {expr: "'blue'"}}
+          },
+          title: {color: {expr: "'violet'"}}
+        })
+      ).toMatchObject({
+        background: {signal: "'yellow'"},
+        padding: {signal: '5'},
+        mark: {color: {signal: "'red'"}},
+        point: {color: {signal: "'green'"}},
+        scale: {
+          bandPaddingInner: {signal: '0.1'}
+        },
+        style: {
+          foo: {color: {signal: "'blue'"}}
+        },
+        title: {color: {signal: "'violet'"}}
+      });
+    });
+
     it('produces correct default color, font, and fontSize config', () => {
       expect(initConfig({color: true, fontSize: true, font: 'abc'})).toEqual({
         ...defaultConfig,
@@ -94,7 +125,7 @@ describe('config', () => {
   });
 
   describe('stripAndRedirectConfig', () => {
-    const config: Config = {
+    const config: Config<SignalRef> = {
       ...defaultConfig,
       mark: {
         ...defaultConfig.mark,
@@ -183,6 +214,42 @@ describe('config', () => {
         title: {subtitleColor: 'red'}
       });
       expect(stripAndRedirectConfig(cfg).title).toEqual({subtitleColor: 'red'});
+    });
+
+    it('converts params config into signals', () => {
+      const cfg = initConfig({
+        signals: [
+          {
+            name: 'x',
+            update: 'foo'
+          }
+        ],
+        params: [
+          {
+            name: 'a',
+            expr: 'bar'
+          },
+          {
+            name: 'b',
+            bind: {input: 'range', min: -6.28, max: 6.28}
+          }
+        ]
+      });
+
+      expect(stripAndRedirectConfig(cfg).signals).toEqual([
+        {
+          name: 'x',
+          update: 'foo'
+        },
+        {
+          name: 'a',
+          update: 'bar'
+        },
+        {
+          name: 'b',
+          bind: {input: 'range', min: -6.28, max: 6.28}
+        }
+      ]);
     });
   });
 

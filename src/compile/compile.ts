@@ -5,6 +5,7 @@ import * as vlFieldDef from '../channeldef';
 import {Config, initConfig, stripAndRedirectConfig} from '../config';
 import * as log from '../log';
 import {normalize} from '../normalize';
+import {assembleParameterSignals} from '../parameter';
 import {LayoutSizeMixins, TopLevel, TopLevelSpec} from '../spec';
 import {
   AutoSizeParams,
@@ -181,9 +182,9 @@ function getTopLevelProperties(
         ? {}
         : {autosize: autosize.type}
       : {autosize}),
-    ...(isFacetModel(model) ? {width, height} : {}),
-    ...extractTopLevelProperties(config),
-    ...extractTopLevelProperties(inputSpec)
+    ...(isFacetModel(model) && typeof width == 'number' && typeof height == 'number' ? {width, height} : {}),
+    ...extractTopLevelProperties(config, false),
+    ...extractTopLevelProperties(inputSpec, true)
   };
 }
 
@@ -224,16 +225,22 @@ function assembleTopLevelModel(
     return true;
   });
 
+  const {params, ...otherTopLevelProps} = topLevelProperties;
+
   return {
     $schema: 'https://vega.github.io/schema/vega/v5.json',
     ...(model.description ? {description: model.description} : {}),
-    ...topLevelProperties,
+    ...otherTopLevelProps,
     ...(title ? {title} : {}),
     ...(style ? {style} : {}),
     ...(encodeEntry ? {encode: {update: encodeEntry}} : {}),
     data,
     ...(projections.length > 0 ? {projections: projections} : {}),
-    ...model.assembleGroup([...layoutSignals, ...model.assembleSelectionTopLevelSignals([])]),
+    ...model.assembleGroup([
+      ...layoutSignals,
+      ...model.assembleSelectionTopLevelSignals([]),
+      ...assembleParameterSignals(params)
+    ]),
     ...(vgConfig ? {config: vgConfig} : {}),
     ...(usermeta ? {usermeta} : {})
   };

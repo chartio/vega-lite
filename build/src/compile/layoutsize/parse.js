@@ -3,6 +3,7 @@ import { getViewConfigContinuousSize, getViewConfigDiscreteSize } from '../../co
 import { hasDiscreteDomain } from '../../scale';
 import { isStep } from '../../spec/base';
 import { isVgRangeStep } from '../../vega.schema';
+import { defaultScaleResolve } from '../resolve';
 import { mergeValuesWithExplicit } from '../split';
 import { getSizeTypeFromLayoutSizeType } from './component';
 export function parseFacetLayoutSize(model) {
@@ -22,7 +23,6 @@ export function parseLayerLayoutSize(model) {
     parseNonUnitLayoutSizeForChannel(model, 'width');
     parseNonUnitLayoutSizeForChannel(model, 'height');
 }
-export const parseRepeatLayoutSize = parseConcatLayoutSize;
 export function parseConcatLayoutSize(model) {
     parseChildrenLayoutSize(model);
     // for columns === 1 (vconcat), we can completely merge width. Otherwise, we can treat merged width as childWidth.
@@ -41,6 +41,7 @@ export function parseChildrenLayoutSize(model) {
  * Merge child layout size (width or height).
  */
 function parseNonUnitLayoutSizeForChannel(model, layoutSizeType) {
+    var _a;
     /*
      * For concat, the parent width or height might not be the same as the children's shared height.
      * For example, hconcat's subviews may share width, but the shared width is not the hconcat view's width.
@@ -56,7 +57,7 @@ function parseNonUnitLayoutSizeForChannel(model, layoutSizeType) {
     // Try to merge layout size
     for (const child of model.children) {
         const childSize = child.component.layoutSize.getWithExplicit(sizeType);
-        const scaleResolve = resolve.scale[channel];
+        const scaleResolve = (_a = resolve.scale[channel]) !== null && _a !== void 0 ? _a : defaultScaleResolve(channel, model);
         if (scaleResolve === 'independent' && childSize.value === 'step') {
             // Do not merge independent scales with range-step as their size depends
             // on the scale domains, which can be different between scales.

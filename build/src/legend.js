@@ -8,36 +8,6 @@ export const LEGEND_SCALE_CHANNELS = [
     'strokeWidth',
     'opacity'
 ];
-export const SIGNAL_LEGEND_PROP_INDEX = {
-    fillColor: {
-        part: 'legend',
-        vgProp: 'fill'
-    },
-    gradientStrokeColor: {
-        part: 'gradient',
-        vgProp: 'stroke'
-    },
-    labelColor: {
-        part: 'labels',
-        vgProp: 'fill'
-    },
-    strokeColor: {
-        part: 'legend',
-        vgProp: 'stroke'
-    },
-    symbolFillColor: {
-        part: 'symbols',
-        vgProp: 'fill'
-    },
-    symbolStrokeColor: {
-        part: 'symbols',
-        vgProp: 'stroke'
-    },
-    titleColor: {
-        part: 'title',
-        vgProp: 'fill'
-    }
-};
 export const defaultLegendConfig = {
     gradientHorizontalMaxLength: 200,
     gradientHorizontalMinLength: 100,

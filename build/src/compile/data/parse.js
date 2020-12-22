@@ -36,23 +36,26 @@ import { StackNode } from './stack';
 import { TimeUnitNode } from './timeunit';
 import { WindowTransformNode } from './window';
 export function findSource(data, sources) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+    var _a, _b, _c, _d;
     for (const other of sources) {
         const otherData = other.data;
         // if both datasets have a name defined, we cannot merge
         if (data.name && other.hasName() && data.name !== other.dataName) {
             continue;
         }
+        const formatMesh = (_a = data['format']) === null || _a === void 0 ? void 0 : _a.mesh;
+        const otherFeature = (_b = otherData.format) === null || _b === void 0 ? void 0 : _b.feature;
         // feature and mesh are mutually exclusive
-        if (((_a = data['format']) === null || _a === void 0 ? void 0 : _a.mesh) && ((_b = otherData.format) === null || _b === void 0 ? void 0 : _b.feature)) {
+        if (formatMesh && otherFeature) {
             continue;
         }
         // we have to extract the same feature or mesh
-        if ((((_c = data['format']) === null || _c === void 0 ? void 0 : _c.feature) || ((_d = otherData.format) === null || _d === void 0 ? void 0 : _d.feature)) &&
-            ((_e = data['format']) === null || _e === void 0 ? void 0 : _e.feature) !== ((_f = otherData.format) === null || _f === void 0 ? void 0 : _f.feature)) {
+        const formatFeature = (_c = data['format']) === null || _c === void 0 ? void 0 : _c.feature;
+        if ((formatFeature || otherFeature) && formatFeature !== otherFeature) {
             continue;
         }
-        if ((((_g = data['format']) === null || _g === void 0 ? void 0 : _g.mesh) || ((_h = otherData.format) === null || _h === void 0 ? void 0 : _h.mesh)) && ((_j = data['format']) === null || _j === void 0 ? void 0 : _j.mesh) !== ((_k = otherData.format) === null || _k === void 0 ? void 0 : _k.mesh)) {
+        const otherMesh = (_d = otherData.format) === null || _d === void 0 ? void 0 : _d.mesh;
+        if ((formatMesh || otherMesh) && formatMesh !== otherMesh) {
             continue;
         }
         if (isInlineData(data) && isInlineData(otherData)) {

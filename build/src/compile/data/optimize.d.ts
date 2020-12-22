@@ -7,7 +7,6 @@ export declare const MAX_OPTIMIZATION_RUNS = 5;
  * Iterates over a dataflow graph and checks whether all links are consistent.
  */
 export declare function checkLinks(nodes: readonly DataFlowNode[]): boolean;
-export declare function isTrue(x: boolean): boolean;
 /**
  * Optimizes the dataflow of the passed in data component.
  */

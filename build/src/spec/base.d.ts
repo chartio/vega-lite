@@ -1,6 +1,7 @@
 import { Color, Cursor, SignalRef, Text } from 'vega';
 import { NormalizedSpec } from '.';
 import { Data } from '../data';
+import { ExprRef } from '../expr';
 import { MarkConfig } from '../mark';
 import { Resolve } from '../resolve';
 import { TitleParams } from '../title';
@@ -14,7 +15,7 @@ export interface BaseSpec {
     /**
      * Title for the plot.
      */
-    title?: Text | TitleParams;
+    title?: Text | TitleParams<ExprRef | SignalRef>;
     /**
      * Name of the visualization for later reference.
      */
@@ -80,54 +81,40 @@ export interface LayoutSizeMixins {
     height?: number | 'container' | Step;
 }
 export declare type LayoutSizeField = keyof LayoutSizeMixins;
-export declare function isFrameMixins(o: any): o is FrameMixins;
-export interface FrameMixins extends LayoutSizeMixins {
+export declare function isFrameMixins(o: any): o is FrameMixins<any>;
+export interface FrameMixins<ES extends ExprRef | SignalRef = ExprRef | SignalRef> extends LayoutSizeMixins {
     /**
      * An object defining the view background's fill and stroke.
      *
      * __Default value:__ none (transparent)
      */
-    view?: ViewBackground;
+    view?: ViewBackground<ES>;
 }
-export declare type DeprecatedFrameMixins = {
-    /**
-     * __Deprecated:__ Please avoid using width in a unit spec that's a part of a layer spec.
-     */
-    width?: FrameMixins['width'];
-    /**
-     * __Deprecated:__ Please avoid using width in a unit spec that's a part of a layer spec.
-     */
-    height?: FrameMixins['height'];
-    /**
-     * __Deprecated:__ Please avoid using width in a unit spec that's a part of a layer spec.
-     */
-    view?: FrameMixins['view'];
-};
 export interface ResolveMixins {
     /**
      * Scale, axis, and legend resolutions for view composition specifications.
      */
     resolve?: Resolve;
 }
-export interface BaseViewBackground extends Partial<Pick<MarkConfig, 'cornerRadius' | 'fillOpacity' | 'opacity' | 'strokeCap' | 'strokeDash' | 'strokeDashOffset' | 'strokeJoin' | 'strokeMiterLimit' | 'strokeOpacity' | 'strokeWidth'>> {
+export interface BaseViewBackground<ES extends ExprRef | SignalRef> extends Partial<Pick<MarkConfig<ES>, 'cornerRadius' | 'fillOpacity' | 'opacity' | 'strokeCap' | 'strokeDash' | 'strokeDashOffset' | 'strokeJoin' | 'strokeMiterLimit' | 'strokeOpacity' | 'strokeWidth'>> {
     /**
      * The fill color.
      *
      * __Default value:__ `undefined`
      */
-    fill?: Color | null | SignalRef;
+    fill?: Color | null | ES;
     /**
      * The stroke color.
      *
      * __Default value:__ `"#ddd"`
      */
-    stroke?: Color | null | SignalRef;
+    stroke?: Color | null | ES;
     /**
      * The mouse cursor used over the view. Any valid [CSS cursor type](https://developer.mozilla.org/en-US/docs/Web/CSS/cursor#Values) can be used.
      */
     cursor?: Cursor;
 }
-export interface ViewBackground extends BaseViewBackground {
+export interface ViewBackground<ES extends ExprRef | SignalRef> extends BaseViewBackground<ES> {
     /**
      * A string or array of strings indicating the name of custom styles to apply to the view background. A style is a named collection of mark property defaults defined within the [style configuration](https://vega.github.io/vega-lite/docs/mark.html#style-config). If style is an array, later styles will override earlier styles.
      *

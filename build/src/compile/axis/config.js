@@ -37,7 +37,7 @@ export function getAxisConfigs(channel, scaleType, orient, config) {
                     ? ['axisTemporal']
                     : [];
     const axisChannel = channel === 'x' ? 'axisX' : 'axisY';
-    const axisOrient = isSignalRef(orient) ? 'axisOrient' : 'axis' + titleCase(orient); // axisTop, axisBottom, ...
+    const axisOrient = isSignalRef(orient) ? 'axisOrient' : `axis${titleCase(orient)}`; // axisTop, axisBottom, ...
     const vlOnlyConfigTypes = [
         // technically Vega does have axisBand, but if we make another separation here,
         // it will further introduce complexity in the code

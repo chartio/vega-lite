@@ -1,4 +1,4 @@
-import { NewSignal } from 'vega';
+import { NewSignal, SignalRef } from 'vega';
 import { ExtendedChannel } from '../channel';
 import { FieldRefOption, TypedFieldDef } from '../channeldef';
 import { Config } from '../config';
@@ -9,11 +9,12 @@ import { VgData, VgLayout, VgMarkGroup } from '../vega.schema';
 import { Model, ModelWithField } from './model';
 export declare function facetSortFieldName(fieldDef: FacetFieldDef<string>, sort: EncodingSortField<string>, opt?: FieldRefOption): string;
 export declare class FacetModel extends ModelWithField {
-    readonly facet: EncodingFacetMapping<string>;
+    readonly facet: EncodingFacetMapping<string, SignalRef>;
     readonly child: Model;
     readonly children: Model[];
-    constructor(spec: NormalizedFacetSpec, parent: Model, parentGivenName: string, config: Config);
+    constructor(spec: NormalizedFacetSpec, parent: Model, parentGivenName: string, config: Config<SignalRef>);
     private initFacet;
+    private initFacetFieldDef;
     channelHasField(channel: ExtendedChannel): boolean;
     fieldDef(channel: ExtendedChannel): TypedFieldDef<string>;
     parseData(): void;
@@ -38,6 +39,6 @@ export declare class FacetModel extends ModelWithField {
     private facetSortOrder;
     private assembleLabelTitle;
     assembleMarks(): VgMarkGroup[];
-    protected getMapping(): EncodingFacetMapping<string>;
+    protected getMapping(): EncodingFacetMapping<string, SignalRef>;
 }
 //# sourceMappingURL=facet.d.ts.map

@@ -1,11 +1,11 @@
-import { Legend as VgLegend, NewSignal, Title as VgTitle } from 'vega';
+import { Legend as VgLegend, NewSignal, SignalRef, Title as VgTitle } from 'vega';
 import { Config } from '../config';
 import { LayoutSizeMixins, NormalizedLayerSpec } from '../spec';
 import { VgData, VgLayout } from '../vega.schema';
 import { Model } from './model';
 export declare class LayerModel extends Model {
     readonly children: Model[];
-    constructor(spec: NormalizedLayerSpec, parent: Model, parentGivenName: string, parentGivenSize: LayoutSizeMixins, config: Config);
+    constructor(spec: NormalizedLayerSpec, parent: Model, parentGivenName: string, parentGivenSize: LayoutSizeMixins, config: Config<SignalRef>);
     parseData(): void;
     parseLayoutSize(): void;
     parseSelections(): void;

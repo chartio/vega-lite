@@ -1,7 +1,7 @@
 import { COMMON_AXIS_PROPERTIES_INDEX } from '../../axis';
 import { duplicate, keys } from '../../util';
-import { Split } from '../split';
 import { isSignalRef } from '../../vega.schema';
+import { Split } from '../split';
 function isFalseOrNull(v) {
     return v === false || v === null;
 }

@@ -10,13 +10,13 @@ import {TimeUnit, TimeUnitParams} from './timeunit';
 
 export interface FilterTransform {
   /**
-   * The `filter` property must be a predication definition, which can takes one of the following forms:
+   * The `filter` property must be a predication definition, which can take one of the following forms:
    *
    * 1) an [expression](https://vega.github.io/vega-lite/docs/types.html#expression) string,
    * where `datum` can be used to refer to the current data object.
    * For example, `{filter: "datum.b2 > 60"}` would make the output data includes only items that have values in the field `b2` over 60.
    *
-   * 2) one of the [field predicates](https://vega.github.io/vega-lite/docs/predicate.html#field-predicate): 
+   * 2) one of the [field predicates](https://vega.github.io/vega-lite/docs/predicate.html#field-predicate):
    * [`equal`](https://vega.github.io/vega-lite/docs/predicate.html#field-equal-predicate),
    * [`lt`](https://vega.github.io/vega-lite/docs/predicate.html#lt-predicate),
    * [`lte`](https://vega.github.io/vega-lite/docs/predicate.html#lte-predicate),
@@ -356,7 +356,7 @@ export interface LookupTransform {
    *
    * __Default value:__ `null`
    */
-  default?: string;
+  default?: any;
 
   /**
    * Data source or selection for secondary data reference.

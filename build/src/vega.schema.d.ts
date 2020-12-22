@@ -1,16 +1,17 @@
-import { AggregateOp, BandScale, BaseScale, BinOrdinalScale, ColorValueRef, Compare as VgCompare, ExprRef as VgExprRef, GeoShapeTransform as VgGeoShapeTransform, IdentityScale, LayoutAlign, LinearScale, LogScale, NumericValueRef, OrdinalScale, PointScale, PowScale, ProjectionType, QuantileScale, QuantizeScale, RangeBand, RangeRaw, RangeScheme, ScaleData, ScaleDataRef, ScaledValueRef, ScaleMultiDataRef, ScaleMultiFieldsRef, SequentialScale, SignalRef, SortField as VgSortField, SqrtScale, SymLogScale, ThresholdScale, TimeInterval, TimeIntervalStep, TimeScale, Title as VgTitle, Transforms as VgTransform, UnionSortField as VgUnionSortField, Mark } from 'vega';
+import type { AggregateOp, BandScale, BaseScale, BinOrdinalScale, ColorValueRef, Compare as VgCompare, ExprRef as VgExprRef, GeoShapeTransform as VgGeoShapeTransform, IdentityScale, LayoutAlign, LinearScale, LogScale, Mark, NumericValueRef, OrdinalScale, PointScale, PowScale, ProjectionType, QuantileScale, QuantizeScale, RangeBand, RangeRaw, RangeScheme, ScaleData, ScaleDataRef, ScaledValueRef, ScaleMultiDataRef, ScaleMultiFieldsRef, SequentialScale, SignalRef, SortField as VgSortField, SqrtScale, SymLogScale, ThresholdScale, TimeInterval, TimeIntervalStep, TimeScale, Title as VgTitle, Transforms as VgTransform, UnionSortField as VgUnionSortField } from 'vega';
 import { Value } from './channeldef';
+import { ExprRef } from './expr';
 import { SortOrder } from './sort';
-import { Flag, Dict } from './util';
-export { VgSortField, VgUnionSortField, VgCompare, VgTitle, LayoutAlign, ProjectionType, VgExprRef };
-declare type ExcludeMapped<T, E> = {
+import { Dict, Flag } from './util';
+export type { VgSortField, VgUnionSortField, VgCompare, VgTitle, LayoutAlign, ProjectionType, VgExprRef };
+export declare type MappedExclude<T, E> = {
     [P in keyof T]: Exclude<T[P], E>;
 };
-declare type ExcludeMappedButKeepSignals<T, E> = {
-    [P in keyof T]: SignalRef extends T[P] ? Exclude<T[P], E> | SignalRef : Exclude<T[P], E>;
+export declare type MapExcludeAndKeepSignalAs<T, E, S extends ExprRef | SignalRef> = {
+    [P in keyof T]: SignalRef extends T[P] ? Exclude<T[P], E> | S : Exclude<T[P], E>;
 };
-export declare type ExcludeMappedValueRef<T> = ExcludeMapped<T, ScaledValueRef<any> | NumericValueRef | ColorValueRef>;
-export declare type ExcludeMappedValueRefButKeepSignal<T> = ExcludeMappedButKeepSignals<T, ScaledValueRef<any> | NumericValueRef | ColorValueRef>;
+export declare type MappedExcludeValueRef<T> = MappedExclude<T, ScaledValueRef<any> | NumericValueRef | ColorValueRef>;
+export declare type MapExcludeValueRefAndReplaceSignalWith<T, S extends ExprRef | SignalRef> = MapExcludeAndKeepSignalAs<T, ScaledValueRef<any> | NumericValueRef | ColorValueRef, S>;
 export interface VgData {
     name: string;
     source?: string;
@@ -30,7 +31,7 @@ export declare type VgScaleDataRefWithSort = ScaleDataRef & {
 };
 export declare function isSignalRef(o: any): o is SignalRef;
 export interface VgValueRef {
-    value?: Value | number[];
+    value?: Value<null>;
     field?: string | {
         datum?: string;
         group?: string;
@@ -99,7 +100,7 @@ export declare type VgEncodeEntry = Partial<Record<VgEncodeChannel, VgValueRef |
     test?: string;
 })[]>>;
 export declare type VgPostEncodingTransform = VgGeoShapeTransform;
-export declare const VG_MARK_CONFIGS: ("width" | "height" | "theta" | "radius" | "fill" | "stroke" | "opacity" | "fillOpacity" | "strokeOpacity" | "strokeWidth" | "strokeDash" | "size" | "angle" | "shape" | "text" | "tooltip" | "href" | "description" | "orient" | "aria" | "interpolate" | "align" | "cornerRadius" | "strokeCap" | "strokeDashOffset" | "strokeJoin" | "strokeMiterLimit" | "ariaRole" | "ariaRoleDescription" | "aspect" | "blend" | "strokeOffset" | "tension" | "startAngle" | "endAngle" | "padAngle" | "innerRadius" | "outerRadius" | "baseline" | "dir" | "dx" | "dy" | "ellipsis" | "limit" | "lineBreak" | "lineHeight" | "font" | "fontSize" | "fontStyle" | "fontWeight" | "cursor" | "cornerRadiusTopLeft" | "cornerRadiusTopRight" | "cornerRadiusBottomRight" | "cornerRadiusBottomLeft")[];
+export declare const VG_MARK_CONFIGS: ("smooth" | "dir" | "font" | "text" | "fill" | "stroke" | "width" | "height" | "shape" | "orient" | "aria" | "description" | "cornerRadius" | "strokeWidth" | "size" | "fillOpacity" | "strokeOpacity" | "opacity" | "interpolate" | "align" | "strokeCap" | "strokeDash" | "strokeDashOffset" | "strokeMiterLimit" | "strokeJoin" | "strokeOffset" | "cursor" | "innerRadius" | "outerRadius" | "startAngle" | "endAngle" | "tension" | "url" | "baseline" | "ellipsis" | "limit" | "dx" | "dy" | "radius" | "theta" | "angle" | "fontSize" | "fontWeight" | "fontStyle" | "tooltip" | "href" | "cornerRadiusTopLeft" | "cornerRadiusTopRight" | "cornerRadiusBottomRight" | "cornerRadiusBottomLeft" | "ariaRole" | "ariaRoleDescription" | "aspect" | "blend" | "padAngle" | "lineBreak" | "lineHeight")[];
 export declare const VG_MARK_INDEX: Flag<Mark['type']>;
 export declare const VG_CORNERRADIUS_CHANNELS: readonly ["cornerRadius", "cornerRadiusTopLeft", "cornerRadiusTopRight", "cornerRadiusBottomLeft", "cornerRadiusBottomRight"];
 export interface VgComparator {

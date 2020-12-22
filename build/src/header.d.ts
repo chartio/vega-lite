@@ -1,10 +1,12 @@
 import { Align, Color, FontStyle, FontWeight, Orient, SignalRef, TextBaseline, TitleAnchor, TitleConfig } from 'vega';
-import { FormatMixins, Guide, VlOnlyGuideConfig } from './guide';
-export declare const HEADER_TITLE_PROPERTIES_MAP: Partial<Record<keyof CoreHeader, keyof TitleConfig>>;
-export declare const HEADER_LABEL_PROPERTIES_MAP: Partial<Record<keyof CoreHeader, keyof TitleConfig>>;
-export declare const HEADER_TITLE_PROPERTIES: ("orient" | "titleAlign" | "titleAnchor" | "titleBaseline" | "titleColor" | "titleFont" | "titleFontSize" | "titleFontStyle" | "titleFontWeight" | "titleLimit" | "titleLineHeight" | "titleOrient" | "titlePadding" | "labelAlign" | "labelBaseline" | "labelColor" | "labelFont" | "labelFontSize" | "labelFontStyle" | "labelFontWeight" | "labelLimit" | "labelPadding" | "labels" | "format" | "formatType" | "labelExpr" | "titleAngle" | "labelAnchor" | "labelAngle" | "labelLineHeight" | "labelOrient")[];
-export declare const HEADER_LABEL_PROPERTIES: ("orient" | "titleAlign" | "titleAnchor" | "titleBaseline" | "titleColor" | "titleFont" | "titleFontSize" | "titleFontStyle" | "titleFontWeight" | "titleLimit" | "titleLineHeight" | "titleOrient" | "titlePadding" | "labelAlign" | "labelBaseline" | "labelColor" | "labelFont" | "labelFontSize" | "labelFontStyle" | "labelFontWeight" | "labelLimit" | "labelPadding" | "labels" | "format" | "formatType" | "labelExpr" | "titleAngle" | "labelAnchor" | "labelAngle" | "labelLineHeight" | "labelOrient")[];
-export interface CoreHeader extends FormatMixins {
+import { FormatMixins } from './channeldef';
+import { ExprRef } from './expr';
+import { Guide, VlOnlyGuideConfig } from './guide';
+export declare const HEADER_TITLE_PROPERTIES_MAP: Partial<Record<keyof CoreHeader<any>, keyof TitleConfig>>;
+export declare const HEADER_LABEL_PROPERTIES_MAP: Partial<Record<keyof CoreHeader<any>, keyof TitleConfig>>;
+export declare const HEADER_TITLE_PROPERTIES: ("orient" | "titleAlign" | "titleAnchor" | "titleBaseline" | "titleColor" | "titleFont" | "titleFontSize" | "titleFontStyle" | "titleFontWeight" | "titleLimit" | "titleLineHeight" | "titleOrient" | "titlePadding" | "labelAlign" | "labelBaseline" | "labelColor" | "labelFont" | "labelFontSize" | "labelFontStyle" | "labelFontWeight" | "labelLimit" | "labelPadding" | "format" | "formatType" | "titleAngle" | "labels" | "labelLineHeight" | "labelAngle" | "labelExpr" | "labelAnchor" | "labelOrient")[];
+export declare const HEADER_LABEL_PROPERTIES: ("orient" | "titleAlign" | "titleAnchor" | "titleBaseline" | "titleColor" | "titleFont" | "titleFontSize" | "titleFontStyle" | "titleFontWeight" | "titleLimit" | "titleLineHeight" | "titleOrient" | "titlePadding" | "labelAlign" | "labelBaseline" | "labelColor" | "labelFont" | "labelFontSize" | "labelFontStyle" | "labelFontWeight" | "labelLimit" | "labelPadding" | "format" | "formatType" | "titleAngle" | "labels" | "labelLineHeight" | "labelAngle" | "labelExpr" | "labelAnchor" | "labelOrient")[];
+export interface CoreHeader<ES extends ExprRef | SignalRef> extends FormatMixins {
     /**
      * The anchor position for placing the title. One of `"start"`, `"middle"`, or `"end"`. For example, with an orientation of top these anchor positions map to a left-, center-, or right-aligned title.
      */
@@ -12,7 +14,7 @@ export interface CoreHeader extends FormatMixins {
     /**
      * Horizontal text alignment (to the anchor) of header titles.
      */
-    titleAlign?: Align | SignalRef;
+    titleAlign?: Align | ES;
     /**
      * The rotation angle of the header title.
      *
@@ -28,40 +30,40 @@ export interface CoreHeader extends FormatMixins {
      *
      * __Default value:__ `"middle"`
      */
-    titleBaseline?: TextBaseline | SignalRef;
+    titleBaseline?: TextBaseline | ES;
     /**
      * Color of the header title, can be in hex color code or regular color name.
      */
-    titleColor?: Color | SignalRef;
+    titleColor?: Color | ES;
     /**
      * Font of the header title. (e.g., `"Helvetica Neue"`).
      */
-    titleFont?: string | SignalRef;
+    titleFont?: string | ES;
     /**
      * Font size of the header title.
      *
      * @minimum 0
      */
-    titleFontSize?: number | SignalRef;
+    titleFontSize?: number | ES;
     /**
      * The font style of the header title.
      */
-    titleFontStyle?: FontStyle | SignalRef;
+    titleFontStyle?: FontStyle | ES;
     /**
      * Font weight of the header title.
      * This can be either a string (e.g `"bold"`, `"normal"`) or a number (`100`, `200`, `300`, ..., `900` where `"normal"` = `400` and `"bold"` = `700`).
      */
-    titleFontWeight?: FontWeight | SignalRef;
+    titleFontWeight?: FontWeight | ES;
     /**
      * The maximum length of the header title in pixels. The text value will be automatically truncated if the rendered size exceeds the limit.
      *
      * __Default value:__ `0`, indicating no limit
      */
-    titleLimit?: number | SignalRef;
+    titleLimit?: number | ES;
     /**
      * Line height in pixels for multi-line header title text or title text with `"line-top"` or `"line-bottom"` baseline.
      */
-    titleLineHeight?: number | SignalRef;
+    titleLineHeight?: number | ES;
     /**
      * The orientation of the header title. One of `"top"`, `"bottom"`, `"left"` or `"right"`.
      */
@@ -71,7 +73,7 @@ export interface CoreHeader extends FormatMixins {
      *
      * __Default value:__ `10`
      */
-    titlePadding?: number | SignalRef;
+    titlePadding?: number | ES;
     /**
      * A boolean flag indicating if labels should be included as part of the header.
      *
@@ -81,13 +83,13 @@ export interface CoreHeader extends FormatMixins {
     /**
      * Horizontal text alignment of header labels. One of `"left"`, `"center"`, or `"right"`.
      */
-    labelAlign?: Align | SignalRef;
+    labelAlign?: Align | ES;
     /**
      * The vertical text baseline for the header labels. One of `"alphabetic"` (default), `"top"`, `"middle"`, `"bottom"`, `"line-top"`, or `"line-bottom"`.
      * The `"line-top"` and `"line-bottom"` values operate similarly to `"top"` and `"bottom"`, but are calculated relative to the `titleLineHeight` rather than `titleFontSize` alone.
      *
      */
-    labelBaseline?: TextBaseline | SignalRef;
+    labelBaseline?: TextBaseline | ES;
     /**
      * The anchor position for placing the labels. One of `"start"`, `"middle"`, or `"end"`. For example, with a label orientation of top these anchor positions map to a left-, center-, or right-aligned label.
      */
@@ -110,35 +112,35 @@ export interface CoreHeader extends FormatMixins {
     /**
      * The color of the header label, can be in hex color code or regular color name.
      */
-    labelColor?: Color | SignalRef;
+    labelColor?: Color | ES;
     /**
      * The font of the header label.
      */
-    labelFont?: string | SignalRef;
+    labelFont?: string | ES;
     /**
      * The font size of the header label, in pixels.
      *
      * @minimum 0
      */
-    labelFontSize?: number | SignalRef;
+    labelFontSize?: number | ES;
     /**
      * The font style of the header label.
      */
-    labelFontStyle?: FontStyle | SignalRef;
+    labelFontStyle?: FontStyle | ES;
     /**
      * The font weight of the header label.
      */
-    labelFontWeight?: FontWeight | SignalRef;
+    labelFontWeight?: FontWeight | ES;
     /**
      * The maximum length of the header label in pixels. The text value will be automatically truncated if the rendered size exceeds the limit.
      *
      * __Default value:__ `0`, indicating no limit
      */
-    labelLimit?: number | SignalRef;
+    labelLimit?: number | ES;
     /**
      * Line height in pixels for multi-line header labels or title text with `"line-top"` or `"line-bottom"` baseline.
      */
-    labelLineHeight?: number | SignalRef;
+    labelLineHeight?: number | ES;
     /**
      * The orientation of the header label. One of `"top"`, `"bottom"`, `"left"` or `"right"`.
      */
@@ -148,43 +150,44 @@ export interface CoreHeader extends FormatMixins {
      *
      * __Default value:__ `10`
      */
-    labelPadding?: number | SignalRef;
+    labelPadding?: number | ES;
     /**
      * Shortcut for setting both labelOrient and titleOrient.
      */
     orient?: Orient;
 }
-export interface HeaderConfig extends CoreHeader, VlOnlyGuideConfig {
+export interface HeaderConfig<ES extends ExprRef | SignalRef> extends CoreHeader<ES>, VlOnlyGuideConfig {
 }
 /**
  * Headers of row / column channels for faceted plots.
  */
-export interface Header extends CoreHeader, Guide {
+export interface Header<ES extends ExprRef | SignalRef> extends CoreHeader<ES>, Guide {
 }
-export interface HeaderConfigMixins {
+export interface HeaderConfigMixins<ES extends ExprRef | SignalRef> {
     /**
      * Header configuration, which determines default properties for all [headers](https://vega.github.io/vega-lite/docs/header.html).
      *
      * For a full list of header configuration options, please see the [corresponding section of in the header documentation](https://vega.github.io/vega-lite/docs/header.html#config).
      */
-    header?: HeaderConfig;
+    header?: HeaderConfig<ES>;
     /**
      * Header configuration, which determines default properties for row [headers](https://vega.github.io/vega-lite/docs/header.html).
      *
      * For a full list of header configuration options, please see the [corresponding section of in the header documentation](https://vega.github.io/vega-lite/docs/header.html#config).
      */
-    headerRow?: HeaderConfig;
+    headerRow?: HeaderConfig<ES>;
     /**
      * Header configuration, which determines default properties for column [headers](https://vega.github.io/vega-lite/docs/header.html).
      *
      * For a full list of header configuration options, please see the [corresponding section of in the header documentation](https://vega.github.io/vega-lite/docs/header.html#config).
      */
-    headerColumn?: HeaderConfig;
+    headerColumn?: HeaderConfig<ES>;
     /**
      * Header configuration, which determines default properties for non-row/column facet [headers](https://vega.github.io/vega-lite/docs/header.html).
      *
      * For a full list of header configuration options, please see the [corresponding section of in the header documentation](https://vega.github.io/vega-lite/docs/header.html#config).
      */
-    headerFacet?: HeaderConfig;
+    headerFacet?: HeaderConfig<ES>;
 }
+export declare const HEADER_CONFIGS: ("header" | "headerRow" | "headerColumn" | "headerFacet")[];
 //# sourceMappingURL=header.d.ts.map

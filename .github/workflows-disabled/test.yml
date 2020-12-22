@@ -4,45 +4,28 @@ on:
   push:
     branches:
       - '**'
+  pull_request:
 
 jobs:
   test-matrix:
-    name: Node ${{ matrix.node }}
+    name: Node
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node: [10, 12, 14]
 
+    if: github.event.pull_request.head.repo.full_name == github.repository
+
     steps:
       - uses: actions/checkout@v2
 
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - uses: actions/cache@v1
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-      - name: Setup Node
+      - name: Setup Node ${{ matrix.node }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node }}
 
-      # remove once https://github.com/Automattic/node-canvas/pull/1568 is in
-      - name: Install extra dependencies for Node 14
-        run: sudo apt-get install libcairo2-dev libpango1.0-dev libgif-dev
-        if: matrix.node == 14
-
       - name: Install Node dependencies
         run: yarn --frozen-lockfile
-
-      - name: Install extra dependencies for Puppeteer
-        run: sudo apt-get install libgbm1
 
       - name: Tests
         run: yarn jest test/
@@ -57,20 +40,10 @@ jobs:
     name: Build Site
     runs-on: ubuntu-latest
 
+    if: github.event.pull_request.head.repo.full_name == github.repository
+
     steps:
       - uses: actions/checkout@v2
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - uses: actions/cache@v1
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
 
       - name: Install Node dependencies
         run: yarn --frozen-lockfile
@@ -78,25 +51,14 @@ jobs:
       - name: Build
         run: yarn build:site
 
-  runtime-coverage:
+  runtime-lint-coverage:
+    name: Runtime, Linting, and Coverage
     runs-on: ubuntu-latest
 
-    name: Runtime and Coverage
+    if: github.event.pull_request.head.repo.full_name == github.repository
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - uses: actions/cache@v1
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
 
       - name: Install Node dependencies
         run: yarn --frozen-lockfile
@@ -107,6 +69,9 @@ jobs:
       - name: Build
         run: yarn build:only
 
+      - name: Lint
+        run: yarn lint
+
       - name: Runtime tests
         run: yarn test:runtime
 
@@ -114,9 +79,7 @@ jobs:
         run: yarn jest test/ --collectCoverage=true
 
       - name: Upload coverage to Codecov
-        run: yarn codecov
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        uses: codecov/codecov-action@v1
 
   test-cli:
     name: CLI
@@ -125,20 +88,10 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
 
+    if: github.event.pull_request.head.repo.full_name == github.repository
+
     steps:
       - uses: actions/checkout@v2
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - uses: actions/cache@v1
-        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
 
       - name: Install Node dependencies
         run: yarn --frozen-lockfile

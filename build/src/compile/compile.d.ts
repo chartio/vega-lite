@@ -50,34 +50,34 @@ export interface CompileOptions {
  */
 export declare function compile(inputSpec: TopLevelSpec, opt?: CompileOptions): {
     spec: VgSpec;
-    normalized: (import("../spec").NormalizedUnitSpec & TopLevelProperties & {
+    normalized: (import("../spec").NormalizedUnitSpec & TopLevelProperties<import("vega").SignalRef | import("../expr").ExprRef> & {
         $schema?: string;
-        config?: Config;
+        config?: Config<import("vega").SignalRef | import("../expr").ExprRef>;
         datasets?: Record<string, import("../data").InlineDataset>;
         usermeta?: Record<string, unknown>;
-    } & LayoutSizeMixins) | (import("../spec").NormalizedLayerSpec & TopLevelProperties & {
+    } & LayoutSizeMixins) | (import("../spec").NormalizedLayerSpec & TopLevelProperties<import("vega").SignalRef | import("../expr").ExprRef> & {
         $schema?: string;
-        config?: Config;
+        config?: Config<import("vega").SignalRef | import("../expr").ExprRef>;
         datasets?: Record<string, import("../data").InlineDataset>;
         usermeta?: Record<string, unknown>;
-    } & LayoutSizeMixins) | (import("../spec").GenericFacetSpec<import("../spec").NormalizedUnitSpec, import("../spec").NormalizedLayerSpec, string> & TopLevelProperties & {
+    } & LayoutSizeMixins) | (import("../spec").GenericFacetSpec<import("../spec").NormalizedUnitSpec, import("../spec").NormalizedLayerSpec, string> & TopLevelProperties<import("vega").SignalRef | import("../expr").ExprRef> & {
         $schema?: string;
-        config?: Config;
+        config?: Config<import("vega").SignalRef | import("../expr").ExprRef>;
         datasets?: Record<string, import("../data").InlineDataset>;
         usermeta?: Record<string, unknown>;
-    } & LayoutSizeMixins) | (import("../spec/concat").GenericConcatSpec<import("../spec").GenericSpec<import("../spec").NormalizedUnitSpec, import("../spec").NormalizedLayerSpec, never, string>> & TopLevelProperties & {
+    } & LayoutSizeMixins) | (import("../spec/concat").GenericConcatSpec<import("../spec").GenericSpec<import("../spec").NormalizedUnitSpec, import("../spec").NormalizedLayerSpec, never, string>> & TopLevelProperties<import("vega").SignalRef | import("../expr").ExprRef> & {
         $schema?: string;
-        config?: Config;
+        config?: Config<import("vega").SignalRef | import("../expr").ExprRef>;
         datasets?: Record<string, import("../data").InlineDataset>;
         usermeta?: Record<string, unknown>;
-    } & LayoutSizeMixins) | (import("../spec").GenericVConcatSpec<import("../spec").GenericSpec<import("../spec").NormalizedUnitSpec, import("../spec").NormalizedLayerSpec, never, string>> & TopLevelProperties & {
+    } & LayoutSizeMixins) | (import("../spec").GenericVConcatSpec<import("../spec").GenericSpec<import("../spec").NormalizedUnitSpec, import("../spec").NormalizedLayerSpec, never, string>> & TopLevelProperties<import("vega").SignalRef | import("../expr").ExprRef> & {
         $schema?: string;
-        config?: Config;
+        config?: Config<import("vega").SignalRef | import("../expr").ExprRef>;
         datasets?: Record<string, import("../data").InlineDataset>;
         usermeta?: Record<string, unknown>;
-    } & LayoutSizeMixins) | (import("../spec").GenericHConcatSpec<import("../spec").GenericSpec<import("../spec").NormalizedUnitSpec, import("../spec").NormalizedLayerSpec, never, string>> & TopLevelProperties & {
+    } & LayoutSizeMixins) | (import("../spec").GenericHConcatSpec<import("../spec").GenericSpec<import("../spec").NormalizedUnitSpec, import("../spec").NormalizedLayerSpec, never, string>> & TopLevelProperties<import("vega").SignalRef | import("../expr").ExprRef> & {
         $schema?: string;
-        config?: Config;
+        config?: Config<import("vega").SignalRef | import("../expr").ExprRef>;
         datasets?: Record<string, import("../data").InlineDataset>;
         usermeta?: Record<string, unknown>;
     } & LayoutSizeMixins);

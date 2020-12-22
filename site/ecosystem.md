@@ -31,6 +31,7 @@ We mark featured plugins and tools with a <span class="octicon octicon-star"></s
 ## Bindings for Programming Languages
 
 - <span class="octicon octicon-star"></span> [Altair](https://altair-viz.github.io) exposes a Python API for building statistical visualizations that follows Vega-Lite syntax.
+- <span class="octicon octicon-star"></span> [Vega-Lite API](https://github.com/vega/vega-lite-api) is a JavaScript API for creating Vega-Lite JSON specifications.
 - <span class="octicon octicon-star"></span> [Elm-Vega](https://package.elm-lang.org/packages/gicentre/elm-vega/latest) generates Vega-Lite specifications in the pure functional language [Elm](https://elm-lang.org).
 - [Altair wrapper in R](https://vegawidget.github.io/altair/)
 - [ipyvega](https://github.com/vega/ipyvega) supports Vega and Vega-Lite charts in Jupyter Notebooks.
@@ -47,6 +48,9 @@ We mark featured plugins and tools with a <span class="octicon octicon-star"></s
 - [Vega node for Node-RED Dashboard](https://flows.nodered.org/node/node-red-node-ui-vega) supports Vega and Vega-Lite visualizations on the [Node-RED](https://nodered.org/) flow-based programming tool.
 - [hvega](https://hackage.haskell.org/package/hvega) generates Vega-Lite specifications in Haskell and is based on Elm-Vega.
 - [Vega-Lite "bindings" for Rust](https://github.com/procyon-rs/vega_lite_3.rs), create vega-lite v3, or [v4](https://github.com/procyon-rs/vega_lite_4.rs), vizualizations in Rust A high-level like Altair in under construction at [procyon](https://github.com/procyon-rs/procyon)
+- [Vega.rb](https://github.com/ankane/vega) brings Vega and Vega-Lite to Ruby.
+- [Jekyll Diagrams](https://github.com/zhustec/jekyll-diagrams) A Jekyll plugin with support for Vega & Vega-Lite and others diagramming libraries.
+- [Liquid Diagrams](https://github.com/zhustec/liquid-diagrams) A Liquid plugin with support for Vega & Vega-Lite and others diagramming libraries.
 
 ## Programming / Data Science Environment that supports Vega-Lite
 
@@ -56,6 +60,7 @@ We mark featured plugins and tools with a <span class="octicon octicon-star"></s
 - [data.world](https://data.world), upload `.vg.json` and `.vl.json` files along side your raw data, or [embed Vega](https://docs.data.world/tutorials/markdown/#vega-and-vega-lite) directly into comments and summary markdown.
 - [nextjournal](https://nextjournal.com/), scientific computing environment with support for data visualizations including [Vega-Lite](https://nextjournal.com/blog/plotting-with-vega-lite-in-nextjournal)
 - [Liminoid](https://liminoid.io/), toolkit for building interactive analytics applications with Python and WebAssembly. Can pass Python data to JavaScript callbacks which render Vega/Vega-Lite specifications.
+- [Neptune.ai](https://neptune.ai), machine learning experiment tracking tool with Vega-Lite and Altair visualizations.
 
 ## Tools that use Vega-Lite
 
@@ -74,6 +79,8 @@ We mark featured plugins and tools with a <span class="octicon octicon-star"></s
 - [Lens.org](https://www.lens.org/): Provides free search and analysis for millions of patents and scholarly works. Simplified interface for creating Vega-Lite data visualisations.
 - [DataVoyager.jl](https://github.com/queryverse/DataVoyager.jl), a Julia package that exposes the [Voyager (2)](https://github.com/vega/voyager) UI to the Julia programming language.
 - [ProfileVega.jl](https://github.com/davidanthoff/ProfileVega.jl), a Julia profile visualization tool that uses Vega-Lite.
+- [Voyager clone](https://matyunya-simple-voyager-clone.ellx.app), a basic Voyager clone with step-by-step tutorial made with [Ellx](https://ellx.io).
+- [NL4DV](https://nl4dv.github.io/nl4dv/), a Python toolkit that generates analytic specifications (attributes + tasks + Vega-Lite visualizations) from natural language (NL) queries, helping people prototype NL systems for data visualization.
 
 ## Tools for Embedding Vega-Lite Visualizations
 

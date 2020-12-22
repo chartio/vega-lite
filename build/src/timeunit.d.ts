@@ -122,7 +122,7 @@ export interface TimeUnitParams {
 }
 export declare type TimeFormatConfig = Partial<Record<TimeUnitFormat, string>>;
 export declare const VEGALITE_TIMEFORMAT: TimeFormatConfig;
-export declare function getTimeUnitParts(timeUnit: TimeUnit): import("vega-typings/types").TimeUnit[];
+export declare function getTimeUnitParts(timeUnit: TimeUnit): LocalSingleTimeUnit[];
 /** Returns true if fullTimeUnit contains the timeUnit, false otherwise. */
 export declare function containsTimeUnit(fullTimeUnit: TimeUnit, timeUnit: TimeUnit): boolean;
 /**

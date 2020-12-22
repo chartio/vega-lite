@@ -15,13 +15,16 @@ import {
 } from 'vega';
 import {ConditionalPredicate, Value, ValueDef} from './channeldef';
 import {DateTime} from './datetime';
+import {ExprRef} from './expr';
 import {Guide, GuideEncodingEntry, TitleMixins, VlOnlyGuideConfig} from './guide';
 import {Flag, keys} from './util';
-import {ExcludeMappedValueRefButKeepSignal, VgEncodeChannel} from './vega.schema';
+import {MapExcludeValueRefAndReplaceSignalWith, VgEncodeChannel} from './vega.schema';
 
-export type BaseAxisNoValueRefs = AxisOverrideMixins & VLOnlyAxisMixins & ExcludeMappedValueRefButKeepSignal<BaseAxis>;
+export type BaseAxisNoValueRefs<ES extends ExprRef | SignalRef> = AxisOverrideMixins<ES> &
+  VLOnlyAxisMixins &
+  Omit<MapExcludeValueRefAndReplaceSignalWith<BaseAxis, ES>, 'labelOverlap'>;
 
-interface AxisOverrideMixins {
+interface AxisOverrideMixins<ES extends ExprRef | SignalRef> {
   // Position and tickMinStep are not config in Vega, but are in Vega-Lite. So we just copy them here.
 
   /**
@@ -29,12 +32,12 @@ interface AxisOverrideMixins {
    *
    * __Default value__: `0`
    */
-  position?: number | SignalRef;
+  position?: number | ES;
 
   /**
    * The minimum desired step between axis ticks, in terms of scale domain values. For example, a value of `1` indicates that ticks should not be less than 1 unit apart. If `tickMinStep` is specified, the `tickCount` value will be adjusted, if necessary, to enforce the minimum step value.
    */
-  tickMinStep?: number | SignalRef;
+  tickMinStep?: number | ES;
 
   // Override comments to be Vega-Lite specific
   /**
@@ -56,7 +59,7 @@ interface AxisOverrideMixins {
    *
    * __Default value:__ `true` for non-nominal fields with non-log scales; `"greedy"` for log scales; otherwise `false`.
    */
-  labelOverlap?: LabelOverlap;
+  labelOverlap?: LabelOverlap | ES;
 
   /**
    * The offset, in pixels, by which to displace the axis from the edge of the enclosing group or data rectangle.
@@ -70,23 +73,23 @@ interface AxisOverrideMixins {
    *
    * __Default value:__ `"bottom"` for x-axes and `"left"` for y-axes.
    */
-  orient?: AxisOrient | SignalRef;
+  orient?: AxisOrient | ES;
 
   /**
    * A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of 2, 5, 10) and lie within the underlying scale's range.
    *
-   * For scales of type `"time"` or `"utc"`, the tick count can instead be a time interval specifier. Legal string values are `"millisecond"`, `"second"`, `"minute"`, `"hour"`, `"day"`, `"week"`, `"month"`, and "year". Alternatively, an object-valued interval specifier of the form `{"interval": "month", "step": 3}` includes a desired number of interval steps. Here, ticks are generated for each quarter (Jan, Apr, Jul, Oct) boundary.
+   * For scales of type `"time"` or `"utc"`, the tick count can instead be a time interval specifier. Legal string values are `"millisecond"`, `"second"`, `"minute"`, `"hour"`, `"day"`, `"week"`, `"month"`, and `"year"`. Alternatively, an object-valued interval specifier of the form `{"interval": "month", "step": 3}` includes a desired number of interval steps. Here, ticks are generated for each quarter (Jan, Apr, Jul, Oct) boundary.
    *
    * __Default value__: Determine using a formula `ceil(width/40)` for x and `ceil(height/40)` for y.
    *
    * @minimum 0
    */
-  tickCount?: number | TimeInterval | TimeIntervalStep | SignalRef;
+  tickCount?: number | TimeInterval | TimeIntervalStep | ES;
 
   /**
    * Explicitly set the visible axis tick values.
    */
-  values?: number[] | string[] | boolean[] | DateTime[] | SignalRef; // Vega already supports Signal -- we have to re-declare here since VL supports special Date Time object that's not valid in Vega.
+  values?: number[] | string[] | boolean[] | DateTime[] | ES; // Vega already supports Signal -- we have to re-declare here since VL supports special Date Time object that's not valid in Vega.
 
   /**
    * A non-negative integer indicating the z-index of the axis.
@@ -118,15 +121,6 @@ interface VLOnlyAxisMixins {
   style?: string | string[];
 }
 
-export type SignalAxisProp =
-  | 'domainColor'
-  | 'labelAlign'
-  | 'labelColor'
-  | 'gridColor'
-  | 'tickColor'
-  | 'titleColor'
-  | 'title';
-
 export type ConditionalAxisProp =
   | 'labelAlign'
   | 'labelBaseline'
@@ -151,16 +145,12 @@ export type ConditionalAxisProp =
   | 'tickWidth';
 
 export const CONDITIONAL_AXIS_PROP_INDEX: Record<
-  ConditionalAxisProp | SignalAxisProp,
+  ConditionalAxisProp,
   {
     part: keyof AxisEncode;
     vgProp: VgEncodeChannel;
   } | null // null if we need to convert condition to signal
 > = {
-  domainColor: {
-    part: 'domain',
-    vgProp: 'stroke'
-  },
   labelAlign: {
     part: 'labels',
     vgProp: 'align'
@@ -235,75 +225,96 @@ export const CONDITIONAL_AXIS_PROP_INDEX: Record<
   tickWidth: {
     part: 'ticks',
     vgProp: 'strokeWidth'
-  },
-  titleColor: {
-    part: 'title',
-    vgProp: 'fill'
-  },
-  title: null // title supports signal, let's use it.
+  }
 };
 
-export type ConditionalAxisProperty<V extends Value | number[]> = (ValueDef<V> | SignalRef) & {
-  condition: ConditionalPredicate<ValueDef<V> | SignalRef> | ConditionalPredicate<ValueDef<V> | SignalRef>[];
+export type ConditionalAxisProperty<V extends Value | number[], ES extends ExprRef | SignalRef> = (ValueDef<V> | ES) & {
+  condition: ConditionalPredicate<ValueDef<V> | ES> | ConditionalPredicate<ValueDef<V> | ES>[];
 };
 
-export function isConditionalAxisValue<V extends Value | number[]>(v: any): v is ConditionalAxisProperty<V> {
+export function isConditionalAxisValue<V extends Value | number[], ES extends ExprRef | SignalRef>(
+  v: any
+): v is ConditionalAxisProperty<V, ES> {
   return v && v['condition'];
 }
 
-export type ConditionalAxisNumber = ConditionalAxisProperty<number | null>;
-export type ConditionalAxisLabelAlign = ConditionalAxisProperty<Align | null>;
-export type ConditionalAxisLabelBaseline = ConditionalAxisProperty<TextBaseline | null>;
-export type ConditionalAxisColor = ConditionalAxisProperty<Color | null>;
-export type ConditionalAxisString = ConditionalAxisProperty<string | null>;
+export type ConditionalAxisNumber<ES extends ExprRef | SignalRef = ExprRef | SignalRef> = ConditionalAxisProperty<
+  number | null,
+  ES
+>;
+export type ConditionalAxisLabelAlign<ES extends ExprRef | SignalRef = ExprRef | SignalRef> = ConditionalAxisProperty<
+  Align | null,
+  ES
+>;
+export type ConditionalAxisLabelBaseline<
+  ES extends ExprRef | SignalRef = ExprRef | SignalRef
+> = ConditionalAxisProperty<TextBaseline | null, ES>;
+export type ConditionalAxisColor<ES extends ExprRef | SignalRef = ExprRef | SignalRef> = ConditionalAxisProperty<
+  Color | null,
+  ES
+>;
+export type ConditionalAxisString<ES extends ExprRef | SignalRef = ExprRef | SignalRef> = ConditionalAxisProperty<
+  string | null,
+  ES
+>;
 
-export type ConditionalAxisLabelFontStyle = ConditionalAxisProperty<FontStyle | null>;
-export type ConditionalAxisLabelFontWeight = ConditionalAxisProperty<FontWeight | null>;
+export type ConditionalAxisLabelFontStyle<
+  ES extends ExprRef | SignalRef = ExprRef | SignalRef
+> = ConditionalAxisProperty<FontStyle | null, ES>;
+export type ConditionalAxisLabelFontWeight<
+  ES extends ExprRef | SignalRef = ExprRef | SignalRef
+> = ConditionalAxisProperty<FontWeight | null, ES>;
 
-export type ConditionalAxisNumberArray = ConditionalAxisProperty<number[] | null>;
+export type ConditionalAxisNumberArray<ES extends ExprRef | SignalRef = ExprRef | SignalRef> = ConditionalAxisProperty<
+  number[] | null,
+  ES
+>;
 
 // Vega axis config is the same as Vega axis base. If this is not the case, add specific type.
-export type AxisConfigBaseWithConditionalAndSignal = Omit<BaseAxisNoValueRefs, ConditionalAxisProp | SignalAxisProp> &
-  AxisPropsWithConditionAndSignal;
+export type AxisConfigBaseWithConditionalAndSignal<ES extends ExprRef | SignalRef> = Omit<
+  BaseAxisNoValueRefs<ES>,
+  ConditionalAxisProp | 'title'
+> &
+  AxisPropsWithCondition<ES>;
 
-export interface AxisPropsWithConditionAndSignal {
-  domainColor?: BaseAxisNoValueRefs['domainColor'] | SignalRef;
-  labelAlign?: BaseAxisNoValueRefs['labelAlign'] | ConditionalAxisLabelAlign;
-  labelBaseline?: BaseAxisNoValueRefs['labelBaseline'] | ConditionalAxisLabelBaseline;
-  labelColor?: BaseAxisNoValueRefs['labelColor'] | ConditionalAxisColor | SignalRef;
-  labelFont?: BaseAxisNoValueRefs['labelFont'] | ConditionalAxisString;
-  labelFontSize?: BaseAxisNoValueRefs['labelFontSize'] | ConditionalAxisNumber;
-  labelFontStyle?: BaseAxisNoValueRefs['labelFontStyle'] | ConditionalAxisLabelFontStyle;
-  labelFontWeight?: BaseAxisNoValueRefs['labelFontWeight'] | ConditionalAxisLabelFontWeight;
-  labelLineHeight?: BaseAxisNoValueRefs['labelLineHeight'] | ConditionalAxisNumber | SignalRef;
-  labelOpacity?: BaseAxisNoValueRefs['labelOpacity'] | ConditionalAxisNumber;
-  labelOffset?: BaseAxisNoValueRefs['labelOffset'] | ConditionalAxisNumber | SignalRef;
-  labelPadding?: BaseAxisNoValueRefs['labelPadding'] | ConditionalAxisNumber;
-  gridColor?: BaseAxisNoValueRefs['gridColor'] | ConditionalAxisColor | SignalRef;
-  gridDash?: BaseAxisNoValueRefs['gridDash'] | ConditionalAxisNumberArray;
-  gridDashOffset?: BaseAxisNoValueRefs['gridDashOffset'] | ConditionalAxisNumber;
-  gridOpacity?: BaseAxisNoValueRefs['gridOpacity'] | ConditionalAxisNumber;
-  gridWidth?: BaseAxisNoValueRefs['gridWidth'] | ConditionalAxisNumber;
-  tickColor?: BaseAxisNoValueRefs['tickColor'] | ConditionalAxisColor | SignalRef;
-  tickDash?: BaseAxisNoValueRefs['tickDash'] | ConditionalAxisNumberArray;
-  tickDashOffset?: BaseAxisNoValueRefs['tickDashOffset'] | ConditionalAxisNumber;
-  tickOpacity?: BaseAxisNoValueRefs['tickOpacity'] | ConditionalAxisNumber;
-  tickSize?: BaseAxisNoValueRefs['tickSize'] | ConditionalAxisNumber;
-  tickWidth?: BaseAxisNoValueRefs['tickWidth'] | ConditionalAxisNumber;
-  titleColor?: BaseAxisNoValueRefs['titleColor'] | SignalRef;
+export interface AxisPropsWithCondition<ES extends ExprRef | SignalRef> {
+  labelAlign?: BaseAxisNoValueRefs<ES>['labelAlign'] | ConditionalAxisLabelAlign<ES>;
+  labelBaseline?: BaseAxisNoValueRefs<ES>['labelBaseline'] | ConditionalAxisLabelBaseline<ES>;
+  labelColor?: BaseAxisNoValueRefs<ES>['labelColor'] | ConditionalAxisColor<ES>;
+  labelFont?: BaseAxisNoValueRefs<ES>['labelFont'] | ConditionalAxisString<ES>;
+  labelFontSize?: BaseAxisNoValueRefs<ES>['labelFontSize'] | ConditionalAxisNumber<ES>;
+  labelFontStyle?: BaseAxisNoValueRefs<ES>['labelFontStyle'] | ConditionalAxisLabelFontStyle<ES>;
+  labelFontWeight?: BaseAxisNoValueRefs<ES>['labelFontWeight'] | ConditionalAxisLabelFontWeight<ES>;
+  labelLineHeight?: BaseAxisNoValueRefs<ES>['labelLineHeight'] | ConditionalAxisNumber<ES>;
+  labelOpacity?: BaseAxisNoValueRefs<ES>['labelOpacity'] | ConditionalAxisNumber<ES>;
+  labelOffset?: BaseAxisNoValueRefs<ES>['labelOffset'] | ConditionalAxisNumber<ES>;
+  labelPadding?: BaseAxisNoValueRefs<ES>['labelPadding'] | ConditionalAxisNumber<ES>;
+  gridColor?: BaseAxisNoValueRefs<ES>['gridColor'] | ConditionalAxisColor<ES>;
+  gridDash?: BaseAxisNoValueRefs<ES>['gridDash'] | ConditionalAxisNumberArray<ES>;
+  gridDashOffset?: BaseAxisNoValueRefs<ES>['gridDashOffset'] | ConditionalAxisNumber<ES>;
+  gridOpacity?: BaseAxisNoValueRefs<ES>['gridOpacity'] | ConditionalAxisNumber<ES>;
+  gridWidth?: BaseAxisNoValueRefs<ES>['gridWidth'] | ConditionalAxisNumber<ES>;
+  tickColor?: BaseAxisNoValueRefs<ES>['tickColor'] | ConditionalAxisColor<ES>;
+  tickDash?: BaseAxisNoValueRefs<ES>['tickDash'] | ConditionalAxisNumberArray<ES>;
+  tickDashOffset?: BaseAxisNoValueRefs<ES>['tickDashOffset'] | ConditionalAxisNumber<ES>;
+  tickOpacity?: BaseAxisNoValueRefs<ES>['tickOpacity'] | ConditionalAxisNumber<ES>;
+  tickSize?: BaseAxisNoValueRefs<ES>['tickSize'] | ConditionalAxisNumber<ES>;
+  tickWidth?: BaseAxisNoValueRefs<ES>['tickWidth'] | ConditionalAxisNumber<ES>;
   title?: TitleMixins['title'];
 }
 
-export type AxisConfig = Guide &
+export type AxisConfig<ES extends ExprRef | SignalRef> = Guide &
   VlOnlyGuideConfig &
-  AxisConfigBaseWithConditionalAndSignal & {
+  AxisConfigBaseWithConditionalAndSignal<ES> & {
     /**
      * Disable axis by default.
      */
     disable?: boolean;
   };
 
-export interface Axis extends AxisConfigBaseWithConditionalAndSignal, Guide {
+export interface Axis<ES extends ExprRef | SignalRef = ExprRef | SignalRef>
+  extends AxisConfigBaseWithConditionalAndSignal<ES>,
+    Guide {
   /**
    * Mark definitions for custom axis encoding.
    *
@@ -311,6 +322,8 @@ export interface Axis extends AxisConfigBaseWithConditionalAndSignal, Guide {
    */
   encoding?: AxisEncoding;
 }
+
+export type AxisInternal = Axis<SignalRef>;
 
 export type AxisPart = keyof AxisEncoding;
 export const AXIS_PARTS: AxisPart[] = ['domain', 'grid', 'labels', 'ticks', 'title'];
@@ -370,7 +383,7 @@ export const AXIS_PROPERTY_TYPE: Record<keyof VgAxis, 'main' | 'grid' | 'both'> 
   tickColor: 'main',
   tickDash: 'main',
   tickDashOffset: 'main',
-  tickMinStep: 'main',
+  tickMinStep: 'both',
   tickOffset: 'both', // Need to be applied to grid axis too, so the grid will align with ticks.
   tickOpacity: 'main',
   tickRound: 'both', // Apply rounding to grid and ticks so they are aligned.
@@ -436,7 +449,7 @@ export interface AxisEncoding {
   title?: GuideEncodingEntry;
 }
 
-export const COMMON_AXIS_PROPERTIES_INDEX: Flag<keyof (VgAxis | Axis)> = {
+export const COMMON_AXIS_PROPERTIES_INDEX: Flag<keyof (VgAxis | Axis<any>)> = {
   orient: 1, // other things can depend on orient
 
   aria: 1,
@@ -516,128 +529,155 @@ export const COMMON_AXIS_PROPERTIES_INDEX: Flag<keyof (VgAxis | Axis)> = {
   zindex: 1
 };
 
-const AXIS_PROPERTIES_INDEX: Flag<keyof Axis> = {
+const AXIS_PROPERTIES_INDEX: Flag<keyof Axis<any>> = {
   ...COMMON_AXIS_PROPERTIES_INDEX,
   style: 1,
   labelExpr: 1,
   encoding: 1
 };
 
-export function isAxisProperty(prop: string): prop is keyof Axis {
+export function isAxisProperty(prop: string): prop is keyof Axis<any> {
   return !!AXIS_PROPERTIES_INDEX[prop];
 }
 
 // Export for dependent projects
 export const AXIS_PROPERTIES = keys(AXIS_PROPERTIES_INDEX);
 
-export interface AxisConfigMixins {
+export interface AxisConfigMixins<ES extends ExprRef | SignalRef = ExprRef | SignalRef> {
   /**
    * Axis configuration, which determines default properties for all `x` and `y` [axes](https://vega.github.io/vega-lite/docs/axis.html). For a full list of axis configuration options, please see the [corresponding section of the axis documentation](https://vega.github.io/vega-lite/docs/axis.html#config).
    */
-  axis?: AxisConfig;
+  axis?: AxisConfig<ES>;
 
   /**
    * X-axis specific config.
    */
-  axisX?: AxisConfig;
+  axisX?: AxisConfig<ES>;
 
   /**
    * Y-axis specific config.
    */
-  axisY?: AxisConfig;
+  axisY?: AxisConfig<ES>;
 
   /**
    * Config for y-axis along the left edge of the chart.
    */
-  axisLeft?: AxisConfig;
+  axisLeft?: AxisConfig<ES>;
 
   /**
    * Config for y-axis along the right edge of the chart.
    */
-  axisRight?: AxisConfig;
+  axisRight?: AxisConfig<ES>;
 
   /**
    * Config for x-axis along the top edge of the chart.
    */
-  axisTop?: AxisConfig;
+  axisTop?: AxisConfig<ES>;
 
   /**
    * Config for x-axis along the bottom edge of the chart.
    */
-  axisBottom?: AxisConfig;
+  axisBottom?: AxisConfig<ES>;
 
   /**
    * Config for axes with "band" scales.
    */
-  axisBand?: AxisConfig;
+  axisBand?: AxisConfig<ES>;
 
   /**
    * Config for axes with "point" scales.
    */
-  axisPoint?: AxisConfig;
+  axisPoint?: AxisConfig<ES>;
 
   /**
    * Config for axes with "point" or "band" scales.
    */
-  axisDiscrete?: AxisConfig;
+  axisDiscrete?: AxisConfig<ES>;
 
   /**
    * Config for quantitative axes.
    */
-  axisQuantitative?: AxisConfig;
+  axisQuantitative?: AxisConfig<ES>;
 
   /**
    * Config for temporal axes.
    */
-  axisTemporal?: AxisConfig;
+  axisTemporal?: AxisConfig<ES>;
 
   /**
    * Config for x-axes with "band" scales.
    */
-  axisXBand?: AxisConfig;
+  axisXBand?: AxisConfig<ES>;
 
   /**
    * Config for x-axes with "point" scales.
    */
-  axisXPoint?: AxisConfig;
+  axisXPoint?: AxisConfig<ES>;
 
   /**
    * Config for x-axes with "point" or "band" scales.
    */
-  axisXDiscrete?: AxisConfig;
+  axisXDiscrete?: AxisConfig<ES>;
 
   /**
    * Config for x-quantitative axes.
    */
-  axisXQuantitative?: AxisConfig;
+  axisXQuantitative?: AxisConfig<ES>;
 
   /**
    * Config for x-temporal axes.
    */
-  axisXTemporal?: AxisConfig;
+  axisXTemporal?: AxisConfig<ES>;
 
   /**
    * Config for y-axes with "band" scales.
    */
-  axisYBand?: AxisConfig;
+  axisYBand?: AxisConfig<ES>;
 
   /**
    * Config for y-axes with "point" scales.
    */
-  axisYPoint?: AxisConfig;
+  axisYPoint?: AxisConfig<ES>;
 
   /**
    * Config for y-axes with "point" or "band" scales.
    */
-  axisYDiscrete?: AxisConfig;
+  axisYDiscrete?: AxisConfig<ES>;
 
   /**
    * Config for y-quantitative axes.
    */
-  axisYQuantitative?: AxisConfig;
+  axisYQuantitative?: AxisConfig<ES>;
 
   /**
    * Config for y-temporal axes.
    */
-  axisYTemporal?: AxisConfig;
+  axisYTemporal?: AxisConfig<ES>;
 }
+
+const AXIS_CONFIGS_INDEX: Flag<keyof AxisConfigMixins<any>> = {
+  axis: 1,
+  axisBand: 1,
+  axisBottom: 1,
+  axisDiscrete: 1,
+  axisLeft: 1,
+  axisPoint: 1,
+  axisQuantitative: 1,
+  axisRight: 1,
+  axisTemporal: 1,
+  axisTop: 1,
+  axisX: 1,
+  axisXBand: 1,
+  axisXDiscrete: 1,
+  axisXPoint: 1,
+  axisXQuantitative: 1,
+  axisXTemporal: 1,
+  axisY: 1,
+  axisYBand: 1,
+  axisYDiscrete: 1,
+  axisYPoint: 1,
+  axisYQuantitative: 1,
+  axisYTemporal: 1
+};
+
+export const AXIS_CONFIGS = keys(AXIS_CONFIGS_INDEX);

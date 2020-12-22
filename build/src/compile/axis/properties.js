@@ -154,7 +154,7 @@ export function defaultLabelAlign(angle, orient, channel) {
         const a = normalizeAngleExpr(angle);
         const orientIsMain = isSignalRef(orient) ? `(${orient.signal} === "${mainOrient}")` : orient === mainOrient;
         return {
-            signal: `(${startAngle ? '(' + a + ' + 90)' : a} % 180 === 0) ? ${isX ? null : '"center"'} :` +
+            signal: `(${startAngle ? `(${a} + 90)` : a} % 180 === 0) ? ${isX ? null : '"center"'} :` +
                 `(${startAngle} < ${a} && ${a} < ${180 + startAngle}) === ${orientIsMain} ? "left" : "right"`
         };
     }
@@ -183,7 +183,7 @@ export function defaultLabelFlush(type, channel) {
 export function defaultLabelOverlap(type, scaleType, hasTimeUnit, sort) {
     // do not prevent overlap for nominal data because there is no way to infer what the missing labels are
     if ((hasTimeUnit && !isObject(sort)) || (type !== 'nominal' && type !== 'ordinal')) {
-        if (scaleType === 'log') {
+        if (scaleType === 'log' || scaleType === 'symlog') {
             return 'greedy';
         }
         return true;

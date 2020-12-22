@@ -64,7 +64,7 @@ export abstract class DataFlowNode {
 
   public addChild(child: DataFlowNode, loc?: number) {
     // do not add the same child twice
-    if (this._children.indexOf(child) > -1) {
+    if (this._children.includes(child)) {
       log.warn(log.message.ADD_SAME_CHILD_TWICE);
       return;
     }
@@ -131,9 +131,9 @@ export class OutputNode extends DataFlowNode {
 
   public clone(): this {
     const cloneObj = new (this.constructor as any)();
-    cloneObj.debugName = 'clone_' + this.debugName;
+    cloneObj.debugName = `clone_${this.debugName}`;
     cloneObj._source = this._source;
-    cloneObj._name = 'clone_' + this._name;
+    cloneObj._name = `clone_${this._name}`;
     cloneObj.type = this.type;
     cloneObj.refCounts = this.refCounts;
     cloneObj.refCounts[cloneObj._name] = 0;

@@ -34,8 +34,8 @@ export class GeoPointNode extends DataFlowNode {
             const suffix = coordinates[0] === LONGITUDE2 ? '2' : '';
             if (pair[0] || pair[1]) {
                 parent = new GeoPointNode(parent, model.projectionName(), pair, [
-                    model.getName('x' + suffix),
-                    model.getName('y' + suffix)
+                    model.getName(`x${suffix}`),
+                    model.getName(`y${suffix}`)
                 ]);
             }
         }

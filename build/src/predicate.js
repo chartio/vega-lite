@@ -1,6 +1,7 @@
 import { isArray } from 'vega-util';
 import { valueExpr, vgField } from './channeldef';
 import { fieldExpr as timeUnitFieldExpr, normalizeTimeUnit } from './timeunit';
+import { stringify } from './util';
 import { isSignalRef } from './vega.schema';
 export function isSelectionPredicate(predicate) {
     return predicate === null || predicate === void 0 ? void 0 : predicate['selection'];
@@ -62,10 +63,10 @@ export function fieldFilterExpression(predicate, useInRange = true) {
         ? // For timeUnit, cast into integer with time() so we can use ===, inrange, indexOf to compare values directly.
             // TODO: We calculate timeUnit on the fly here. Consider if we would like to consolidate this with timeUnit pipeline
             // TODO: support utc
-            'time(' + timeUnitFieldExpr(timeUnit, field) + ')'
+            `time(${timeUnitFieldExpr(timeUnit, field)})`
         : vgField(predicate, { expr: 'datum' });
     if (isFieldEqualPredicate(predicate)) {
-        return fieldExpr + '===' + predicateValueExpr(predicate.equal, timeUnit);
+        return `${fieldExpr}===${predicateValueExpr(predicate.equal, timeUnit)}`;
     }
     else if (isFieldLTPredicate(predicate)) {
         const upper = predicate.lt;
@@ -112,7 +113,7 @@ export function fieldFilterExpression(predicate, useInRange = true) {
         return exprs.length > 0 ? exprs.join(' && ') : 'true';
     }
     /* istanbul ignore next: it should never reach here */
-    throw new Error(`Invalid field predicate: ${JSON.stringify(predicate)}`);
+    throw new Error(`Invalid field predicate: ${stringify(predicate)}`);
 }
 export function fieldValidPredicate(fieldExpr, valid = true) {
     if (valid) {

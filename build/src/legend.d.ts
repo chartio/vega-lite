@@ -1,25 +1,12 @@
-import { BaseLegend, LabelOverlap, Legend as VgLegend, LegendConfig as VgLegendConfig, LegendEncode, LegendOrient, Orientation, SignalRef } from 'vega';
+import { BaseLegend, LabelOverlap, Legend as VgLegend, LegendConfig as VgLegendConfig, LegendOrient, Orientation, SignalRef } from 'vega';
 import { DateTime } from './datetime';
+import { ExprRef } from './expr';
 import { Guide, GuideEncodingEntry, VlOnlyGuideConfig } from './guide';
 import { Flag } from './util';
-import { ExcludeMappedValueRefButKeepSignal, VgEncodeChannel } from './vega.schema';
+import { MapExcludeValueRefAndReplaceSignalWith } from './vega.schema';
 export declare const LEGEND_SCALE_CHANNELS: readonly ["size", "shape", "fill", "stroke", "strokeDash", "strokeWidth", "opacity"];
-export declare type SignalLegendProp = 'fillColor' | 'gradientStrokeColor' | 'labelColor' | 'strokeColor' | 'symbolFillColor' | 'symbolStrokeColor' | 'titleColor';
-export declare const SIGNAL_LEGEND_PROP_INDEX: Record<SignalLegendProp, {
-    part: keyof LegendEncode;
-    vgProp: VgEncodeChannel;
-} | null>;
-declare type BaseLegendNoValueRefs = ExcludeMappedValueRefButKeepSignal<BaseLegend>;
-export interface LegendPropsWithSignal {
-    fillColor?: BaseLegendNoValueRefs['fillColor'] | SignalRef;
-    gradientStrokeColor?: BaseLegendNoValueRefs['gradientStrokeColor'] | SignalRef;
-    labelColor?: BaseLegendNoValueRefs['labelColor'] | SignalRef;
-    strokeColor?: BaseLegendNoValueRefs['strokeColor'] | SignalRef;
-    symbolFillColor?: BaseLegendNoValueRefs['symbolFillColor'] | SignalRef;
-    symbolStrokeColor?: BaseLegendNoValueRefs['symbolStrokeColor'] | SignalRef;
-    titleColor?: BaseLegendNoValueRefs['titleColor'] | SignalRef;
-}
-export declare type LegendConfig = LegendMixins & VlOnlyGuideConfig & Omit<VgLegendConfig, SignalLegendProp> & LegendPropsWithSignal & {
+declare type BaseLegendNoValueRefs<ES extends ExprRef | SignalRef> = MapExcludeValueRefAndReplaceSignalWith<BaseLegend, ES>;
+export declare type LegendConfig<ES extends ExprRef | SignalRef> = LegendMixins<ES> & VlOnlyGuideConfig & MapExcludeValueRefAndReplaceSignalWith<VgLegendConfig, ES> & {
     /**
      * Max legend length for a vertical gradient when `config.legend.gradientLength` is undefined.
      *
@@ -70,7 +57,7 @@ export declare type LegendConfig = LegendMixins & VlOnlyGuideConfig & Omit<VgLeg
 /**
  * Properties of a legend or boolean flag for determining whether to show it.
  */
-export interface Legend extends Omit<BaseLegendNoValueRefs, SignalLegendProp | 'orient'>, LegendPropsWithSignal, LegendMixins, Guide {
+export interface Legend<ES extends ExprRef | SignalRef> extends Omit<BaseLegendNoValueRefs<ES>, 'orient'>, LegendMixins<ES>, Guide {
     /**
      * Mark definitions for custom legend encoding.
      *
@@ -88,11 +75,11 @@ export interface Legend extends Omit<BaseLegendNoValueRefs, SignalLegendProp | '
      *
      * __Default value__: `undefined`
      */
-    tickMinStep?: number | SignalRef;
+    tickMinStep?: number | ES;
     /**
      * Explicitly set the visible legend values.
      */
-    values?: number[] | string[] | boolean[] | DateTime[] | SignalRef;
+    values?: number[] | string[] | boolean[] | DateTime[] | ES;
     /**
      * The type of the legend. Use `"symbol"` to create a discrete legend and `"gradient"` for a continuous color gradient.
      *
@@ -109,13 +96,13 @@ export interface Legend extends Omit<BaseLegendNoValueRefs, SignalLegendProp | '
      */
     zindex?: number;
 }
-interface LegendMixins {
+interface LegendMixins<ES extends ExprRef | SignalRef> {
     /**
      * The strategy to use for resolving overlap of labels in gradient legends. If `false`, no overlap reduction is attempted. If set to `true` or `"parity"`, a strategy of removing every other label is used. If set to `"greedy"`, a linear scan of the labels is performed, removing any label that overlaps with the last visible label (this often works better for log-scaled axes).
      *
      * __Default value:__ `"greedy"` for `log scales otherwise `true`.
      */
-    labelOverlap?: LabelOverlap | SignalRef;
+    labelOverlap?: LabelOverlap | ES;
     /**
      * The direction of the legend, one of `"vertical"` or `"horizontal"`.
      *
@@ -132,6 +119,7 @@ interface LegendMixins {
      */
     orient?: LegendOrient;
 }
+export declare type LegendInternal = Legend<SignalRef>;
 export interface LegendEncoding {
     /**
      * Custom encoding for the legend container.
@@ -155,8 +143,8 @@ export interface LegendEncoding {
      */
     gradient?: GuideEncodingEntry;
 }
-export declare const defaultLegendConfig: LegendConfig;
-export declare const COMMON_LEGEND_PROPERTY_INDEX: Flag<keyof (VgLegend | Legend)>;
-export declare const LEGEND_PROPERTIES: ("description" | "values" | "title" | "labelAlign" | "labelBaseline" | "labelColor" | "labelFont" | "labelFontSize" | "labelFontStyle" | "labelFontWeight" | "labelOpacity" | "labelOffset" | "labelPadding" | "titleColor" | "orient" | "format" | "formatType" | "offset" | "tickCount" | "tickMinStep" | "aria" | "titlePadding" | "titleAlign" | "titleAnchor" | "titleBaseline" | "titleFont" | "titleFontSize" | "titleFontStyle" | "titleFontWeight" | "titleLimit" | "titleLineHeight" | "titleOpacity" | "labelOverlap" | "labelSeparation" | "labelLimit" | "zindex" | "type" | "padding" | "cornerRadius" | "fillColor" | "gradientStrokeColor" | "strokeColor" | "symbolFillColor" | "symbolStrokeColor" | "symbolLimit" | "legendX" | "legendY" | "titleOrient" | "gradientLength" | "gradientOpacity" | "gradientThickness" | "gradientStrokeWidth" | "clipHeight" | "columns" | "columnPadding" | "rowPadding" | "gridAlign" | "symbolDash" | "symbolDashOffset" | "symbolOffset" | "symbolOpacity" | "symbolSize" | "symbolStrokeWidth" | "symbolType" | "direction")[];
+export declare const defaultLegendConfig: LegendConfig<SignalRef>;
+export declare const COMMON_LEGEND_PROPERTY_INDEX: Flag<keyof (VgLegend | Legend<any>)>;
+export declare const LEGEND_PROPERTIES: ("title" | "values" | "padding" | "type" | "orient" | "symbolLimit" | "tickCount" | "aria" | "description" | "cornerRadius" | "fillColor" | "offset" | "strokeColor" | "legendX" | "legendY" | "titleAlign" | "titleAnchor" | "titleBaseline" | "titleColor" | "titleFont" | "titleFontSize" | "titleFontStyle" | "titleFontWeight" | "titleLimit" | "titleLineHeight" | "titleOpacity" | "titleOrient" | "titlePadding" | "gradientLength" | "gradientOpacity" | "gradientThickness" | "gradientStrokeColor" | "gradientStrokeWidth" | "clipHeight" | "columns" | "columnPadding" | "rowPadding" | "gridAlign" | "symbolDash" | "symbolDashOffset" | "symbolFillColor" | "symbolOffset" | "symbolOpacity" | "symbolSize" | "symbolStrokeColor" | "symbolStrokeWidth" | "symbolType" | "labelAlign" | "labelBaseline" | "labelColor" | "labelFont" | "labelFontSize" | "labelFontStyle" | "labelFontWeight" | "labelLimit" | "labelOpacity" | "labelPadding" | "labelOffset" | "labelOverlap" | "labelSeparation" | "zindex" | "format" | "formatType" | "tickMinStep" | "direction")[];
 export {};
 //# sourceMappingURL=legend.d.ts.map

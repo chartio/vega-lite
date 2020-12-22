@@ -1,15 +1,26 @@
-import { __rest } from "tslib";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { FACET_CHANNELS, getPositionScaleChannel, isChannel, isScaleChannel } from '../channel';
 import { getFieldDef, vgField } from '../channeldef';
 import { DataSourceType } from '../data';
 import { forEach, reduce } from '../encoding';
+import { replaceExprRef } from '../expr';
 import * as log from '../log';
 import { hasDiscreteDomain } from '../scale';
 import { isFacetSpec } from '../spec';
 import { extractCompositionLayout, isStep } from '../spec/base';
 import { extractTitleConfig, isText } from '../title';
 import { normalizeTransform } from '../transform';
-import { contains, duplicate, keys, varName, isEmpty } from '../util';
+import { contains, duplicate, isEmpty, keys, varName } from '../util';
 import { isVgRangeStep } from '../vega.schema';
 import { assembleAxes } from './axis/assemble';
 import { signalOrValueRef } from './common';
@@ -71,7 +82,6 @@ export class Model {
         this.type = type;
         this.parent = parent;
         this.config = config;
-        this.view = view;
         this.children = [];
         /**
          * Corrects the data references in marks after assemble.
@@ -90,9 +100,10 @@ export class Model {
         };
         this.parent = parent;
         this.config = config;
+        this.view = replaceExprRef(view);
         // If name is not provided, always use parent's givenName to avoid name conflicts.
         this.name = (_a = spec.name) !== null && _a !== void 0 ? _a : parentGivenName;
-        this.title = isText(spec.title) ? { text: spec.title } : spec.title;
+        this.title = isText(spec.title) ? { text: spec.title } : spec.title ? replaceExprRef(spec.title) : undefined;
         // Shared name maps
         this.scaleNameMap = parent ? parent.scaleNameMap : new NameMap();
         this.projectionNameMap = parent ? parent.projectionNameMap : new NameMap();
@@ -282,7 +293,7 @@ export class Model {
         return group;
     }
     getName(text) {
-        return varName((this.name ? this.name + '_' : '') + text);
+        return varName((this.name ? `${this.name}_` : '') + text);
     }
     getDataName(type) {
         return this.getName(DataSourceType[type].toLowerCase());

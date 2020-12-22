@@ -1,4 +1,14 @@
-import { __rest } from "tslib";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { isArray } from 'vega-util';
 import { COLUMN, FACET, ROW } from '../channel';
 import { hasConditionalFieldOrDatumDef, isFieldOrDatumDef, isValueDef } from '../channeldef';
@@ -14,7 +24,6 @@ import { isUnitSpec } from '../spec/unit';
 import { isEmpty, keys, omit, varName } from '../util';
 import { isSignalRef } from '../vega.schema';
 import { PathOverlayNormalizer } from './pathoverlay';
-import { RangeStepNormalizer } from './rangestep';
 import { replaceRepeaterInEncoding, replaceRepeaterInFacet } from './repeater';
 import { RuleForRangedLineNormalizer } from './ruleforrangedline';
 export class CoreNormalizer extends SpecMapper {
@@ -25,8 +34,7 @@ export class CoreNormalizer extends SpecMapper {
             errorBarNormalizer,
             errorBandNormalizer,
             new PathOverlayNormalizer(),
-            new RuleForRangedLineNormalizer(),
-            new RangeStepNormalizer()
+            new RuleForRangedLineNormalizer()
         ];
     }
     map(spec, params) {
@@ -78,7 +86,7 @@ export class CoreNormalizer extends SpecMapper {
         else {
             return Object.assign(Object.assign({}, rest), { layer: layer.map(layerValue => {
                     const childRepeater = Object.assign(Object.assign({}, repeater), { layer: layerValue });
-                    const childName = (childSpec.name || '') + repeaterPrefix + `child__layer_${varName(layerValue)}`;
+                    const childName = `${(childSpec.name || '') + repeaterPrefix}child__layer_${varName(layerValue)}`;
                     const child = this.mapLayerOrUnit(childSpec, Object.assign(Object.assign({}, params), { repeater: childRepeater, repeaterPrefix: childName }));
                     child.name = childName;
                     return child;
@@ -213,7 +221,7 @@ function mergeEncoding({ parentEncoding, encoding = {}, layer }) {
             else if (hasConditionalFieldOrDatumDef(channelDef)) {
                 merged[channel] = Object.assign(Object.assign({}, channelDef), { condition: Object.assign(Object.assign({}, parentChannelDef), channelDef.condition) });
             }
-            else if (channelDef) {
+            else if (channelDef || channelDef === null) {
                 merged[channel] = channelDef;
             }
             else if (layer ||

@@ -1,4 +1,4 @@
-import { GeoJSONTransform as VgGeoJSONTransform, Vector2 } from 'vega';
+import { Transforms as VgTransform, Vector2 } from 'vega';
 import { VgExprRef } from '../../vega.schema';
 import { UnitModel } from '../unit';
 import { DataFlowNode } from './dataflow';
@@ -12,6 +12,6 @@ export declare class GeoJSONNode extends DataFlowNode {
     dependentFields(): Set<string>;
     producedFields(): Set<string>;
     hash(): string;
-    assemble(): VgGeoJSONTransform;
+    assemble(): VgTransform[];
 }
 //# sourceMappingURL=geojson.d.ts.map

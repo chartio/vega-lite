@@ -104,6 +104,8 @@ export function normalizeBoxPlot(
 
   const boxPlotType = getBoxPlotType(extent);
   const {
+    bins,
+    timeUnits,
     transform,
     continuousAxisChannelDef,
     continuousAxis,
@@ -221,117 +223,110 @@ export function normalizeBoxPlot(
     })
   ];
 
-  // ## Filtered Layers
-
-  let filteredLayersMixins: NormalizedUnitSpec | NormalizedLayerSpec;
-
-  if (boxPlotType !== 'min-max') {
-    const lowerBoxExpr = `datum["lower_box_${continuousAxisChannelDef.field}"]`;
-    const upperBoxExpr = `datum["upper_box_${continuousAxisChannelDef.field}"]`;
-    const iqrExpr = `(${upperBoxExpr} - ${lowerBoxExpr})`;
-    const lowerWhiskerExpr = `${lowerBoxExpr} - ${extent} * ${iqrExpr}`;
-    const upperWhiskerExpr = `${upperBoxExpr} + ${extent} * ${iqrExpr}`;
-    const fieldExpr = `datum["${continuousAxisChannelDef.field}"]`;
-
-    const joinaggregateTransform: JoinAggregateTransform = {
-      joinaggregate: boxParamsQuartiles(continuousAxisChannelDef.field),
-      groupby
-    };
-
-    let filteredWhiskerSpec: NormalizedLayerSpec = undefined;
-    if (boxPlotType === 'tukey') {
-      filteredWhiskerSpec = {
-        transform: [
-          {
-            filter: `(${lowerWhiskerExpr} <= ${fieldExpr}) && (${fieldExpr} <= ${upperWhiskerExpr})`
-          },
-          {
-            aggregate: [
-              {
-                op: 'min',
-                field: continuousAxisChannelDef.field,
-                as: 'lower_whisker_' + continuousAxisChannelDef.field
-              },
-              {
-                op: 'max',
-                field: continuousAxisChannelDef.field,
-                as: 'upper_whisker_' + continuousAxisChannelDef.field
-              },
-              // preserve lower_box / upper_box
-              {
-                op: 'min',
-                field: 'lower_box_' + continuousAxisChannelDef.field,
-                as: 'lower_box_' + continuousAxisChannelDef.field
-              },
-              {
-                op: 'max',
-                field: 'upper_box_' + continuousAxisChannelDef.field,
-                as: 'upper_box_' + continuousAxisChannelDef.field
-              },
-              ...aggregate
-            ],
-            groupby
-          }
-        ],
-        layer: whiskerLayers
-      };
-    }
-
-    const {tooltip, ...encodingWithoutSizeColorContinuousAxisAndTooltip} = encodingWithoutSizeColorAndContinuousAxis;
-
-    const {scale, axis} = continuousAxisChannelDef;
-    const title = getTitle(continuousAxisChannelDef);
-    const axisWithoutTitle = omit(axis, ['title']);
-
-    const outlierLayersMixins = partLayerMixins<BoxPlotPartsMixins>(markDef, 'outliers', config.boxplot, {
-      transform: [{filter: `(${fieldExpr} < ${lowerWhiskerExpr}) || (${fieldExpr} > ${upperWhiskerExpr})`}],
-      mark: 'point',
-      encoding: {
-        [continuousAxis]: {
-          field: continuousAxisChannelDef.field,
-          type: continuousAxisChannelDef.type,
-          ...(title !== undefined ? {title} : {}),
-          ...(scale !== undefined ? {scale} : {}),
-          // add axis without title since we already added the title above
-          ...(isEmpty(axisWithoutTitle) ? {} : {axis: axisWithoutTitle})
-        },
-        ...encodingWithoutSizeColorContinuousAxisAndTooltip,
-        ...(customTooltipWithoutAggregatedField ? {tooltip: customTooltipWithoutAggregatedField} : {})
-      }
-    })[0];
-
-    if (outlierLayersMixins && filteredWhiskerSpec) {
-      filteredLayersMixins = {
-        transform: [joinaggregateTransform],
-        layer: [outlierLayersMixins, filteredWhiskerSpec]
-      };
-    } else if (outlierLayersMixins) {
-      filteredLayersMixins = outlierLayersMixins;
-      filteredLayersMixins.transform.unshift(joinaggregateTransform);
-    } else if (filteredWhiskerSpec) {
-      filteredLayersMixins = filteredWhiskerSpec;
-      filteredLayersMixins.transform.unshift(joinaggregateTransform);
-    }
-  }
-
-  if (filteredLayersMixins) {
-    // tukey box plot with outliers included
+  if (boxPlotType === 'min-max') {
     return {
       ...outerSpec,
-      layer: [
-        filteredLayersMixins,
-        {
-          // boxplot
-          transform,
-          layer: boxLayers
-        }
-      ]
+      transform: (outerSpec.transform ?? []).concat(transform),
+      layer: boxLayers
     };
   }
+
+  // Tukey Box Plot
+
+  const lowerBoxExpr = `datum["lower_box_${continuousAxisChannelDef.field}"]`;
+  const upperBoxExpr = `datum["upper_box_${continuousAxisChannelDef.field}"]`;
+  const iqrExpr = `(${upperBoxExpr} - ${lowerBoxExpr})`;
+  const lowerWhiskerExpr = `${lowerBoxExpr} - ${extent} * ${iqrExpr}`;
+  const upperWhiskerExpr = `${upperBoxExpr} + ${extent} * ${iqrExpr}`;
+  const fieldExpr = `datum["${continuousAxisChannelDef.field}"]`;
+
+  const joinaggregateTransform: JoinAggregateTransform = {
+    joinaggregate: boxParamsQuartiles(continuousAxisChannelDef.field),
+    groupby
+  };
+
+  const filteredWhiskerSpec: NormalizedLayerSpec = {
+    transform: [
+      {
+        filter: `(${lowerWhiskerExpr} <= ${fieldExpr}) && (${fieldExpr} <= ${upperWhiskerExpr})`
+      },
+      {
+        aggregate: [
+          {
+            op: 'min',
+            field: continuousAxisChannelDef.field,
+            as: `lower_whisker_${continuousAxisChannelDef.field}`
+          },
+          {
+            op: 'max',
+            field: continuousAxisChannelDef.field,
+            as: `upper_whisker_${continuousAxisChannelDef.field}`
+          },
+          // preserve lower_box / upper_box
+          {
+            op: 'min',
+            field: `lower_box_${continuousAxisChannelDef.field}`,
+            as: `lower_box_${continuousAxisChannelDef.field}`
+          },
+          {
+            op: 'max',
+            field: `upper_box_${continuousAxisChannelDef.field}`,
+            as: `upper_box_${continuousAxisChannelDef.field}`
+          },
+          ...aggregate
+        ],
+        groupby
+      }
+    ],
+    layer: whiskerLayers
+  };
+
+  const {tooltip, ...encodingWithoutSizeColorContinuousAxisAndTooltip} = encodingWithoutSizeColorAndContinuousAxis;
+
+  const {scale, axis} = continuousAxisChannelDef;
+  const title = getTitle(continuousAxisChannelDef);
+  const axisWithoutTitle = omit(axis, ['title']);
+
+  const outlierLayersMixins = partLayerMixins<BoxPlotPartsMixins>(markDef, 'outliers', config.boxplot, {
+    transform: [{filter: `(${fieldExpr} < ${lowerWhiskerExpr}) || (${fieldExpr} > ${upperWhiskerExpr})`}],
+    mark: 'point',
+    encoding: {
+      [continuousAxis]: {
+        field: continuousAxisChannelDef.field,
+        type: continuousAxisChannelDef.type,
+        ...(title !== undefined ? {title} : {}),
+        ...(scale !== undefined ? {scale} : {}),
+        // add axis without title since we already added the title above
+        ...(isEmpty(axisWithoutTitle) ? {} : {axis: axisWithoutTitle})
+      },
+      ...encodingWithoutSizeColorContinuousAxisAndTooltip,
+      ...(color ? {color} : {}),
+      ...(customTooltipWithoutAggregatedField ? {tooltip: customTooltipWithoutAggregatedField} : {})
+    }
+  })[0];
+
+  let filteredLayersMixins: NormalizedLayerSpec;
+  const filteredLayersMixinsTransforms = [...bins, ...timeUnits, joinaggregateTransform];
+  if (outlierLayersMixins) {
+    filteredLayersMixins = {
+      transform: filteredLayersMixinsTransforms,
+      layer: [outlierLayersMixins, filteredWhiskerSpec]
+    };
+  } else {
+    filteredLayersMixins = filteredWhiskerSpec;
+    filteredLayersMixins.transform.unshift(...filteredLayersMixinsTransforms);
+  }
+
   return {
     ...outerSpec,
-    transform: (outerSpec.transform ?? []).concat(transform),
-    layer: boxLayers
+    layer: [
+      filteredLayersMixins,
+      {
+        // boxplot
+        transform,
+        layer: boxLayers
+      }
+    ]
   };
 }
 
@@ -340,12 +335,12 @@ function boxParamsQuartiles(continousAxisField: string): AggregatedFieldDef[] {
     {
       op: 'q1',
       field: continousAxisField,
-      as: 'lower_box_' + continousAxisField
+      as: `lower_box_${continousAxisField}`
     },
     {
       op: 'q3',
       field: continousAxisField,
-      as: 'upper_box_' + continousAxisField
+      as: `upper_box_${continousAxisField}`
     }
   ];
 }
@@ -366,7 +361,7 @@ function boxParams(
     {
       op: 'median',
       field: continuousFieldName,
-      as: 'mid_box_' + continuousFieldName
+      as: `mid_box_${continuousFieldName}`
     },
     {
       op: 'min',
@@ -387,15 +382,15 @@ function boxParams(
           // This is for the  original k-IQR, which we do not expose
           {
             calculate: `datum["upper_box_${continuousFieldName}"] - datum["lower_box_${continuousFieldName}"]`,
-            as: 'iqr_' + continuousFieldName
+            as: `iqr_${continuousFieldName}`
           },
           {
             calculate: `min(datum["upper_box_${continuousFieldName}"] + datum["iqr_${continuousFieldName}"] * ${extent}, datum["max_${continuousFieldName}"])`,
-            as: 'upper_whisker_' + continuousFieldName
+            as: `upper_whisker_${continuousFieldName}`
           },
           {
             calculate: `max(datum["lower_box_${continuousFieldName}"] - datum["iqr_${continuousFieldName}"] * ${extent}, datum["min_${continuousFieldName}"])`,
-            as: 'lower_whisker_' + continuousFieldName
+            as: `lower_whisker_${continuousFieldName}`
           }
         ];
 
@@ -423,6 +418,8 @@ function boxParams(
   ];
 
   return {
+    bins,
+    timeUnits,
     transform,
     groupby,
     aggregate,

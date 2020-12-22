@@ -1,10 +1,12 @@
+import {SignalRef} from 'vega';
+import {FieldName} from '../channeldef';
 import {Config} from '../config';
 import {Encoding} from '../encoding';
+import {ExprRef} from '../expr';
 import {Projection} from '../projection';
 import {GenericSpec, NormalizedSpec} from '../spec';
 import {GenericLayerSpec, NormalizedLayerSpec} from '../spec/layer';
 import {GenericUnitSpec, NormalizedUnitSpec} from '../spec/unit';
-import {FieldName} from '../channeldef';
 import {RepeaterValue} from './repeater';
 
 export type Normalize<S extends GenericSpec<any, any, any, any>, NS extends NormalizedSpec> = (
@@ -35,9 +37,9 @@ export type NormalizeLayerOrUnit = Normalize<
 >;
 
 export interface NormalizerParams {
-  config: Config;
+  config: Config<SignalRef>;
   parentEncoding?: Encoding<FieldName>;
-  parentProjection?: Projection;
+  parentProjection?: Projection<ExprRef>;
   repeater?: RepeaterValue;
   repeaterPrefix?: string;
 }

@@ -1,10 +1,11 @@
-import { NewSignal } from 'vega';
-import { Axis } from '../axis';
-import { Channel, ScaleChannel, SingleDefChannel, PositionChannel, NonPositionScaleChannel } from '../channel';
+import { NewSignal, SignalRef } from 'vega';
+import { AxisInternal } from '../axis';
+import { Channel, NonPositionScaleChannel, PositionChannel, ScaleChannel, SingleDefChannel } from '../channel';
 import { Config } from '../config';
 import * as vlEncoding from '../encoding';
 import { Encoding } from '../encoding';
-import { Legend } from '../legend';
+import { ExprRef } from '../expr';
+import { LegendInternal } from '../legend';
 import { Mark, MarkDef } from '../mark';
 import { Projection } from '../projection';
 import { Domain } from '../scale';
@@ -13,35 +14,37 @@ import { LayoutSizeMixins, NormalizedUnitSpec } from '../spec';
 import { StackProperties } from '../stack';
 import { Dict } from '../util';
 import { VgData, VgLayout } from '../vega.schema';
-import { AxisIndex } from './axis/component';
-import { LegendIndex } from './legend/component';
+import { AxisInternalIndex } from './axis/component';
+import { LegendInternalIndex } from './legend/component';
 import { Model, ModelWithField } from './model';
 import { ScaleIndex } from './scale/component';
 /**
  * Internal model of Vega-Lite specification for the compiler.
  */
 export declare class UnitModel extends ModelWithField {
-    readonly markDef: MarkDef;
+    readonly markDef: MarkDef<Mark, SignalRef>;
     readonly encoding: Encoding<string>;
     readonly specifiedScales: ScaleIndex;
     readonly stack: StackProperties;
-    protected specifiedAxes: AxisIndex;
-    protected specifiedLegends: LegendIndex;
-    specifiedProjection: Projection;
+    protected specifiedAxes: AxisInternalIndex;
+    protected specifiedLegends: LegendInternalIndex;
+    specifiedProjection: Projection<ExprRef | SignalRef>;
     readonly selection: Dict<SelectionDef>;
     children: Model[];
-    constructor(spec: NormalizedUnitSpec, parent: Model, parentGivenName: string, parentGivenSize: LayoutSizeMixins, config: Config);
+    constructor(spec: NormalizedUnitSpec, parent: Model, parentGivenName: string, parentGivenSize: LayoutSizeMixins, config: Config<SignalRef>);
     get hasProjection(): boolean;
     /**
      * Return specified Vega-Lite scale domain for a particular channel
      * @param channel
      */
     scaleDomain(channel: ScaleChannel): Domain;
-    axis(channel: PositionChannel): Axis;
-    legend(channel: NonPositionScaleChannel): Legend;
+    axis(channel: PositionChannel): AxisInternal;
+    legend(channel: NonPositionScaleChannel): LegendInternal;
     private initScales;
+    private initScale;
     private initAxes;
-    private initLegend;
+    private initAxis;
+    private initLegends;
     parseData(): void;
     parseLayoutSize(): void;
     parseSelections(): void;

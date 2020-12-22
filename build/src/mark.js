@@ -1,5 +1,5 @@
 import { toSet } from 'vega-util';
-import { contains, keys } from './util';
+import { keys } from './util';
 /**
  * All types of primitive marks.
  */
@@ -37,10 +37,10 @@ export function isMark(m) {
     return m in Mark;
 }
 export function isPathMark(m) {
-    return contains(['line', 'area', 'trail'], m);
+    return ['line', 'area', 'trail'].includes(m);
 }
 export function isRectBasedMark(m) {
-    return contains(['rect', 'bar', 'image', 'arc' /* arc is rect/interval in polar coordinate */], m);
+    return ['rect', 'bar', 'image', 'arc' /* arc is rect/interval in polar coordinate */].includes(m);
 }
 export const PRIMITIVE_MARKS = keys(Mark);
 export function isMarkDef(mark) {
@@ -85,6 +85,24 @@ export const defaultMarkConfig = {
     invalid: 'filter',
     timeUnitBand: 1
 };
+const MARK_CONFIG_INDEX = {
+    mark: 1,
+    arc: 1,
+    area: 1,
+    bar: 1,
+    circle: 1,
+    image: 1,
+    line: 1,
+    point: 1,
+    rect: 1,
+    rule: 1,
+    square: 1,
+    text: 1,
+    tick: 1,
+    trail: 1,
+    geoshape: 1
+};
+export const MARK_CONFIGS = keys(MARK_CONFIG_INDEX);
 export const BAR_CORNER_RADIUS_INDEX = {
     horizontal: ['cornerRadiusTopRight', 'cornerRadiusBottomRight'],
     vertical: ['cornerRadiusTopLeft', 'cornerRadiusTopRight']

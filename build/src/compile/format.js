@@ -5,13 +5,14 @@ import { fieldValidPredicate } from '../predicate';
 import { ScaleType } from '../scale';
 import { formatExpression, normalizeTimeUnit, timeUnitSpecifierExpression } from '../timeunit';
 import { QUANTITATIVE } from '../type';
+import { stringify } from '../util';
 import { isSignalRef } from '../vega.schema';
 import { datumDefToExpr } from './mark/encode/valueref';
 export function isCustomFormatType(formatType) {
     return formatType && formatType !== 'number' && formatType !== 'time';
 }
 function customFormatExpr(formatType, field, format) {
-    return `${formatType}(${field}${format ? `, ${JSON.stringify(format)}` : ''})`;
+    return `${formatType}(${field}${format ? `, ${stringify(format)}` : ''})`;
 }
 export const BIN_RANGE_DELIMITER = ' \u2013 ';
 export function formatSignalRef({ fieldOrDatumDef, format, formatType, expr, normalizeStack, config }) {

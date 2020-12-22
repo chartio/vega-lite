@@ -4,12 +4,13 @@ import { isBinned, isBinning } from '../../../bin';
 import { getMainRangeChannel, X, X2, Y2 } from '../../../channel';
 import { binRequiresRange, getBand, isDatumDef, isFieldDef, isFieldOrDatumDef, isTypedFieldDef, isValueDef, vgField } from '../../../channeldef';
 import { dateTimeToExpr, isDateTime } from '../../../datetime';
+import { isExprRef } from '../../../expr';
 import * as log from '../../../log';
 import { isPathMark } from '../../../mark';
 import { fieldValidPredicate } from '../../../predicate';
 import { hasDiscreteDomain, isContinuousToContinuous } from '../../../scale';
 import { TEMPORAL } from '../../../type';
-import { contains } from '../../../util';
+import { contains, stringify } from '../../../util';
 import { isSignalRef } from '../../../vega.schema';
 import { getMarkPropOrConfig, signalOrValueRef } from '../../common';
 export function midPointRefWithPositionInvalidTest(params) {
@@ -63,7 +64,7 @@ export function datumDefToExpr(datumDef) {
     if (isDateTime(datum)) {
         return dateTimeToExpr(datum);
     }
-    return `${JSON.stringify(datum)}`;
+    return `${stringify(datum)}`;
 }
 export function valueRefForFieldOrDatumDef(fieldDef, scaleName, opt, encode) {
     const ref = {};
@@ -77,6 +78,9 @@ export function valueRefForFieldOrDatumDef(fieldDef, scaleName, opt, encode) {
         }
         else if (isSignalRef(datum)) {
             ref.signal = datum.signal;
+        }
+        else if (isExprRef(datum)) {
+            ref.signal = datum.expr;
         }
         else {
             ref.value = datum;

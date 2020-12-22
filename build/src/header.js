@@ -31,4 +31,11 @@ export const HEADER_LABEL_PROPERTIES_MAP = {
 };
 export const HEADER_TITLE_PROPERTIES = keys(HEADER_TITLE_PROPERTIES_MAP);
 export const HEADER_LABEL_PROPERTIES = keys(HEADER_LABEL_PROPERTIES_MAP);
+const HEADER_CONFIGS_INDEX = {
+    header: 1,
+    headerRow: 1,
+    headerColumn: 1,
+    headerFacet: 1
+};
+export const HEADER_CONFIGS = keys(HEADER_CONFIGS_INDEX);
 //# sourceMappingURL=header.js.map

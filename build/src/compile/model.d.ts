@@ -1,8 +1,9 @@
-import { Axis as VgAxis, Legend as VgLegend, NewSignal, Projection as VgProjection, SignalRef, Title as VgTitle } from 'vega';
-import { Channel, ScaleChannel, SingleDefChannel, ExtendedChannel } from '../channel';
+import { Axis as VgAxis, Legend as VgLegend, NewSignal, Projection as VgProjection, Signal, SignalRef, Title as VgTitle } from 'vega';
+import { Channel, ExtendedChannel, ScaleChannel, SingleDefChannel } from '../channel';
 import { FieldDef, FieldRefOption } from '../channeldef';
 import { Config } from '../config';
 import { Data, DataSourceType } from '../data';
+import { ExprRef } from '../expr';
 import { Resolve } from '../resolve';
 import { GenericCompositionLayoutWithColumns, LayoutSizeField, LayoutSizeMixins, SpecType, ViewBackground } from '../spec/base';
 import { NormalizedSpec } from '../spec/index';
@@ -66,11 +67,10 @@ export declare function isLayerModel(model: Model): model is LayerModel;
 export declare abstract class Model {
     readonly type: SpecType;
     readonly parent: Model;
-    readonly config: Config;
-    readonly view?: ViewBackground;
+    readonly config: Config<SignalRef>;
     readonly name: string;
     size: LayoutSizeMixins;
-    readonly title: TitleParams;
+    readonly title: TitleParams<SignalRef>;
     readonly description: string;
     readonly data: Data | null;
     readonly transforms: Transform[];
@@ -82,8 +82,9 @@ export declare abstract class Model {
     /** Name map for signals, which can be renamed by a model's parent. */
     protected signalNameMap: NameMapInterface;
     readonly component: Component;
+    readonly view?: ViewBackground<SignalRef>;
     abstract readonly children: Model[];
-    constructor(spec: NormalizedSpec, type: SpecType, parent: Model, parentGivenName: string, config: Config, resolve: Resolve, view?: ViewBackground);
+    constructor(spec: NormalizedSpec, type: SpecType, parent: Model, parentGivenName: string, config: Config<SignalRef>, resolve: Resolve, view?: ViewBackground<ExprRef | SignalRef>);
     get width(): SignalRef;
     get height(): SignalRef;
     parse(): void;
@@ -119,7 +120,7 @@ export declare abstract class Model {
     /**
      * Assemble the mark group for this model. We accept optional `signals` so that we can include concat top-level signals with the top-level model's local signals.
      */
-    assembleGroup(signals?: NewSignal[]): any;
+    assembleGroup(signals?: Signal[]): any;
     getName(text: string): string;
     getDataName(type: DataSourceType): string;
     /**

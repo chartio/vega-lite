@@ -1,23 +1,6 @@
 import { Model } from '../model';
 import { DataFlowNode } from './dataflow';
-import { BottomUpOptimizer, TopDownOptimizer } from './optimizer';
-import * as optimizers from './optimizers';
-export interface OptimizerFlags {
-    /**
-     * If true, iteration continues.
-     */
-    continueFlag: boolean;
-    /**
-     * If true, the tree has been mutated by the function.
-     */
-    mutatedFlag: boolean;
-}
-/**
- * Move parse nodes up to forks.
- */
-export declare class MoveParseUp extends BottomUpOptimizer {
-    run(node: DataFlowNode): OptimizerFlags;
-}
+import { BottomUpOptimizer, Optimizer, TopDownOptimizer } from './optimizer';
 /**
  * Merge identical nodes at forks by comparing hashes.
  *
@@ -25,53 +8,38 @@ export declare class MoveParseUp extends BottomUpOptimizer {
  */
 export declare class MergeIdenticalNodes extends TopDownOptimizer {
     mergeNodes(parent: DataFlowNode, nodes: DataFlowNode[]): void;
-    run(node: DataFlowNode): boolean;
+    run(node: DataFlowNode): void;
 }
 /**
- * Repeatedly remove leaf nodes that are not output or facet nodes.
- * The reason is that we don't need subtrees that don't have any output nodes.
- * Facet nodes are needed for the row or column domains.
+ * Optimizer that removes identifier nodes that are not needed for selections.
  */
-export declare class RemoveUnusedSubtrees extends BottomUpOptimizer {
-    run(node: DataFlowNode): OptimizerFlags;
-}
-/**
- * Removes duplicate time unit nodes (as determined by the name of the
- * output field) that may be generated due to selections projected over
- * time units.
- *
- * TODO: Try to make this a top down optimizer that keeps only the first
- * insance of a time unit node.
- * TODO: Try to make a generic version of this that only keeps one node per hash.
- */
-export declare class RemoveDuplicateTimeUnits extends BottomUpOptimizer {
-    private fields;
-    private prev;
-    run(node: DataFlowNode): OptimizerFlags;
-    reset(): void;
-}
-/**
- * Merge adjacent time unit nodes.
- */
-export declare class MergeTimeUnits extends BottomUpOptimizer {
-    run(node: DataFlowNode): OptimizerFlags;
-}
-/**
- * Move facet nodes down to the next fork or output node. Also pull the main output with the facet node.
- * After moving down the facet node, make a copy of the subtree and make it a child of the main output.
- */
-export declare function moveFacetDown(node: DataFlowNode): void;
-/**
- * Remove output nodes that are not required. Starting from a root.
- */
-export declare class RemoveUnnecessaryOutputNodes extends TopDownOptimizer {
-    constructor();
-    run(node: DataFlowNode): boolean;
-}
 export declare class RemoveUnnecessaryIdentifierNodes extends TopDownOptimizer {
     private requiresSelectionId;
     constructor(model: Model);
-    run(node: DataFlowNode): boolean;
+    run(node: DataFlowNode): void;
+}
+/**
+ * Removes duplicate time unit nodes (as determined by the name of the output field) that may be generated due to
+ * selections projected over time units. Only keeps the first time unit in any branch.
+ *
+ * This optimizer is a custom top down optimizer that keep track of produced fields in a branch.
+ */
+export declare class RemoveDuplicateTimeUnits extends Optimizer {
+    optimize(node: DataFlowNode): boolean;
+    run(node: DataFlowNode, timeUnitFields: Set<string>): void;
+}
+/**
+ * Remove output nodes that are not required.
+ */
+export declare class RemoveUnnecessaryOutputNodes extends TopDownOptimizer {
+    constructor();
+    run(node: DataFlowNode): void;
+}
+/**
+ * Move parse nodes up to forks and merges them if possible.
+ */
+export declare class MoveParseUp extends BottomUpOptimizer {
+    run(node: DataFlowNode): void;
 }
 /**
  * Inserts an intermediate ParseNode containing all non-conflicting parse fields and removes the empty ParseNodes.
@@ -79,10 +47,24 @@ export declare class RemoveUnnecessaryIdentifierNodes extends TopDownOptimizer {
  * We assume that dependent paths that do not have a parse node can be just merged.
  */
 export declare class MergeParse extends BottomUpOptimizer {
-    run(node: DataFlowNode): optimizers.OptimizerFlags;
+    run(node: DataFlowNode): void;
+}
+/**
+ * Repeatedly remove leaf nodes that are not output or facet nodes.
+ * The reason is that we don't need subtrees that don't have any output nodes.
+ * Facet nodes are needed for the row or column domains.
+ */
+export declare class RemoveUnusedSubtrees extends BottomUpOptimizer {
+    run(node: DataFlowNode): void;
+}
+/**
+ * Merge adjacent time unit nodes.
+ */
+export declare class MergeTimeUnits extends BottomUpOptimizer {
+    run(node: DataFlowNode): void;
 }
 export declare class MergeAggregates extends BottomUpOptimizer {
-    run(node: DataFlowNode): optimizers.OptimizerFlags;
+    run(node: DataFlowNode): void;
 }
 /**
  * Merge bin nodes and move them up through forks. Stop at filters, parse, identifier as we want them to stay before the bin node.
@@ -90,7 +72,7 @@ export declare class MergeAggregates extends BottomUpOptimizer {
 export declare class MergeBins extends BottomUpOptimizer {
     private model;
     constructor(model: Model);
-    run(node: DataFlowNode): OptimizerFlags;
+    run(node: DataFlowNode): void;
 }
 /**
  * This optimizer takes output nodes that are at a fork and moves them before the fork.
@@ -100,6 +82,6 @@ export declare class MergeBins extends BottomUpOptimizer {
  * are inserted after the main output node.
  */
 export declare class MergeOutputs extends BottomUpOptimizer {
-    run(node: DataFlowNode): optimizers.OptimizerFlags;
+    run(node: DataFlowNode): void;
 }
 //# sourceMappingURL=optimizers.d.ts.map

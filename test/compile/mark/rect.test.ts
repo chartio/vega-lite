@@ -16,7 +16,7 @@ describe('Mark: Rect', () => {
     });
     const props = rect.encodeEntry(model);
 
-    it('should draw centered rect ', () => {
+    it('should draw centered rect', () => {
       expect(props.xc).toEqual({scale: 'x', field: 'x'});
       expect(props.width).toEqual({value: 50});
       expect(props.yc).toEqual({scale: 'y', field: 'y'});
@@ -42,6 +42,23 @@ describe('Mark: Rect', () => {
       expect(props.height).toEqual({value: 49});
     });
   });
+
+  it(
+    'should throw warning if align is expression',
+    log.wrap(localLogger => {
+      const model = parseUnitModelWithScaleAndLayoutSize({
+        data: {url: 'data/cars.json'},
+        mark: {type: 'rect', width: 50, height: 49, align: {expr: 'test'}, baseline: 'top'},
+        encoding: {
+          x: {field: 'x', type: 'quantitative'},
+          y: {type: 'quantitative', field: 'y'}
+        }
+      });
+      rect.encodeEntry(model);
+
+      expect(localLogger.warns[0]).toEqual(log.message.rangeMarkAlignmentCannotBeExpression('align'));
+    })
+  );
 
   describe('simple with width and height with right align and bottom baseline', () => {
     const model = parseUnitModelWithScaleAndLayoutSize({
@@ -73,7 +90,7 @@ describe('Mark: Rect', () => {
     });
     const props = rect.encodeEntry(model);
 
-    it('should draw centered rect ', () => {
+    it('should draw centered rect', () => {
       expect(props.x).toEqual({scale: 'x', field: 'x'});
       expect(props.x2).toEqual({value: -1});
       expect(props.y).toEqual({scale: 'y', field: 'y'});

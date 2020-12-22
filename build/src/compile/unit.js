@@ -1,13 +1,18 @@
+import { isArray } from 'vega-util';
+import { isConditionalAxisValue } from '../axis';
 import { GEOPOSITION_CHANNELS, NONPOSITION_SCALE_CHANNELS, POSITION_SCALE_CHANNELS, SCALE_CHANNELS, supportLegend, X, Y } from '../channel';
 import { getFieldDef, getFieldOrDatumDef, isFieldOrDatumDef, isTypedFieldDef } from '../channeldef';
 import { isGraticuleGenerator } from '../data';
 import * as vlEncoding from '../encoding';
 import { initEncoding } from '../encoding';
+import { replaceExprRef } from '../expr';
 import { GEOSHAPE, isMarkDef } from '../mark';
 import { isFrameMixins } from '../spec/base';
 import { stack } from '../stack';
+import { keys } from '../util';
 import { assembleAxisSignals } from './axis/assemble';
 import { parseUnitAxes } from './axis/parse';
+import { signalOrValueRefWithCondition, signalRefOrValue } from './common';
 import { parseData } from './data/parse';
 import { assembleLayoutSignals } from './layoutsize/assemble';
 import { initLayoutSize } from './layoutsize/init';
@@ -48,7 +53,7 @@ export class UnitModel extends ModelWithField {
         this.stack = stack(mark, encoding);
         this.specifiedScales = this.initScales(mark, encoding);
         this.specifiedAxes = this.initAxes(encoding);
-        this.specifiedLegends = this.initLegend(encoding);
+        this.specifiedLegends = this.initLegends(encoding);
         this.specifiedProjection = spec.projection;
         // Selections will be initialized upon parse.
         this.selection = spec.selection;
@@ -78,10 +83,22 @@ export class UnitModel extends ModelWithField {
             var _a;
             const fieldOrDatumDef = getFieldOrDatumDef(encoding[channel]);
             if (fieldOrDatumDef) {
-                scales[channel] = (_a = fieldOrDatumDef.scale) !== null && _a !== void 0 ? _a : {};
+                scales[channel] = this.initScale((_a = fieldOrDatumDef.scale) !== null && _a !== void 0 ? _a : {});
             }
             return scales;
         }, {});
+    }
+    initScale(scale) {
+        const { domain, range } = scale;
+        // TODO: we could simplify this function if we had a recursive replace function
+        const scaleInternal = replaceExprRef(scale);
+        if (isArray(domain)) {
+            scaleInternal.domain = domain.map(signalRefOrValue);
+        }
+        if (isArray(range)) {
+            scaleInternal.range = range.map(signalRefOrValue);
+        }
+        return scaleInternal;
     }
     initAxes(encoding) {
         return POSITION_SCALE_CHANNELS.reduce((_axis, channel) => {
@@ -92,17 +109,32 @@ export class UnitModel extends ModelWithField {
                 (channel === X && isFieldOrDatumDef(encoding.x2)) ||
                 (channel === Y && isFieldOrDatumDef(encoding.y2))) {
                 const axisSpec = isFieldOrDatumDef(channelDef) ? channelDef.axis : undefined;
-                _axis[channel] = axisSpec ? Object.assign({}, axisSpec) : axisSpec; // convert truthy value to object
+                _axis[channel] = axisSpec
+                    ? this.initAxis(Object.assign({}, axisSpec)) // convert truthy value to object
+                    : axisSpec;
             }
             return _axis;
         }, {});
     }
-    initLegend(encoding) {
+    initAxis(axis) {
+        const props = keys(axis);
+        const axisInternal = {};
+        for (const prop of props) {
+            const val = axis[prop];
+            axisInternal[prop] = isConditionalAxisValue(val)
+                ? signalOrValueRefWithCondition(val)
+                : signalRefOrValue(val);
+        }
+        return axisInternal;
+    }
+    initLegends(encoding) {
         return NONPOSITION_SCALE_CHANNELS.reduce((_legend, channel) => {
             const fieldOrDatumDef = getFieldOrDatumDef(encoding[channel]);
             if (fieldOrDatumDef && supportLegend(channel)) {
                 const legend = fieldOrDatumDef.legend;
-                _legend[channel] = legend ? Object.assign({}, legend) : legend; // convert truthy value to object
+                _legend[channel] = legend
+                    ? replaceExprRef(legend) // convert truthy value to object
+                    : legend;
             }
             return _legend;
         }, {});

@@ -1,7 +1,7 @@
 import {Legend as VgLegend, LegendEncode} from 'vega';
 import {COLOR, NonPositionScaleChannel, SHAPE} from '../../channel';
 import {DatumDef, FieldDef, getFieldOrDatumDef, isFieldDef, MarkPropDatumDef, MarkPropFieldDef} from '../../channeldef';
-import {Legend, LEGEND_SCALE_CHANNELS} from '../../legend';
+import {LegendInternal, LEGEND_SCALE_CHANNELS} from '../../legend';
 import {normalizeTimeUnit} from '../../timeunit';
 import {GEOJSON} from '../../type';
 import {deleteNestedProperty, isEmpty, keys, varName} from '../../util';
@@ -65,12 +65,12 @@ function getLegendDefWithScale(model: UnitModel, channel: NonPositionScaleChanne
 function isExplicit<T extends string | number | object | boolean>(
   value: T,
   property: keyof LegendComponentProps,
-  legend: Legend,
+  legend: LegendInternal,
   fieldDef: FieldDef<string>
 ) {
   switch (property) {
     case 'disable':
-      return legend !== undefined; // if axis is specified or null/false, then it's enable/disable state is explicit
+      return legend !== undefined; // if axis is specified or null/false, then its enable/disable state is explicit
     case 'values':
       // specified legend.values is already respected, but may get transformed.
       return !!legend?.values;

@@ -24,6 +24,7 @@ import {
 } from '../../channeldef';
 import {DataSourceType} from '../../data';
 import {DateTime} from '../../datetime';
+import {ExprRef} from '../../expr';
 import * as log from '../../log';
 import {Domain, hasDiscreteDomain, isDomainUnionWith, isSelectionDomain, ScaleConfig, ScaleType} from '../../scale';
 import {SelectionExtent} from '../../selection';
@@ -141,7 +142,7 @@ function normalizeUnaggregatedDomain(
   domain: Domain,
   fieldDef: TypedFieldDef<string>,
   scaleType: ScaleType,
-  scaleConfig: ScaleConfig
+  scaleConfig: ScaleConfig<SignalRef>
 ) {
   if (domain === 'unaggregated') {
     const {valid, reason} = canUseUnaggregatedDomain(fieldDef, scaleType);
@@ -207,7 +208,7 @@ export function parseDomainForChannel(model: UnitModel, channel: ScaleChannel): 
 }
 
 function mapDomainToDataSignal(
-  domain: (number | string | boolean | DateTime | SignalRef | number[])[],
+  domain: (number | string | boolean | DateTime | ExprRef | SignalRef | number[])[],
   type: Type,
   timeUnit: TimeUnit
 ) {
@@ -218,7 +219,7 @@ function mapDomainToDataSignal(
 }
 
 function convertDomainIfItIsDateTime(
-  domain: (number | string | boolean | DateTime | SignalRef | number[])[],
+  domain: (number | string | boolean | DateTime | ExprRef | SignalRef | number[])[],
   type: Type,
   timeUnit: TimeUnit | TimeUnitParams
 ): [number[]] | [string[]] | [boolean[]] | SignalRef[] {
@@ -609,7 +610,7 @@ export function mergeDomains(domains: VgNonUnionDomain[]): VgDomain {
   // only keep sort properties that work with unioned domains
   const unionDomainSorts = util.unique<VgUnionSortField>(
     sorts.map(s => {
-      if (util.isBoolean(s) || !('op' in s) || s.op in UNIONDOMAIN_SORT_OP_INDEX) {
+      if (util.isBoolean(s) || !('op' in s) || (isString(s.op) && s.op in UNIONDOMAIN_SORT_OP_INDEX)) {
         return s as VgUnionSortField;
       }
       log.warn(log.message.domainSortDropped(s));

@@ -21,7 +21,7 @@ export function assembleTitleGroup(model, channel) {
     const facetFieldDef = model.component.layoutHeaders[channel].facetFieldDef
         ? model.component.layoutHeaders[channel].facetFieldDef
         : undefined;
-    const { titleAnchor, titleAngle: ta, titleOrient } = getHeaderProperties(['titleAnchor', 'titleAngle', 'titleOrient'], facetFieldDef, config, channel);
+    const { titleAnchor, titleAngle: ta, titleOrient } = getHeaderProperties(['titleAnchor', 'titleAngle', 'titleOrient'], facetFieldDef.header, config, channel);
     const headerChannel = getHeaderChannel(channel, titleOrient);
     const titleAngle = normalizeAngle(ta);
     return {
@@ -83,7 +83,7 @@ function getSort(facetFieldDef, channel) {
     }
 }
 export function assembleLabelTitle(facetFieldDef, channel, config) {
-    const { format, formatType, labelAngle, labelAnchor, labelOrient, labelExpr } = getHeaderProperties(['format', 'formatType', 'labelAngle', 'labelAnchor', 'labelOrient', 'labelExpr'], facetFieldDef, config, channel);
+    const { format, formatType, labelAngle, labelAnchor, labelOrient, labelExpr } = getHeaderProperties(['format', 'formatType', 'labelAngle', 'labelAnchor', 'labelOrient', 'labelExpr'], facetFieldDef.header, config, channel);
     const titleTextExpr = formatSignalRef({ fieldOrDatumDef: facetFieldDef, format, formatType, expr: 'parent', config })
         .signal;
     const headerChannel = getHeaderChannel(channel, labelOrient);
@@ -99,7 +99,7 @@ export function assembleHeaderGroup(model, channel, headerType, layoutHeader, he
         const { facetFieldDef } = layoutHeader;
         const config = model.config ? model.config : undefined;
         if (facetFieldDef && headerComponent.labels) {
-            const { labelOrient } = getHeaderProperties(['labelOrient'], facetFieldDef, config, channel);
+            const { labelOrient } = getHeaderProperties(['labelOrient'], facetFieldDef.header, config, channel);
             // Include label title in the header if orient aligns with the channel
             if ((channel === 'row' && !contains(['top', 'bottom'], labelOrient)) ||
                 (channel === 'column' && !contains(['left', 'right'], labelOrient))) {
@@ -113,7 +113,7 @@ export function assembleHeaderGroup(model, channel, headerType, layoutHeader, he
             const sizeChannel = channel === 'row' ? 'height' : 'width';
             return Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({ name: model.getName(`${channel}_${headerType}`), type: 'group', role: `${channel}-${headerType}` }, (layoutHeader.facetFieldDef
                 ? {
-                    from: { data: model.getName(channel + '_domain') },
+                    from: { data: model.getName(`${channel}_domain`) },
                     sort: getSort(facetFieldDef, channel)
                 }
                 : {})), (hasAxes && isFacetWithoutRowCol
@@ -151,7 +151,7 @@ export function assembleLayoutTitleBand(headerComponentIndex, config) {
     for (const channel of FACET_CHANNELS) {
         const headerComponent = headerComponentIndex[channel];
         if (headerComponent === null || headerComponent === void 0 ? void 0 : headerComponent.facetFieldDef) {
-            const { titleAnchor, titleOrient } = getHeaderProperties(['titleAnchor', 'titleOrient'], headerComponent.facetFieldDef, config, channel);
+            const { titleAnchor, titleOrient } = getHeaderProperties(['titleAnchor', 'titleOrient'], headerComponent.facetFieldDef.header, config, channel);
             const headerChannel = getHeaderChannel(channel, titleOrient);
             const band = getLayoutTitleBand(titleAnchor, headerChannel);
             if (band !== undefined) {
@@ -167,7 +167,7 @@ export function assembleHeaderProperties(config, facetFieldDef, channel, propert
         if (!propertiesMap[prop]) {
             continue;
         }
-        const value = getHeaderProperty(prop, facetFieldDef, config, channel);
+        const value = getHeaderProperty(prop, facetFieldDef === null || facetFieldDef === void 0 ? void 0 : facetFieldDef.header, config, channel);
         if (value !== undefined) {
             props[propertiesMap[prop]] = value;
         }

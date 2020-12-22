@@ -16,8 +16,6 @@ export class Split {
         return new Split(duplicate(this.explicit), duplicate(this.implicit));
     }
     combine() {
-        // FIXME remove "as any".
-        // Add "as any" to avoid an error "Spread types may only be created from object types".
         return Object.assign(Object.assign({}, this.explicit), this.implicit);
     }
     get(key) {
@@ -34,9 +32,9 @@ export class Split {
         }
         return { explicit: false, value: undefined };
     }
-    setWithExplicit(key, value) {
-        if (value.value !== undefined) {
-            this.set(key, value.value, value.explicit);
+    setWithExplicit(key, { value, explicit }) {
+        if (value !== undefined) {
+            this.set(key, value, explicit);
         }
     }
     set(key, value, explicit) {
@@ -44,13 +42,13 @@ export class Split {
         this[explicit ? 'explicit' : 'implicit'][key] = value;
         return this;
     }
-    copyKeyFromSplit(key, s) {
+    copyKeyFromSplit(key, { explicit, implicit }) {
         // Explicit has higher precedence
-        if (s.explicit[key] !== undefined) {
-            this.set(key, s.explicit[key], true);
+        if (explicit[key] !== undefined) {
+            this.set(key, explicit[key], true);
         }
-        else if (s.implicit[key] !== undefined) {
-            this.set(key, s.implicit[key], false);
+        else if (implicit[key] !== undefined) {
+            this.set(key, implicit[key], false);
         }
     }
     copyKeyFromObject(key, s) {

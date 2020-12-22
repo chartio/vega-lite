@@ -1,10 +1,9 @@
-import {NewSignal} from 'vega';
+import {NewSignal, SignalRef} from 'vega';
 import {Config} from '../config';
 import * as log from '../log';
 import {isHConcatSpec, isVConcatSpec, NormalizedConcatSpec, NormalizedSpec} from '../spec';
-import {VgLayout} from '../vega.schema';
 import {keys} from '../util';
-import {VgData} from '../vega.schema';
+import {VgData, VgLayout} from '../vega.schema';
 import {buildModel} from './buildmodel';
 import {parseData} from './data/parse';
 import {assembleLayoutSignals} from './layoutsize/assemble';
@@ -14,7 +13,7 @@ import {Model} from './model';
 export class ConcatModel extends Model {
   public readonly children: Model[];
 
-  constructor(spec: NormalizedConcatSpec, parent: Model, parentGivenName: string, config: Config) {
+  constructor(spec: NormalizedConcatSpec, parent: Model, parentGivenName: string, config: Config<SignalRef>) {
     super(spec, 'concat', parent, parentGivenName, config, spec.resolve);
 
     if (spec.resolve?.axis?.x === 'shared' || spec.resolve?.axis?.y === 'shared') {
@@ -22,7 +21,7 @@ export class ConcatModel extends Model {
     }
 
     this.children = this.getChildren(spec).map((child, i) => {
-      return buildModel(child, this, this.getName('concat_' + i), undefined, config);
+      return buildModel(child, this, this.getName(`concat_${i}`), undefined, config);
     });
   }
 

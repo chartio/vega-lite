@@ -79,7 +79,9 @@ const VG_MARK_CONFIG_INDEX = {
     cornerRadiusBottomRight: 1,
     aspect: 1,
     width: 1,
-    height: 1
+    height: 1,
+    url: 1,
+    smooth: 1
     // commented below are vg channel that do not have mark config.
     // x: 1,
     // y: 1,

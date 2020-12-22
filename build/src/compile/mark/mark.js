@@ -42,7 +42,7 @@ export function parseMarkGroups(model) {
         }
         // otherwise use standard mark groups
     }
-    else if (contains([BAR], model.mark)) {
+    else if (model.mark === BAR) {
         const hasCornerRadius = VG_CORNERRADIUS_CHANNELS.some(prop => getMarkPropOrConfig(prop, model.markDef, model.config));
         if (model.stack && !model.fieldDef('size') && hasCornerRadius) {
             return getGroupsForStackedBarWithCornerRadius(model);
@@ -313,6 +313,10 @@ function interactiveFlag(model) {
         parentCount = keys(parent.component.selection).length;
         parent = parent.parent;
     }
-    return parentCount ? { interactive: unitCount > 0 } : null;
+    return parentCount
+        ? {
+            interactive: unitCount > 0 || !!model.encoding.tooltip
+        }
+        : null;
 }
 //# sourceMappingURL=mark.js.map

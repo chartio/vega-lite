@@ -29,11 +29,11 @@ export declare function mergeDomains(domains: VgNonUnionDomain[]): VgDomain;
  * Return `undefined` otherwise.
  */
 export declare function getFieldFromDomain(domain: VgDomain): string;
-export declare function assembleDomain(model: Model, channel: ScaleChannel): SignalRef | (string | number | boolean | SignalRef)[] | (import("vega").ScaleDataRef & {
+export declare function assembleDomain(model: Model, channel: ScaleChannel): SignalRef | (import("vega").ScaleDataRef & {
     sort?: VgSortField;
 }) | (import("vega").ScaleMultiDataRef & {
     sort?: VgSortField;
 }) | (import("vega").ScaleMultiFieldsRef & {
     sort?: VgSortField;
-});
+}) | (string | number | boolean | SignalRef)[];
 //# sourceMappingURL=domain.d.ts.map

@@ -1,9 +1,21 @@
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { isString, mergeConfig } from 'vega-util';
 import { getPositionScaleChannel } from '../channel';
 import * as vlFieldDef from '../channeldef';
 import { initConfig, stripAndRedirectConfig } from '../config';
 import * as log from '../log';
 import { normalize } from '../normalize';
+import { assembleParameterSignals } from '../parameter';
 import { extractTopLevelProperties, getFitType, isFitType } from '../spec/toplevel';
 import { keys } from '../util';
 import { buildModel } from './buildmodel';
@@ -127,7 +139,7 @@ function getTopLevelProperties(inputSpec, autosize, config, model) {
         ? autosize.type === 'pad'
             ? {}
             : { autosize: autosize.type }
-        : { autosize })), (isFacetModel(model) ? { width, height } : {})), extractTopLevelProperties(config)), extractTopLevelProperties(inputSpec));
+        : { autosize })), (isFacetModel(model) && typeof width == 'number' && typeof height == 'number' ? { width, height } : {})), extractTopLevelProperties(config, false)), extractTopLevelProperties(inputSpec, true));
 }
 /*
  * Assemble the top-level model to a Vega spec.
@@ -154,6 +166,11 @@ function assembleTopLevelModel(model, topLevelProperties, datasets = {}, usermet
         }
         return true;
     });
-    return Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({ $schema: 'https://vega.github.io/schema/vega/v5.json' }, (model.description ? { description: model.description } : {})), topLevelProperties), (title ? { title } : {})), (style ? { style } : {})), (encodeEntry ? { encode: { update: encodeEntry } } : {})), { data }), (projections.length > 0 ? { projections: projections } : {})), model.assembleGroup([...layoutSignals, ...model.assembleSelectionTopLevelSignals([])])), (vgConfig ? { config: vgConfig } : {})), (usermeta ? { usermeta } : {}));
+    const { params } = topLevelProperties, otherTopLevelProps = __rest(topLevelProperties, ["params"]);
+    return Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({ $schema: 'https://vega.github.io/schema/vega/v5.json' }, (model.description ? { description: model.description } : {})), otherTopLevelProps), (title ? { title } : {})), (style ? { style } : {})), (encodeEntry ? { encode: { update: encodeEntry } } : {})), { data }), (projections.length > 0 ? { projections: projections } : {})), model.assembleGroup([
+        ...layoutSignals,
+        ...model.assembleSelectionTopLevelSignals([]),
+        ...assembleParameterSignals(params)
+    ])), (vgConfig ? { config: vgConfig } : {})), (usermeta ? { usermeta } : {}));
 }
 //# sourceMappingURL=compile.js.map

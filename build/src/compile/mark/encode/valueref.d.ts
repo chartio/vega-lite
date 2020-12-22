@@ -17,7 +17,7 @@ export declare function wrapPositionInvalidTest({ fieldDef, channel, markDef, re
     channel: PositionChannel | PolarPositionChannel;
     markDef: MarkDef<Mark>;
     ref: VgValueRef;
-    config: Config;
+    config: Config<SignalRef>;
 }): VgValueRef | VgValueRef[];
 export declare function fieldInvalidTestValueRef(fieldDef: FieldDef<string>, channel: PositionChannel | PolarPositionChannel): {
     field: {
@@ -51,8 +51,8 @@ export interface MidPointParams {
     channel: Channel;
     channelDef: ChannelDef;
     channel2Def?: SecondaryChannelDef<string>;
-    markDef: MarkDef<Mark>;
-    config: Config;
+    markDef: MarkDef<Mark, SignalRef>;
+    config: Config<SignalRef>;
     scaleName: string;
     scale: ScaleComponent;
     stack?: StackProperties;
@@ -71,7 +71,7 @@ export declare function midPoint({ channel, channelDef, channel2Def, markDef, co
  * Convert special "width" and "height" values in Vega-Lite into Vega value ref.
  */
 export declare function widthHeightValueOrSignalRef(channel: Channel, value: Value | SignalRef): SignalRef | {
-    value: string | number | boolean | string[] | number[] | import("vega").LinearGradient | import("vega").RadialGradient;
+    value: Value<null>;
 } | {
     field: {
         group: string;

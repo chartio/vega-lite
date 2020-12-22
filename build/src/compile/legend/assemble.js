@@ -1,5 +1,15 @@
-import { __rest } from "tslib";
-import { LEGEND_SCALE_CHANNELS, SIGNAL_LEGEND_PROP_INDEX } from '../../legend';
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
+import { LEGEND_SCALE_CHANNELS } from '../../legend';
 import { keys, replaceAll, stringify, vals } from '../../util';
 import { isSignalRef } from '../../vega.schema';
 import { mergeLegendComponent } from './parse';
@@ -68,17 +78,6 @@ export function assembleLegend(legendCmpt, config) {
             expr = replaceAll(labelExpr, 'datum.label', legend.encode.labels.update.text.signal);
         }
         setLegendEncode(legend, 'labels', 'text', { signal: expr });
-    }
-    for (const prop in legend) {
-        const propValue = legend[prop];
-        if (isSignalRef(propValue)) {
-            const propIndex = SIGNAL_LEGEND_PROP_INDEX[prop];
-            if (propIndex) {
-                const { vgProp, part } = propIndex;
-                setLegendEncode(legend, part, vgProp, propValue);
-                delete legend[prop];
-            }
-        }
     }
     return legend;
 }

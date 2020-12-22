@@ -1,4 +1,14 @@
-import { __rest } from "tslib";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { isString, toSet } from 'vega-util';
 import * as CHANNEL from './channel';
 import { isColorChannel } from './channel';
@@ -189,18 +199,18 @@ export function scaleTypeSupportProperty(scaleType, propName) {
             return true;
         case 'scheme':
         case 'interpolate':
-            return !contains(['point', 'band', 'identity'], scaleType);
+            return !['point', 'band', 'identity'].includes(scaleType);
         case 'bins':
-            return !contains(['point', 'band', 'identity', 'ordinal'], scaleType);
+            return !['point', 'band', 'identity', 'ordinal'].includes(scaleType);
         case 'round':
             return isContinuousToContinuous(scaleType) || scaleType === 'band' || scaleType === 'point';
         case 'padding':
         case 'rangeMin':
         case 'rangeMax':
-            return isContinuousToContinuous(scaleType) || contains(['point', 'band'], scaleType);
+            return isContinuousToContinuous(scaleType) || ['point', 'band'].includes(scaleType);
         case 'paddingOuter':
         case 'align':
-            return contains(['point', 'band'], scaleType);
+            return ['point', 'band'].includes(scaleType);
         case 'paddingInner':
             return scaleType === 'band';
         case 'domainMax':

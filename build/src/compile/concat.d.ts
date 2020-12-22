@@ -1,12 +1,11 @@
-import { NewSignal } from 'vega';
+import { NewSignal, SignalRef } from 'vega';
 import { Config } from '../config';
 import { NormalizedConcatSpec } from '../spec';
-import { VgLayout } from '../vega.schema';
-import { VgData } from '../vega.schema';
+import { VgData, VgLayout } from '../vega.schema';
 import { Model } from './model';
 export declare class ConcatModel extends Model {
     readonly children: Model[];
-    constructor(spec: NormalizedConcatSpec, parent: Model, parentGivenName: string, config: Config);
+    constructor(spec: NormalizedConcatSpec, parent: Model, parentGivenName: string, config: Config<SignalRef>);
     parseData(): void;
     parseSelections(): void;
     parseMarkGroup(): void;

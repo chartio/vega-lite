@@ -1,4 +1,4 @@
-import { SignalRef } from 'vega-typings/types';
+import { SignalRef } from 'vega';
 import { DatumDef, FieldDef } from '../channeldef';
 import { Config } from '../config';
 import { ScaleType } from '../scale';
@@ -31,7 +31,7 @@ export declare function formatCustomType({ fieldOrDatumDef, format, formatType, 
 export declare function guideFormat(fieldOrDatumDef: FieldDef<string> | DatumDef<string>, type: Type, format: string | Dict<unknown>, formatType: string, config: Config, omitTimeFormatConfig: boolean): string | {
     signal: string;
 };
-export declare function guideFormatType(formatType: string | SignalRef, fieldOrDatumDef: FieldDef<string> | DatumDef<string>, scaleType: ScaleType): SignalRef | "time" | "number";
+export declare function guideFormatType(formatType: string | SignalRef, fieldOrDatumDef: FieldDef<string> | DatumDef<string>, scaleType: ScaleType): "time" | "number" | SignalRef;
 /**
  * Returns number format for a fieldDef.
  */

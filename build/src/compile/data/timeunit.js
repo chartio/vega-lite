@@ -1,8 +1,18 @@
-import { __rest } from "tslib";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { getSecondaryRangeChannel } from '../../channel';
 import { hasBand, vgField } from '../../channeldef';
 import { getTimeUnitParts, normalizeTimeUnit } from '../../timeunit';
-import { duplicate, hash, isEmpty, replacePathInField, vals } from '../../util';
+import { duplicate, hash, isEmpty, replacePathInField, vals, entries } from '../../util';
 import { isUnitModel } from '../model';
 import { DataFlowNode } from './dataflow';
 export class TimeUnitNode extends DataFlowNode {
@@ -52,7 +62,7 @@ export class TimeUnitNode extends DataFlowNode {
         // if the same hash happen twice, merge "band"
         for (const key in other.formula) {
             if (!this.formula[key] || other.formula[key].band) {
-                // copy if it's not a duplicate or if we need to include copy band over
+                // copy if it's not a duplicate or if we need to copy band over
                 this.formula[key] = other.formula[key];
             }
         }
@@ -61,6 +71,18 @@ export class TimeUnitNode extends DataFlowNode {
             child.parent = this;
         }
         other.remove();
+    }
+    /**
+     * Remove time units coming from the other node.
+     */
+    removeFormulas(fields) {
+        const newFormula = {};
+        for (const [key, timeUnit] of entries(this.formula)) {
+            if (!fields.has(timeUnit.as)) {
+                newFormula[key] = timeUnit;
+            }
+        }
+        this.formula = newFormula;
     }
     producedFields() {
         return new Set(vals(this.formula).map(f => f.as));

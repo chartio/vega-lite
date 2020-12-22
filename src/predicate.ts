@@ -2,8 +2,10 @@ import {SignalRef} from 'vega';
 import {isArray} from 'vega-util';
 import {FieldName, valueExpr, vgField} from './channeldef';
 import {DateTime} from './datetime';
+import {ExprRef} from './expr';
 import {LogicalComposition} from './logical';
 import {fieldExpr as timeUnitFieldExpr, normalizeTimeUnit, TimeUnit, TimeUnitParams} from './timeunit';
+import {stringify} from './util';
 import {isSignalRef} from './vega.schema';
 
 export type Predicate =
@@ -61,7 +63,7 @@ export interface FieldEqualPredicate extends FieldPredicateBase {
   /**
    * The value that the field should be equal to.
    */
-  equal: string | number | boolean | DateTime | SignalRef;
+  equal: string | number | boolean | DateTime | ExprRef | SignalRef;
 }
 
 export function isFieldEqualPredicate(predicate: any): predicate is FieldEqualPredicate {
@@ -72,7 +74,7 @@ export interface FieldLTPredicate extends FieldPredicateBase {
   /**
    * The value that the field should be less than.
    */
-  lt: string | number | DateTime | SignalRef;
+  lt: string | number | DateTime | ExprRef | SignalRef;
 }
 
 export function isFieldLTPredicate(predicate: any): predicate is FieldLTPredicate {
@@ -83,7 +85,7 @@ export interface FieldLTEPredicate extends FieldPredicateBase {
   /**
    * The value that the field should be less than or equals to.
    */
-  lte: string | number | DateTime | SignalRef;
+  lte: string | number | DateTime | ExprRef | SignalRef;
 }
 
 export function isFieldLTEPredicate(predicate: any): predicate is FieldLTEPredicate {
@@ -94,7 +96,7 @@ export interface FieldGTPredicate extends FieldPredicateBase {
   /**
    * The value that the field should be greater than.
    */
-  gt: string | number | DateTime | SignalRef;
+  gt: string | number | DateTime | ExprRef | SignalRef;
 }
 
 export function isFieldGTPredicate(predicate: any): predicate is FieldGTPredicate {
@@ -105,7 +107,7 @@ export interface FieldGTEPredicate extends FieldPredicateBase {
   /**
    * The value that the field should be greater than or equals to.
    */
-  gte: string | number | DateTime | SignalRef;
+  gte: string | number | DateTime | ExprRef | SignalRef;
 }
 
 export function isFieldGTEPredicate(predicate: any): predicate is FieldGTEPredicate {
@@ -119,7 +121,7 @@ export interface FieldRangePredicate extends FieldPredicateBase {
    * @maxItems 2
    * @minItems 2
    */
-  range: (number | DateTime | null | SignalRef)[] | SignalRef;
+  range: (number | DateTime | null | ExprRef | SignalRef)[] | ExprRef | SignalRef;
 }
 
 export function isFieldRangePredicate(predicate: any): predicate is FieldRangePredicate {
@@ -179,7 +181,7 @@ export function isFieldPredicate(
   );
 }
 
-function predicateValueExpr(v: number | string | boolean | DateTime | SignalRef, timeUnit: TimeUnit) {
+function predicateValueExpr(v: number | string | boolean | DateTime | ExprRef | SignalRef, timeUnit: TimeUnit) {
   return valueExpr(v, {timeUnit, wrapTime: true});
 }
 
@@ -195,11 +197,11 @@ export function fieldFilterExpression(predicate: FieldPredicate, useInRange = tr
     ? // For timeUnit, cast into integer with time() so we can use ===, inrange, indexOf to compare values directly.
       // TODO: We calculate timeUnit on the fly here. Consider if we would like to consolidate this with timeUnit pipeline
       // TODO: support utc
-      'time(' + timeUnitFieldExpr(timeUnit, field) + ')'
+      `time(${timeUnitFieldExpr(timeUnit, field)})`
     : vgField(predicate, {expr: 'datum'});
 
   if (isFieldEqualPredicate(predicate)) {
-    return fieldExpr + '===' + predicateValueExpr(predicate.equal, timeUnit);
+    return `${fieldExpr}===${predicateValueExpr(predicate.equal, timeUnit)}`;
   } else if (isFieldLTPredicate(predicate)) {
     const upper = predicate.lt;
     return `${fieldExpr}<${predicateValueExpr(upper, timeUnit)}`;
@@ -245,7 +247,7 @@ export function fieldFilterExpression(predicate: FieldPredicate, useInRange = tr
   }
 
   /* istanbul ignore next: it should never reach here */
-  throw new Error(`Invalid field predicate: ${JSON.stringify(predicate)}`);
+  throw new Error(`Invalid field predicate: ${stringify(predicate)}`);
 }
 
 export function fieldValidPredicate(fieldExpr: string, valid = true) {

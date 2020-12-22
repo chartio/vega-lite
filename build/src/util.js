@@ -70,7 +70,7 @@ export function isNullOrFalse(x) {
     return x === false || x === null;
 }
 export function contains(array, item) {
-    return array.indexOf(item) > -1;
+    return array.includes(item);
 }
 /**
  * Returns true if any item returns true.
@@ -189,18 +189,7 @@ export function isEmpty(obj) {
 // This is a stricter version of Object.keys but with better types. See https://github.com/Microsoft/TypeScript/pull/12253#issuecomment-263132208
 export const keys = Object.keys;
 export const vals = Object.values;
-export function entries(x) {
-    const _entries = [];
-    for (const k in x) {
-        if (hasOwnProperty(x, k)) {
-            _entries.push({
-                key: k,
-                value: x[k]
-            });
-        }
-    }
-    return _entries;
-}
+export const entries = Object.entries;
 export function isBoolean(b) {
     return b === true || b === false;
 }
@@ -215,13 +204,13 @@ export function varName(s) {
 }
 export function logicalExpr(op, cb) {
     if (isLogicalNot(op)) {
-        return '!(' + logicalExpr(op.not, cb) + ')';
+        return `!(${logicalExpr(op.not, cb)})`;
     }
     else if (isLogicalAnd(op)) {
-        return '(' + op.and.map((and) => logicalExpr(and, cb)).join(') && (') + ')';
+        return `(${op.and.map((and) => logicalExpr(and, cb)).join(') && (')})`;
     }
     else if (isLogicalOr(op)) {
-        return '(' + op.or.map((or) => logicalExpr(or, cb)).join(') || (') + ')';
+        return `(${op.or.map((or) => logicalExpr(or, cb)).join(') || (')})`;
     }
     else {
         return cb(op);
@@ -334,7 +323,7 @@ export function internalField(name) {
     return isInternalField(name) ? name : `__${name}`;
 }
 export function isInternalField(name) {
-    return name.indexOf('__') === 0;
+    return name.startsWith('__');
 }
 /**
  * Normalize angle to be within [0,360).

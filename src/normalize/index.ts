@@ -1,19 +1,18 @@
-import {Field} from '../channeldef';
+import {SignalRef} from 'vega';
 import {isString} from 'vega-util';
+import {Field} from '../channeldef';
 import {Config, initConfig} from '../config';
 import * as log from '../log';
 import {
-  LayerSpec,
   FacetedUnitSpec,
-  GenericSpec,
   isFacetSpec,
   isLayerSpec,
   isUnitSpec,
   LayoutSizeMixins,
+  NonNormalizedSpec,
   NormalizedSpec,
-  TopLevelSpec,
-  UnitSpec,
-  RepeatSpec
+  RepeatSpec,
+  TopLevelSpec
 } from '../spec';
 import {AutoSizeParams, AutosizeType, TopLevel} from '../spec/toplevel';
 import {deepEqual} from '../util';
@@ -22,7 +21,7 @@ import {CoreNormalizer} from './core';
 
 export function normalize(
   spec: TopLevelSpec & LayoutSizeMixins,
-  config?: Config
+  config?: Config<SignalRef>
 ): TopLevel<NormalizedSpec> & LayoutSizeMixins {
   if (config === undefined) {
     config = initConfig(spec.config);
@@ -45,8 +44,8 @@ const normalizer = new CoreNormalizer();
  * Decompose extended unit specs into composition of pure unit specs.
  */
 function normalizeGenericSpec(
-  spec: GenericSpec<UnitSpec, LayerSpec, RepeatSpec, Field> | FacetedUnitSpec | RepeatSpec,
-  config: Config = {}
+  spec: NonNormalizedSpec | FacetedUnitSpec<Field> | RepeatSpec,
+  config: Config<SignalRef> = {}
 ) {
   return normalizer.map(spec, {config});
 }
@@ -121,4 +120,4 @@ export function normalizeAutoSize(
   return autosize;
 }
 
-export {NormalizerParams};
+export type {NormalizerParams};

@@ -23,5 +23,5 @@ export declare class ScaleComponent extends Split<ScaleComponentProps> {
     domainDefinitelyIncludesZero(): boolean;
 }
 export declare type ScaleComponentIndex = Partial<Record<ScaleChannel, ScaleComponent>>;
-export declare type ScaleIndex = Partial<Record<ScaleChannel, Scale>>;
+export declare type ScaleIndex = Partial<Record<ScaleChannel, Scale<SignalRef>>>;
 //# sourceMappingURL=component.d.ts.map

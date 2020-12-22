@@ -1,9 +1,20 @@
-import {SignalRef, Text} from 'vega';
-import {array, stringValue} from 'vega-util';
-import {AxisConfig} from '../axis';
-import {FieldDefBase, FieldRefOption, OrderFieldDef, vgField} from '../channeldef';
+import {ExprRef, SignalRef, Text} from 'vega';
+import {array, isArray, stringValue} from 'vega-util';
+import {AxisConfig, ConditionalAxisProperty} from '../axis';
+import {
+  ConditionalPredicate,
+  DatumDef,
+  FieldDef,
+  FieldDefBase,
+  FieldRefOption,
+  OrderFieldDef,
+  Value,
+  ValueDef,
+  vgField
+} from '../channeldef';
 import {Config, StyleConfigIndex} from '../config';
-import {MarkConfig, MarkDef} from '../mark';
+import {isExprRef} from '../expr';
+import {Mark, MarkConfig, MarkDef} from '../mark';
 import {SortFields} from '../sort';
 import {isText} from '../title';
 import {deepEqual, getFirstDefined} from '../util';
@@ -14,7 +25,42 @@ import {UnitModel} from './unit';
 
 export const BIN_RANGE_DELIMITER = ' \u2013 ';
 
-export function signalOrValueRef<T>(value: T | SignalRef): {value: T} | SignalRef {
+export function signalOrValueRefWithCondition<V extends Value | number[]>(
+  val: ConditionalAxisProperty<V, SignalRef | ExprRef>
+): ConditionalAxisProperty<V, SignalRef> {
+  const condition = isArray(val.condition)
+    ? (val.condition as ConditionalPredicate<ValueDef<any> | ExprRef | SignalRef>[]).map(conditionalSignalRefOrValue)
+    : conditionalSignalRefOrValue(val.condition);
+
+  return {
+    ...signalRefOrValue<ValueDef<any>>(val),
+    condition
+  };
+}
+
+export function signalRefOrValue<T>(value: T | SignalRef | ExprRef): T | SignalRef {
+  if (isExprRef(value)) {
+    const {expr, ...rest} = value;
+    return {signal: expr, ...rest};
+  }
+  return value;
+}
+
+export function conditionalSignalRefOrValue<T extends FieldDef<any> | DatumDef | ValueDef<any>>(
+  value: ConditionalPredicate<T | ExprRef | SignalRef>
+): ConditionalPredicate<T | SignalRef> {
+  if (isExprRef(value)) {
+    const {expr, ...rest} = value;
+    return {signal: expr, ...rest};
+  }
+  return value;
+}
+
+export function signalOrValueRef<T>(value: T | SignalRef | ExprRef): {value: T} | SignalRef {
+  if (isExprRef(value)) {
+    const {expr, ...rest} = value;
+    return {signal: expr, ...rest};
+  }
   if (isSignalRef(value)) {
     return value;
   }
@@ -35,7 +81,7 @@ export function signalOrStringValue(v: SignalRef | any) {
   return v == null ? null : stringValue(v);
 }
 
-export function applyMarkConfig(e: VgEncodeEntry, model: UnitModel, propsList: (keyof MarkConfig)[]) {
+export function applyMarkConfig(e: VgEncodeEntry, model: UnitModel, propsList: (keyof MarkConfig<any>)[]) {
   for (const property of propsList) {
     const value = getMarkConfig(property, model.markDef, model.config);
     if (value !== undefined) {
@@ -49,15 +95,15 @@ export function getStyles(mark: MarkDef): string[] {
   return [].concat(mark.type, mark.style ?? []);
 }
 
-export function getMarkPropOrConfig<P extends keyof MarkDef>(
+export function getMarkPropOrConfig<P extends keyof MarkDef, ES extends ExprRef | SignalRef>(
   channel: P,
-  mark: MarkDef,
-  config: Config,
+  mark: MarkDef<Mark, ES>,
+  config: Config<SignalRef>,
   opt: {
     vgChannel?: VgEncodeChannel;
     ignoreVgConfig?: boolean;
   } = {}
-): MarkDef[P] {
+): MarkDef<Mark, ES>[P] {
   const {vgChannel, ignoreVgConfig} = opt;
   if (vgChannel && mark[vgChannel] !== undefined) {
     return mark[vgChannel];
@@ -74,13 +120,13 @@ export function getMarkPropOrConfig<P extends keyof MarkDef>(
  * Return property value from style or mark specific config property if exists.
  * Otherwise, return general mark specific config.
  */
-export function getMarkConfig<P extends keyof MarkDef>(
+export function getMarkConfig<P extends keyof MarkDef, ES extends ExprRef | SignalRef>(
   channel: P,
-  mark: MarkDef,
-  config: Config,
+  mark: MarkDef<Mark, ES>,
+  config: Config<SignalRef>,
   {vgChannel}: {vgChannel?: VgEncodeChannel} = {}
-): MarkDef[P] {
-  return getFirstDefined<MarkDef[P]>(
+): MarkDef<Mark, ES>[P] {
+  return getFirstDefined<MarkDef<Mark, ES>[P]>(
     // style config has highest precedence
     vgChannel ? getMarkStyleConfig(channel, mark, config.style) : undefined,
     getMarkStyleConfig(channel, mark, config.style),
@@ -95,18 +141,18 @@ export function getMarkConfig<P extends keyof MarkDef>(
   );
 }
 
-export function getMarkStyleConfig<P extends keyof MarkDef>(
+export function getMarkStyleConfig<P extends keyof MarkDef, ES extends ExprRef | SignalRef>(
   prop: P,
-  mark: MarkDef,
-  styleConfigIndex: StyleConfigIndex
+  mark: MarkDef<Mark, ES>,
+  styleConfigIndex: StyleConfigIndex<SignalRef>
 ) {
   return getStyleConfig(prop, getStyles(mark), styleConfigIndex);
 }
 
-export function getStyleConfig<P extends keyof MarkDef | keyof AxisConfig>(
+export function getStyleConfig<P extends keyof MarkDef | keyof AxisConfig<SignalRef>>(
   p: P,
   styles: string | string[],
-  styleConfigIndex: StyleConfigIndex
+  styleConfigIndex: StyleConfigIndex<SignalRef>
 ) {
   styles = array(styles);
   let value;

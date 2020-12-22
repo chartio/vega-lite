@@ -13,11 +13,11 @@ export declare function rectBinPosition({ fieldDef, fieldDef2, channel, band, sc
     channel: 'x' | 'y' | 'theta' | 'radius';
     band: number;
     scaleName: string;
-    markDef: MarkDef<Mark>;
+    markDef: MarkDef<Mark, SignalRef>;
     spacing?: number;
     axisTranslate: number | SignalRef;
     reverse: boolean | SignalRef;
-    config: Config;
+    config: Config<SignalRef>;
 }): {
     [x: string]: VgValueRef | VgValueRef[];
 } | {
@@ -38,6 +38,6 @@ export declare function rectBinRef({ channel, fieldDef, scaleName, markDef, band
     markDef: MarkDef<Mark>;
     band: number;
     offset?: number | SignalRef;
-    config?: Config;
+    config?: Config<SignalRef>;
 }): VgValueRef | VgValueRef[];
 //# sourceMappingURL=position-rect.d.ts.map

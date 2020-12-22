@@ -2,6 +2,8 @@ import { Color, SignalRef } from 'vega';
 import { BaseSpec } from '.';
 import { Config } from '../config';
 import { InlineDataset } from '../data';
+import { ExprRef } from '../expr';
+import { Parameter } from '../parameter';
 import { Dict } from '../util';
 /**
  * @minimum 0
@@ -34,20 +36,23 @@ export declare type TopLevel<S extends BaseSpec> = S & TopLevelProperties & {
      */
     usermeta?: Dict<unknown>;
 };
-export interface TopLevelProperties {
+/**
+ * Shared properties between Top-Level specs and Config
+ */
+export interface TopLevelProperties<ES extends ExprRef | SignalRef = ExprRef | SignalRef> {
     /**
      * CSS color property to use as the background of the entire view.
      *
      * __Default value:__ `"white"`
      */
-    background?: Color | SignalRef;
+    background?: Color | ES;
     /**
      * The default visualization padding, in pixels, from the edge of the visualization canvas to the data rectangle. If a number, specifies padding for all sides.
      * If an object, the value should have the format `{"left": 5, "top": 5, "right": 5, "bottom": 5}` to specify padding for each side of the visualization.
      *
      * __Default value__: `5`
      */
-    padding?: Padding | SignalRef;
+    padding?: Padding | ES;
     /**
      * How the visualization size should be determined. If a string, should be one of `"pad"`, `"fit"` or `"none"`.
      * Object values can additionally specify parameters for content sizing and automatic resizing.
@@ -55,6 +60,10 @@ export interface TopLevelProperties {
      * __Default value__: `pad`
      */
     autosize?: AutosizeType | AutoSizeParams;
+    /**
+     * Dynamic variables that parameterize a visualization.
+     */
+    params?: Parameter[];
 }
 export declare type FitType = 'fit' | 'fit-x' | 'fit-y';
 export declare function isFitType(autoSizeType: AutosizeType): autoSizeType is FitType;
@@ -80,5 +89,5 @@ export interface AutoSizeParams {
      */
     contains?: 'content' | 'padding';
 }
-export declare function extractTopLevelProperties<T extends TopLevelProperties>(t: T): {};
+export declare function extractTopLevelProperties(t: TopLevelProperties, includeParams: boolean): TopLevelProperties<SignalRef>;
 //# sourceMappingURL=toplevel.d.ts.map

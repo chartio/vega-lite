@@ -2,6 +2,7 @@ import { getViewConfigContinuousSize } from '../../config';
 import { hasDiscreteDomain } from '../../scale';
 import { getFirstDefined } from '../../util';
 import { isVgRangeStep } from '../../vega.schema';
+import { signalOrStringValue } from '../common';
 import { isFacetModel } from '../model';
 import { getSizeTypeFromLayoutSizeType } from './component';
 import { isFacetMapping } from '../../spec/facet';
@@ -77,7 +78,7 @@ export function sizeSignals(model, sizeType) {
 }
 function stepSignal(scaleName, range) {
     return {
-        name: scaleName + '_step',
+        name: `${scaleName}_step`,
         value: range.step
     };
 }
@@ -95,7 +96,7 @@ export function sizeExpr(scaleName, scaleComponent, cardinality) {
             : // For point, as calculated in https://github.com/vega/vega-scale/blob/master/src/band.js#L128,
                 // it's equivalent to have paddingInner = 1 since there is only n-1 steps between n points.
                 1;
-    return `bandspace(${cardinality}, ${paddingInner}, ${paddingOuter}) * ${scaleName}_step`;
+    return `bandspace(${cardinality}, ${signalOrStringValue(paddingInner)}, ${signalOrStringValue(paddingOuter)}) * ${scaleName}_step`;
 }
 export function autosizedFacetExpr(model, sizeType) {
     const channel = sizeType === 'width' ? 'column' : 'row';

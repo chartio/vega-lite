@@ -1,12 +1,15 @@
 import { isBinned, isBinning } from '../../bin';
 import { isContinuousFieldOrDatumDef, isFieldDef, isNumericDataDef } from '../../channeldef';
 import { isAggregate } from '../../encoding';
+import { replaceExprRef } from '../../expr';
 import * as log from '../../log';
 import { AREA, BAR, BAR_CORNER_RADIUS_INDEX as BAR_CORNER_RADIUS_END_INDEX, CIRCLE, IMAGE, LINE, POINT, RECT, RULE, SQUARE, TEXT, TICK } from '../../mark';
 import { QUANTITATIVE, TEMPORAL } from '../../type';
 import { contains, getFirstDefined } from '../../util';
 import { getMarkConfig, getMarkPropOrConfig } from '../common';
-export function initMarkdef(markDef, encoding, config) {
+export function initMarkdef(originalMarkDef, encoding, config) {
+    // FIXME: markDef expects that exprRefs are replaced recursively but replaceExprRef only replaces the top level
+    const markDef = replaceExprRef(originalMarkDef);
     // set orient, which can be overridden by rules as sometimes the specified orient is invalid.
     const specifiedOrient = getMarkPropOrConfig('orient', markDef, config);
     markDef.orient = orient(markDef.type, encoding, specifiedOrient);

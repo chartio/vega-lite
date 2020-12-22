@@ -45,7 +45,7 @@ function parseUnitScaleCore(model) {
         if (fieldOrDatumDef && specifiedScale !== null && specifiedScale !== false) {
             specifiedScale = specifiedScale !== null && specifiedScale !== void 0 ? specifiedScale : {};
             const sType = scaleType(specifiedScale, channel, fieldOrDatumDef, mark);
-            scaleComponents[channel] = new ScaleComponent(model.scaleName(channel + '', true), {
+            scaleComponents[channel] = new ScaleComponent(model.scaleName(`${channel}`, true), {
                 value: sType,
                 explicit: specifiedScale.type === sType
             });

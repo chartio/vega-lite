@@ -1,4 +1,14 @@
-import { __rest } from "tslib";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { isArray, isBoolean, isString } from 'vega-util';
 import { isContinuousFieldOrDatumDef, isFieldDef, isFieldOrDatumDefForTimeFormat } from '../channeldef';
 import { fieldDefs } from '../encoding';
@@ -55,7 +65,7 @@ export function getCompositeMarkTooltip(tooltipSummary, continuousAxisChannelDef
         return {
             field: fieldPrefix + continuousAxisChannelDef.field,
             type: continuousAxisChannelDef.type,
-            title: isSignalRef(titlePrefix) ? { signal: titlePrefix + `"${escape(mainTitle)}"` } : titlePrefix + mainTitle
+            title: isSignalRef(titlePrefix) ? { signal: `${titlePrefix}"${escape(mainTitle)}"` } : titlePrefix + mainTitle
         };
     });
     const tooltipFieldDefs = fieldDefs(encodingWithoutContinuousAxis).map(toStringFieldDef);
@@ -77,10 +87,10 @@ export function makeCompositeAggregatePartFactory(compositeMarkDef, continuousAx
         const title = getTitle(continuousAxisChannelDef);
         return partLayerMixins(compositeMarkDef, partName, compositeMarkConfig, {
             mark,
-            encoding: Object.assign(Object.assign(Object.assign({ [continuousAxis]: Object.assign(Object.assign(Object.assign({ field: positionPrefix + '_' + continuousAxisChannelDef.field, type: continuousAxisChannelDef.type }, (title !== undefined ? { title } : {})), (scale !== undefined ? { scale } : {})), (axis !== undefined ? { axis } : {})) }, (isString(endPositionPrefix)
+            encoding: Object.assign(Object.assign(Object.assign({ [continuousAxis]: Object.assign(Object.assign(Object.assign({ field: `${positionPrefix}_${continuousAxisChannelDef.field}`, type: continuousAxisChannelDef.type }, (title !== undefined ? { title } : {})), (scale !== undefined ? { scale } : {})), (axis !== undefined ? { axis } : {})) }, (isString(endPositionPrefix)
                 ? {
-                    [continuousAxis + '2']: {
-                        field: endPositionPrefix + '_' + continuousAxisChannelDef.field
+                    [`${continuousAxis}2`]: {
+                        field: `${endPositionPrefix}_${continuousAxisChannelDef.field}`
                     }
                 }
                 : {})), sharedEncoding), extraEncoding)
@@ -101,9 +111,9 @@ export function compositeMarkContinuousAxis(spec, orient, compositeMark) {
     const { encoding } = spec;
     const continuousAxis = orient === 'vertical' ? 'y' : 'x';
     const continuousAxisChannelDef = encoding[continuousAxis]; // Safe to cast because if x is not continuous fielddef, the orient would not be horizontal.
-    const continuousAxisChannelDef2 = encoding[continuousAxis + '2'];
-    const continuousAxisChannelDefError = encoding[continuousAxis + 'Error'];
-    const continuousAxisChannelDefError2 = encoding[continuousAxis + 'Error2'];
+    const continuousAxisChannelDef2 = encoding[`${continuousAxis}2`];
+    const continuousAxisChannelDefError = encoding[`${continuousAxis}Error`];
+    const continuousAxisChannelDefError2 = encoding[`${continuousAxis}Error2`];
     return {
         continuousAxisChannelDef: filterAggregateFromChannelDef(continuousAxisChannelDef, compositeMark),
         continuousAxisChannelDef2: filterAggregateFromChannelDef(continuousAxisChannelDef2, compositeMark),

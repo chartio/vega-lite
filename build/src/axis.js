@@ -1,9 +1,5 @@
 import { keys } from './util';
 export const CONDITIONAL_AXIS_PROP_INDEX = {
-    domainColor: {
-        part: 'domain',
-        vgProp: 'stroke'
-    },
     labelAlign: {
         part: 'labels',
         vgProp: 'align'
@@ -78,12 +74,7 @@ export const CONDITIONAL_AXIS_PROP_INDEX = {
     tickWidth: {
         part: 'ticks',
         vgProp: 'strokeWidth'
-    },
-    titleColor: {
-        part: 'title',
-        vgProp: 'fill'
-    },
-    title: null // title supports signal, let's use it.
+    }
 };
 export function isConditionalAxisValue(v) {
     return v && v['condition'];
@@ -141,7 +132,7 @@ export const AXIS_PROPERTY_TYPE = {
     tickColor: 'main',
     tickDash: 'main',
     tickDashOffset: 'main',
-    tickMinStep: 'main',
+    tickMinStep: 'both',
     tickOffset: 'both',
     tickOpacity: 'main',
     tickRound: 'both',
@@ -257,4 +248,29 @@ export function isAxisProperty(prop) {
 }
 // Export for dependent projects
 export const AXIS_PROPERTIES = keys(AXIS_PROPERTIES_INDEX);
+const AXIS_CONFIGS_INDEX = {
+    axis: 1,
+    axisBand: 1,
+    axisBottom: 1,
+    axisDiscrete: 1,
+    axisLeft: 1,
+    axisPoint: 1,
+    axisQuantitative: 1,
+    axisRight: 1,
+    axisTemporal: 1,
+    axisTop: 1,
+    axisX: 1,
+    axisXBand: 1,
+    axisXDiscrete: 1,
+    axisXPoint: 1,
+    axisXQuantitative: 1,
+    axisXTemporal: 1,
+    axisY: 1,
+    axisYBand: 1,
+    axisYDiscrete: 1,
+    axisYPoint: 1,
+    axisYQuantitative: 1,
+    axisYTemporal: 1
+};
+export const AXIS_CONFIGS = keys(AXIS_CONFIGS_INDEX);
 //# sourceMappingURL=axis.js.map

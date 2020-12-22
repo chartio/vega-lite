@@ -12,9 +12,9 @@ export declare class Split<T extends object> {
     combine(): Partial<T>;
     get<K extends keyof T>(key: K): T[K];
     getWithExplicit<K extends keyof T>(key: K): Explicit<T[K]>;
-    setWithExplicit<K extends keyof T>(key: K, value: Explicit<T[K]>): void;
+    setWithExplicit<K extends keyof T>(key: K, { value, explicit }: Explicit<T[K]>): void;
     set<K extends keyof T>(key: K, value: T[K], explicit: boolean): this;
-    copyKeyFromSplit<S extends T>(key: keyof T, s: Split<S>): void;
+    copyKeyFromSplit<S extends T>(key: keyof T, { explicit, implicit }: Split<S>): void;
     copyKeyFromObject<S extends T>(key: keyof T, s: Partial<S>): void;
     /**
      * Merge split object into this split object. Properties from the other split

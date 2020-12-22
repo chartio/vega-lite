@@ -17,7 +17,7 @@ export interface LayoutHeaderComponentIndex {
  */
 export interface LayoutHeaderComponent {
     title?: Text | SignalRef;
-    facetFieldDef?: FacetFieldDef<string>;
+    facetFieldDef?: FacetFieldDef<string, SignalRef>;
     /**
      * An array of header components for headers.
      * For facet, there should be only one header component, which is data-driven.

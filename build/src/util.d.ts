@@ -67,12 +67,12 @@ export declare const vals: {
     } | ArrayLike<T>): T[];
     (o: {}): any[];
 };
-export declare function entries<T>(x: {
-    [key: string]: T;
-}): {
-    key: string;
-    value: T;
-}[];
+export declare const entries: {
+    <T>(o: {
+        [s: string]: T;
+    } | ArrayLike<T>): [string, T][];
+    (o: {}): [string, any][];
+};
 export declare type Flag<S extends string> = {
     [K in S]: 1;
 };

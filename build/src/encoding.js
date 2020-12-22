@@ -1,4 +1,14 @@
-import { __rest } from "tslib";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import { array, isArray } from 'vega-util';
 import { isArgmaxDef, isArgminDef } from './aggregate';
 import { isBinned, isBinning } from './bin';
@@ -90,9 +100,9 @@ export function extractTransformsFromEncoding(oldEncoding, config) {
                         // Create accompanying 'x2' or 'y2' field if channel is 'x' or 'y' respectively
                         if (isXorY(channel)) {
                             const secondaryChannel = {
-                                field: newField + '_end'
+                                field: `${newField}_end`
                             };
-                            encoding[channel + '2'] = secondaryChannel;
+                            encoding[`${channel}2`] = secondaryChannel;
                         }
                         newFieldDef.bin = 'binned';
                         if (!isSecondaryRangeChannel(channel)) {
@@ -227,11 +237,12 @@ export function initEncoding(encoding, mark, filled, config) {
  * For composite marks, we have to call initChannelDef during init so we can infer types earlier.
  */
 export function normalizeEncoding(encoding, config) {
-    return keys(encoding).reduce((normalizedEncoding, channel) => {
+    const normalizedEncoding = {};
+    for (const channel of keys(encoding)) {
         const newChannelDef = initChannelDef(encoding[channel], channel, config, { compositeMark: true });
         normalizedEncoding[channel] = newChannelDef;
-        return normalizedEncoding;
-    }, {});
+    }
+    return normalizedEncoding;
 }
 export function fieldDefs(encoding) {
     const arr = [];

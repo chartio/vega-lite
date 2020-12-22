@@ -1,4 +1,4 @@
-import {event, select, selectAll, Selection} from 'd3-selection';
+import {select, selectAll, Selection} from 'd3-selection';
 // @ts-ignore
 import hljs from 'highlight.js/lib/core';
 // @ts-ignore
@@ -8,9 +8,9 @@ import diff from 'highlight.js/lib/languages/diff';
 // @ts-ignore
 import javascript from 'highlight.js/lib/languages/javascript';
 // @ts-ignore
-import typescript from 'highlight.js/lib/languages/typescript';
-// @ts-ignore
 import json from 'highlight.js/lib/languages/json';
+// @ts-ignore
+import typescript from 'highlight.js/lib/languages/typescript';
 // @ts-ignore
 import xml from 'highlight.js/lib/languages/xml';
 import compactStringify from 'json-stringify-pretty-compact';
@@ -50,7 +50,7 @@ selectAll('h2, h3, h4, h5, h6').each(function (this: d3.BaseType) {
 });
 
 /* Documentation */
-function renderExample($target: Selection<any, any, any, any>, specText: string) {
+function renderExample($target: Selection<any, any, any, any>, specText: string, figureOnly: boolean) {
   $target.classed('example', true);
   $target.text('');
 
@@ -58,8 +58,16 @@ function renderExample($target: Selection<any, any, any, any>, specText: string)
 
   // Decrease visual noise by removing $schema and description from code examples.
   const textClean = specText.replace(/(\s)+"(\$schema|description)": ".*?",/g, '');
-  const code = $target.append('pre').attr('class', 'example-code').append('code').attr('class', 'json').text(textClean);
-  hljs.highlightBlock(code.node() as any);
+
+  if (!figureOnly) {
+    const code = $target
+      .append('pre')
+      .attr('class', 'example-code')
+      .append('code')
+      .attr('class', 'json')
+      .text(textClean);
+    hljs.highlightBlock(code.node() as any);
+  }
 
   const spec = JSON.parse(specText);
 
@@ -85,14 +93,15 @@ export function embedExample($target: any, spec: TopLevelSpec, actions = true, t
       .append('a')
       .text('Open in Vega Editor')
       .attr('href', '#')
-      .on('click', function () {
+      .on('click', function (event) {
         post(window, editorURL, {
           mode: 'vega-lite',
           spec: compactStringify(spec),
           config: vgSpec.config,
           renderer: 'svg'
         });
-        event.preventDefault();
+        // remove as any when d3 typings are updated
+        (event as any).preventDefault();
       });
   }
 
@@ -102,16 +111,17 @@ export function embedExample($target: any, spec: TopLevelSpec, actions = true, t
 function getSpec(el: d3.BaseType) {
   const sel = select(el);
   const name = sel.attr('data-name');
+  const figureOnly = !!sel.attr('figure-only');
   if (name) {
     const dir = sel.attr('data-dir');
-    const fullUrl = BASEURL + '/examples/' + (dir ? dir + '/' : '') + name + '.vl.json';
+    const fullUrl = `${BASEURL}/examples/${dir ? `${dir}/` : ''}${name}.vl.json`;
 
     fetch(fullUrl)
       .then(response => {
         response
           .text()
           .then(spec => {
-            renderExample(sel, spec);
+            renderExample(sel, spec, figureOnly);
           })
           .catch(console.error);
       })
@@ -128,16 +138,16 @@ window['changeSpec'] = (elId: string, newSpec: string) => {
 };
 
 window['buildSpecOpts'] = (id: string, baseName: string) => {
-  const oldName = select('#' + id).attr('data-name');
-  const prefixSel = select('select[name=' + id + ']');
-  const inputsSel = selectAll('input[name=' + id + ']:checked');
+  const oldName = select(`#${id}`).attr('data-name');
+  const prefixSel = select(`select[name=${id}]`);
+  const inputsSel = selectAll(`input[name=${id}]:checked`);
   const prefix = prefixSel.empty() ? id : prefixSel.property('value');
   const values = inputsSel
     .nodes()
     .map((n: any) => n.value)
     .sort()
     .join('_');
-  const newName = baseName + prefix + (values ? '_' + values : '');
+  const newName = baseName + prefix + (values ? `_${values}` : '');
   if (oldName !== newName) {
     window['changeSpec'](id, newName);
   }
